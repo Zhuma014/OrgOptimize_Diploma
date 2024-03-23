@@ -1,0 +1,22 @@
+{
+  "app_name": "Urven",
+  "registration": "Sign Up",
+  "login": "Sign In",
+  "email": "Email",
+  "password": "Password",
+  "phone_number": "Phone number",
+  "status": "Status",
+  "next": "Next",
+  "user": "User",
+  "specialist": "Specialist",
+  "forgot_password": "Forgot password?",
+  "enter_code": "Enter the code",
+  "resend_code": "Resend the code",
+  "new_password": "Enter the new password",
+  "save_continue": "Save and continue",
+  "input_empty": "Это поле не должно быть пустым",
+  "please_fill_all_fields": "Пожалуйста, заполните все поля",
+  "enter_correct_email": "Введите корректный E-mail",
+  "enter_valid_password": "Пароль должен содержать не менее 8 символов (в том числе буквы, цифры, символы)",
+  "success": "Успешно"
+}
