@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:urven/app.dart';
 import 'package:urven/utils/lu.dart';
 
-
 void main() {
   runApp(
     const MaterialApp(
@@ -11,7 +10,7 @@ void main() {
       localizationsDelegates: LU.localizationsDelegates,
       supportedLocales: LU.supportedLocales,
       locale: LU.defaultLocale,
-      home:UrvenApp(),
+      home: OrgOptimizeApp(),
     ),
   );
 }

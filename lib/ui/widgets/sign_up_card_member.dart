@@ -2,6 +2,7 @@
 
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:urven/ui/screens/code_input_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/email_utils.dart';
@@ -10,24 +11,26 @@ import 'package:urven/utils/password_utils.dart';
 import 'package:urven/utils/text_field.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 
-class SignUpCard extends StatefulWidget {
-  const SignUpCard({super.key});
+class SignUpCardMember extends StatefulWidget {
+  const SignUpCardMember({Key? key}) : super(key: key);
 
   @override
-  _SignUpCardState createState() => _SignUpCardState();
+  _SignUpCardMemberState createState() => _SignUpCardMemberState();
 }
 
-class _SignUpCardState extends State<SignUpCard> {
+class _SignUpCardMemberState extends State<SignUpCardMember> {
+    final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-  String? _selectedStatus;
+  String? _selectedClub;
+  DateTime? _selectedBirthday; // New field for selected birthday
+  final TextEditingController _birthdayController = TextEditingController(); // Add birthday controller
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _phoneNumberController.dispose();
+    _birthdayController.dispose(); // Dispose birthday controller
     super.dispose();
   }
 
@@ -42,6 +45,11 @@ class _SignUpCardState extends State<SignUpCard> {
           children: <Widget>[
             const SizedBox(height: SSC.p20),
             RoundedTextField(
+              labelText: LU.of(context).full_name,
+              controller: _nameController,
+            ),
+            const SizedBox(height: SSC.p18),
+            RoundedTextField(
               labelText: LU.of(context).email,
               controller: _emailController,
             ),
@@ -53,28 +61,38 @@ class _SignUpCardState extends State<SignUpCard> {
             ),
             const SizedBox(height: SSC.p18),
             RoundedTextField(
-              labelText: LU.of(context).phone_number,
-              controller: _phoneNumberController,
-            ),
-            const SizedBox(height: SSC.p18),
-            RoundedTextField(
-              labelText: LU.of(context).status,
-              items: [LU.of(context).user, LU.of(context).specialist],
+              labelText: LU.of(context).birthday,
+              isBirthdayField: true,
+              controller: _birthdayController, // Use birthday controller
               onChanged: (value) {
                 setState(() {
-                  _selectedStatus = value;
+                  _selectedBirthday = DateFormat('yyyy-MM-dd').parse(value!);
                 });
               },
             ),
+
+            const SizedBox(height: SSC.p18),
+            RoundedTextField(
+              labelText: LU.of(context).choose_club,
+              items: [LU.of(context).orchestra, LU.of(context).volunteer],
+              onChanged: (value) {
+                setState(() {
+                  _selectedClub = value;
+                });
+              },
+            ),
+            
             const SizedBox(height: SSC.p51),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  if (_emailController.text.isEmpty ||
+
+                  if (_nameController.text.isEmpty ||
+                    _emailController.text.isEmpty ||
                       _passwordController.text.isEmpty ||
-                      _phoneNumberController.text.isEmpty ||
-                      _selectedStatus == null) {
+                      _selectedClub == null ||
+                      _birthdayController.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(LU.of(context).please_fill_all_fields),
@@ -91,7 +109,6 @@ class _SignUpCardState extends State<SignUpCard> {
                       ),
                     );
                     return;
-
                   }
                   if (!_passwordController.text.isValidPassword()) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -101,10 +118,8 @@ class _SignUpCardState extends State<SignUpCard> {
                       ),
                     );
                     return;
-
                   } else {
                     //success
-
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -113,15 +128,16 @@ class _SignUpCardState extends State<SignUpCard> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Palette.YELLOWBUTTON,
+                  backgroundColor: Palette.MAIN,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 18.0),
-                  child: Text(LU.of(context).next,
-                      style: const TextStyle(color: Colors.black)),
+                  child: Text(
+                    LU.of(context).next,
+                  ),
                 ),
               ),
             ),

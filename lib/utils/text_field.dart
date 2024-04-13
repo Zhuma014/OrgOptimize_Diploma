@@ -2,6 +2,8 @@
 
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 
@@ -12,6 +14,7 @@ class RoundedTextField extends StatefulWidget {
   final FormFieldValidator<String>? validator;
   final TextEditingController? controller;
   final ValueChanged<String?>? onChanged;
+  final bool isBirthdayField;
 
   const RoundedTextField({
     Key? key,
@@ -21,6 +24,7 @@ class RoundedTextField extends StatefulWidget {
     this.validator,
     this.controller,
     this.onChanged,
+    this.isBirthdayField = false,
   }) : super(key: key);
 
   @override
@@ -38,48 +42,93 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
         color: Colors.grey[200],
       ),
       child: widget.items.isNotEmpty
-          ? DropdownButtonFormField<String>(
-              value: widget.controller?.text,
-              onChanged: widget.onChanged,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                labelText: widget.labelText,
-                border: InputBorder.none,
-              ),
-              items: widget.items.map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            )
-          : TextFormField(
-              controller: widget.controller,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                labelText: widget.labelText,
-                border: InputBorder.none,
-                suffixIcon: (widget.obscureText && widget.labelText == LU.of(context).password) || (widget.obscureText && widget.labelText == LU.of(context).new_password)
-                    ? IconButton(
-                        icon: Icon(_isObscure
-                            ? Icons.visibility
-                            : Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            _isObscure = !_isObscure;
-                          });
-                        },
-                      )
-                    : null,
-                prefixText: widget.labelText == LU.of(context).phone_number ? '+7 ' : '',
-                 prefixStyle: const TextStyle(
-                  color: Colors.black,
-                  fontSize: SSC.p16
-                ),
-              ),
-obscureText: (_isObscure && widget.labelText == LU.of(context).password) || (_isObscure && widget.labelText == LU.of(context).new_password),
-              validator: widget.validator,
-            ),
+          ? _buildDropdownFormField()
+          : _buildDateFormField(),
     );
+  }
+
+  Widget _buildDropdownFormField() {
+    return DropdownButtonFormField<String>(
+      value: widget.controller?.text,
+      onChanged: widget.onChanged,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        labelText: widget.labelText,
+        border: InputBorder.none,
+      ),
+      items: widget.items.map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildDateFormField() {
+    return TextFormField(
+      controller: widget.controller,
+      onTap: widget.isBirthdayField ? _pickDate : null,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        labelText: widget.labelText,
+        border: InputBorder.none,
+        suffixIcon: _buildSuffixIcon(),
+        prefixStyle: const TextStyle(
+          color: Colors.black,
+          fontSize: SSC.p16,
+        ),
+      ),
+      obscureText: _isObscure && (widget.obscureText || widget.labelText == LU.of(context).new_password),
+      validator: widget.validator,
+    );
+  }
+
+  Widget? _buildSuffixIcon() {
+    if (widget.obscureText) {
+      return IconButton(
+        icon: Icon(_isObscure ? Icons.visibility : Icons.visibility_off),
+        onPressed: () {
+          setState(() {
+            _isObscure = !_isObscure;
+          });
+        },
+      );
+    } else if (widget.isBirthdayField) {
+      return IconButton(
+        icon: Icon(Icons.calendar_today),
+        onPressed: _pickDate,
+      );
+    }
+    return null;
+  }
+
+  Future<void> _pickDate() async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Palette.MAIN,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                primary: Colors.black,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (pickedDate != null) {
+      widget.controller?.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+    }
   }
 }

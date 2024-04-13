@@ -51,7 +51,7 @@ class _CodeInputScreenState extends State<CodeInputScreen> {
             children: [
               const SizedBox(height: SSC.p172),
               Text(
-               LU.of(context).enter_code,
+                LU.of(context).enter_code,
                 style: const TextStyle(
                     color: Colors.white,
                     fontSize: SSC.p42,
@@ -105,19 +105,21 @@ class _CodeInputScreenState extends State<CodeInputScreen> {
                   onPressed: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const UrvenApp()),
+                      MaterialPageRoute(
+                          builder: (context) => const OrgOptimizeApp()),
                       ModalRoute.withName('/'),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Palette.YELLOWBUTTON,
+                    backgroundColor: Palette.MAIN,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25.0),
                     ),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 18.0),
-                    child: Text(LU.of(context).next, style: const TextStyle(color: Colors.black)),
+                    child: Text(LU.of(context).next,
+                        style: const TextStyle(color: Colors.black)),
                   ),
                 ),
               ),
@@ -133,7 +135,7 @@ class _CodeInputScreenState extends State<CodeInputScreen> {
                   child: Text(
                     LU.of(context).resend_code,
                     style: const TextStyle(
-                      color: Palette.YELLOWBUTTON,
+                      color: Palette.MAIN,
                       fontSize: SSC.p14,
                       fontWeight: FontWeight.w400,
                     ),

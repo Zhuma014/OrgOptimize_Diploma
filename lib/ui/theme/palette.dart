@@ -4,6 +4,6 @@ import 'package:flutter/material.dart';
 
 class Palette {
   static const BACKGROUND = Color(0xFF262628);
- static const YELLOWBUTTON = Color(0xFFFED705);
+ static const MAIN = Color.fromRGBO(147, 0, 142, 1);
 
 }

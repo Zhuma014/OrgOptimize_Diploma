@@ -1,99 +1,100 @@
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
-import 'package:urven/ui/widgets/sign_in_card.dart';
-import 'package:urven/ui/widgets/sign_up_card.dart';
-import 'package:urven/ui/theme/palette.dart';
-import 'package:urven/ui/widgets/local_asset_image.dart';
-import 'package:urven/utils/lu.dart';
-import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/ui/screens/sign_in.dart';
+import 'package:urven/ui/screens/sign_up.dart';
 
-class UrvenApp extends StatelessWidget {
-  const UrvenApp({super.key});
+import 'package:urven/ui/theme/palette.dart';
+import 'package:urven/utils/lu.dart';
+
+class OrgOptimizeApp extends StatelessWidget {
+  const OrgOptimizeApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    SSC().init(context); 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: Palette.BACKGROUND,
-        body: Column(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: SSC.p160),
-            Row(
+            Image.asset(
+              'assets/images/image.png',
+              width: 200,
+              height: 200,
+              fit: BoxFit.contain,
+            ),
+            SizedBox(height: 80),
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const LocalAssetImage(
-                  name: 'image.png',
-                  width: SSC.p63,
-                  height: SSC.p85,
-                  fit: BoxFit.fill,
-                ),
-                const SizedBox(width: SSC.p12),
-                SizedBox(
-                  height: SSC.p54,
-                  width: SSC.p146,
+                Container(
+                  height: 50,
                   child: Text(
                     LU.of(context).app_name,
-                    style: const TextStyle(
-                      fontSize: SSC.p50,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w500,
+                        color: Palette.MAIN),
+                  ),
+                ),
+                Container(
+                  height: 50,
+                  child: Text(
+                    LU.of(context).slogan,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.grey),
+                  ),
+                ),
+                SizedBox(height: 80),
+                SizedBox(
+                  width: 120,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(                    LU.of(context).login,
+),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Palette.MAIN,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
                     ),
                   ),
-                )
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  width: 120,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignUpScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                    LU.of(context).registration,
+                      style: TextStyle(color: Palette.MAIN),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25.0),
+                        side: BorderSide(color: Palette.MAIN),
+                      ),
+                    ),
+                  ),
+                ),
               ],
-            ),
-            const SizedBox(height: SSC.p36),
-            Center(
-              child: Column(
-                children: [
-                  Container(
-                    constraints: const BoxConstraints(maxWidth: SSC.p235),
-                    child: TabBar(
-                      indicatorColor: Palette.YELLOWBUTTON,
-                      tabs: [
-                        Tab(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              LU.of(context).registration,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: SSC.p14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Tab(
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              LU.of(context).login,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: SSC.p14,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: SSC.p31),
-                ],
-              ),
-            ),
-            const Expanded(
-              child: TabBarView(
-                children: [
-                  SignUpCard(),
-                  SignInCard(),
-                ],
-              ),
             ),
           ],
         ),

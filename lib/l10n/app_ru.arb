@@ -1,14 +1,15 @@
 {
-  "app_name": "Urven",
+  "app_name": "OrgOptimize",
   "registration": "Регистрация",
   "login": "Вход",
+  "full_name": "ФИО",
   "email": "Email",
   "password": "Пароль",
   "phone_number": "Номер телефона",
-  "status": "Статус",
+  "choose_club": "Выберите клуб",
   "next": "Далее",
-  "user": "Пользователь",
-  "specialist": "Специалист",
+  "orchestra": "Оркестр",
+  "volunteer": "Клуб волонтеров",
   "forgot_password": "Забыли пароль?",
   "enter_code": "Введите код",
   "resend_code": "Выслать SMS повторно",
@@ -18,5 +19,12 @@
   "please_fill_all_fields": "Пожалуйста, заполните все поля",
   "enter_correct_email": "Введите корректный E-mail",
   "enter_valid_password": "Пароль должен содержать не менее 8 символов (в том числе буквы, цифры, символы)",
-  "success": "Успешно"
+  "success": "Успешно",
+  "member": "Участник",
+  "club": "Клуб",
+  "slogan": "Место единомышленников",
+  "birthday": "Дата рождения",
+  "name_of_the_club": "Наименование клуба",
+  "login_to_account": "Войдите в аккаунт",
+  "сreate_account": "Создайте аккаунт"
 }

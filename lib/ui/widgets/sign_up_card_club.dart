@@ -2,28 +2,32 @@
 
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
-import 'package:urven/ui/screens/forgot_password.dart';
+import 'package:urven/ui/screens/code_input_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/email_utils.dart';
 import 'package:urven/utils/lu.dart';
+import 'package:urven/utils/password_utils.dart';
 import 'package:urven/utils/text_field.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 
-class SignInCard extends StatefulWidget {
-  const SignInCard({super.key});
+class SignUpCardClub extends StatefulWidget {
+  const SignUpCardClub({super.key});
 
   @override
-  _SignInCardState createState() => _SignInCardState();
+  _SignUpCardClubState createState() => _SignUpCardClubState();
 }
 
-class _SignInCardState extends State<SignInCard> {
+class _SignUpCardClubState extends State<SignUpCardClub> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _clubNameController = TextEditingController();
+  String? _selectedStatus;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _clubNameController.dispose();
     super.dispose();
   }
 
@@ -47,40 +51,20 @@ class _SignInCardState extends State<SignInCard> {
               obscureText: true,
               controller: _passwordController,
             ),
-            const SizedBox(height: SSC.p35),
-            Container(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ForgotPasswordScreen(),
-                    ),
-                  );
-                },
-                style: ButtonStyle(
-                  padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                    const EdgeInsets.symmetric(horizontal: 19),
-                  ),
-                ),
-                child: Text(
-                  LU.of(context).forgot_password,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: SSC.p14,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ),
+            const SizedBox(height: SSC.p18),
+            RoundedTextField(
+              labelText: LU.of(context).name_of_the_club,
+              controller:_clubNameController,
             ),
-            const SizedBox(height: SSC.p35),
+            const SizedBox(height: SSC.p51),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
                   if (_emailController.text.isEmpty ||
-                      _passwordController.text.isEmpty) {
+                      _passwordController.text.isEmpty ||
+                      _clubNameController.text.isEmpty
+                    ) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(LU.of(context).please_fill_all_fields),
@@ -96,13 +80,23 @@ class _SignInCardState extends State<SignInCard> {
                         duration: const Duration(seconds: 2),
                       ),
                     );
-                  } else {
-                    //success
+                    return;
+                  }
+                  if (!_passwordController.text.isValidPassword()) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(LU.of(context).success),
+                        content: Text(LU.of(context).enter_valid_password),
                         duration: const Duration(seconds: 2),
                       ),
+                    );
+                    return;
+                  } else {
+                    //success
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CodeInputScreen()),
                     );
                   }
                 },
@@ -116,7 +110,7 @@ class _SignInCardState extends State<SignInCard> {
                   padding: const EdgeInsets.symmetric(vertical: 18.0),
                   child: Text(
                     LU.of(context).next,
-                    ),
+                  ),
                 ),
               ),
             ),

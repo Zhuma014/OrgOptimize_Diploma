@@ -8,6 +8,8 @@ class Navigation {
   static const String INDEX = '/';
   static const String FORGOTPASSWORD = '/r_forgot_password';
   static const String CODEINPUT = '/r_code_input';
+    static const String HOME = '/r_home';
+
 
   static getIndex() {
     return Navigation.INDEX;
@@ -15,9 +17,11 @@ class Navigation {
 
   static getRoutes() {
     return {
-      Navigation.INDEX: (context) => const UrvenApp(),
+      Navigation.INDEX: (context) => const OrgOptimizeApp(),
       Navigation.FORGOTPASSWORD: (context) => const ForgotPasswordScreen(),
       Navigation.CODEINPUT: (context) => const CodeInputScreen(),
+      Navigation.HOME: (context) => const CodeInputScreen(),
+
     };
   }
 }

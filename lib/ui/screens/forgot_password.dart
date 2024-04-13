@@ -84,7 +84,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   }
                 },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Palette.YELLOWBUTTON,
+                        backgroundColor: Palette.MAIN,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),

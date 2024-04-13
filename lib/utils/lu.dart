@@ -9,7 +9,7 @@ class LU {
   static const List<Locale> supportedLocales =
       AppLocalizations.supportedLocales;
 
-  static const Locale defaultLocale = Locale('ru');
+  static const Locale defaultLocale = Locale('en');
 
   static AppLocalizations of(BuildContext context) {
     AppLocalizations? appLocalizations = Localizations.of<AppLocalizations>(
