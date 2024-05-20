@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "143571382795",
+    "project_id": "orgoptimize",
+    "storage_bucket": "orgoptimize.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143571382795:android:0c440c83f3d6ec908f8d0e",
+        "android_client_info": {
+          "package_name": "com.example.urven"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "143571382795-q5iji1f82uurj7o3oc9gfj0t8b8ahjpm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA7UprtkkXyRL35nq4z5i5JSmxA1X6a7Ns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "143571382795-q5iji1f82uurj7o3oc9gfj0t8b8ahjpm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "143571382795-egp5b3n3obfe0t2rc0etfc83o06aemjc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.urven"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,14 +1,20 @@
 // ignore_for_file: constant_identifier_names
-
-import 'package:urven/ui/screens/code_input_screen.dart';
-import 'package:urven/ui/screens/forgot_password.dart';
 import 'package:urven/app.dart';
+import 'package:urven/ui/screens/all_clubs.dart';
+import 'package:urven/ui/screens/authentication_screen.dart';
+import 'package:urven/ui/screens/my_clubs_screen.dart';
+import 'package:urven/ui/screens/edit_profile_screen.dart';
+import 'package:urven/ui/screens/settings_screen.dart';
+import 'package:urven/wrapper.dart';
 
 class Navigation {
   static const String INDEX = '/';
-  static const String FORGOTPASSWORD = '/r_forgot_password';
-  static const String CODEINPUT = '/r_code_input';
-    static const String HOME = '/r_home';
+  static const String HOME = '/r_home';
+  static const String AUTHENTICATION = '/r_authentication';
+  static const String EDIT_USER_PROFILE = '/r_edit_profile';
+  static const String SETTINGS = '/r_settings';
+  static const String MYCLUBS = '/r_my_clubs';
+    static const String ALLCLUBS = '/r_all_clubs';
 
 
   static getIndex() {
@@ -18,9 +24,13 @@ class Navigation {
   static getRoutes() {
     return {
       Navigation.INDEX: (context) => const OrgOptimizeApp(),
-      Navigation.FORGOTPASSWORD: (context) => const ForgotPasswordScreen(),
-      Navigation.CODEINPUT: (context) => const CodeInputScreen(),
-      Navigation.HOME: (context) => const CodeInputScreen(),
+      Navigation.HOME: (context) => const MainWrapper(),
+      Navigation.AUTHENTICATION: (context) => const AuthenticationScreen(),
+      Navigation.EDIT_USER_PROFILE: (context) => const EditProfileScreen(),
+      Navigation.SETTINGS: (context) => const SettingsScreen(),
+      Navigation.MYCLUBS: (context) =>  MyClubsScreen(),
+            Navigation.ALLCLUBS: (context) =>  ClubsScreen(),
+
 
     };
   }

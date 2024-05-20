@@ -1,53 +1,57 @@
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
-import 'package:urven/ui/screens/sign_in.dart';
-import 'package:urven/ui/screens/sign_up.dart';
+import 'package:urven/data/preferences/preferences_manager.dart';
+import 'package:urven/ui/screens/authentication_screen.dart';
 
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/lu.dart';
+import 'package:urven/wrapper.dart';
 
 class OrgOptimizeApp extends StatelessWidget {
   const OrgOptimizeApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+if (PreferencesManager.instance.isAuthenticated()) {
+      return const MainWrapper();
+    }
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Palette.BACKGROUND,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               'assets/images/image.png',
-              width: 200,
-              height: 200,
+              width: 300,
+              height: 300,
               fit: BoxFit.contain,
             ),
-            SizedBox(height: 80),
+            const SizedBox(height: 80),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
+                SizedBox(
                   height: 50,
                   child: Text(
                     LU.of(context).app_name,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w500,
                         color: Palette.MAIN),
                   ),
                 ),
-                Container(
+                SizedBox(
                   height: 50,
                   child: Text(
                     LU.of(context).slogan,
-                    style: TextStyle(
+                    style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
                         color: Colors.grey),
                   ),
                 ),
-                SizedBox(height: 80),
+                const SizedBox(height: 120),
                 SizedBox(
                   width: 120,
                   child: ElevatedButton(
@@ -55,42 +59,18 @@ class OrgOptimizeApp extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const SignInScreen(),
+                          builder: (context) => const AuthenticationScreen(),
                         ),
                       );
                     },
-                    child: Text(                    LU.of(context).login,
-),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Palette.MAIN,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.0),
                       ),
                     ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                SizedBox(
-                  width: 120,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignUpScreen(),
-                        ),
-                      );
-                    },
                     child: Text(
-                    LU.of(context).registration,
-                      style: TextStyle(color: Palette.MAIN),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
-                        side: BorderSide(color: Palette.MAIN),
-                      ),
+                      LU.of(context).get_started,
                     ),
                   ),
                 ),

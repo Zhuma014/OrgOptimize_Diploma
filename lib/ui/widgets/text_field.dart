@@ -4,7 +4,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:urven/ui/theme/palette.dart';
-import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 
 class RoundedTextField extends StatefulWidget {
@@ -79,7 +78,7 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
           fontSize: SSC.p16,
         ),
       ),
-      obscureText: _isObscure && (widget.obscureText || widget.labelText == LU.of(context).new_password),
+      obscureText: _isObscure && (widget.obscureText),
       validator: widget.validator,
     );
   }
@@ -96,7 +95,7 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
       );
     } else if (widget.isBirthdayField) {
       return IconButton(
-        icon: Icon(Icons.calendar_today),
+        icon: const Icon(Icons.calendar_today),
         onPressed: _pickDate,
       );
     }
@@ -112,14 +111,14 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
+            colorScheme: const ColorScheme.light(
               primary: Palette.MAIN,
               onPrimary: Colors.white,
               onSurface: Colors.black,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                primary: Colors.black,
+                foregroundColor: Colors.black,
               ),
             ),
           ),
