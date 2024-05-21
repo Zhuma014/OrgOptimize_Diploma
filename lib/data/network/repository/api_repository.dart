@@ -2,6 +2,9 @@
 
 import 'package:dio/dio.dart';
 import 'package:urven/data/models/base/api_result.dart';
+import 'package:urven/data/models/chat/chat_room.dart';
+import 'package:urven/data/models/chat/chat_room_member.dart';
+import 'package:urven/data/models/chat/message.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/data/models/user/join_request.dart';
 import 'package:urven/data/models/user/sign_in.dart';
@@ -34,6 +37,13 @@ class ApiRepository {
   static const JOIN_REQUESTS_LIST = '/join/requests/';
   static const APPROVE_JOIN_REQUEST = '/join/{club_id}/requests/{request_id}/approve';
   static const REJECT_JOIN_REQUEST = '/join/{club_id}/requests/{request_id}/reject';
+
+  static const CHAT_WS_URL = 'ws://10.0.2.2:8000/chat/ws/';
+  static const CHAT_ROOMS = '/chat/rooms';
+  static const CHAT_ROOM_MESSAGES = '/chat/rooms/{room_id}/messages';
+  static const CHAT_ROOM_MEMBERS = '/chat/rooms/{room_id}/members';
+
+
 
   factory ApiRepository() => _instance;
 
@@ -153,6 +163,15 @@ class ApiRepository {
       throw 'Failed to fetch clubs: $e';
     }
   }
+
+    Future<Club> getClubById(int clubId) async {
+    try {
+      return Club.map(await _dioService.get(path: CLUBS + clubId.toString()));
+    } catch (e) {
+      Logger.d(TAG, 'getUserProfile() -> e:$e');
+      return Club.withError(_handleError(e));
+    }
+  }
   Future<Event> createEvent(
       String title, String description, DateTime eventDate, String location,
       {dynamic userId, dynamic clubId}) async {
@@ -256,6 +275,52 @@ Future<JoinRequest> rejectJoinRequest(int clubId, int requestId) async {
     return JoinRequest.withError(_handleError(e));
   }
 }
+
+// Chat methods
+Future<List<ChatRoom>> getChatRooms() async {
+  try {
+    final response = await _dioService.get(path: CHAT_ROOMS);
+
+    if (response is List) {
+      return response.map((json) => ChatRoom.fromJson(json)).toList();
+    } else if (response is Map<String, dynamic>) {
+      // Assuming the server returns an error message in a map format
+      if (response.containsKey('detail')) {
+        throw Exception(response['detail']);
+      } else {
+        throw Exception('Unexpected response format');
+      }
+    } else {
+      throw Exception('Unexpected response format');
+    }
+  } catch (e) {
+    Logger.d(TAG, 'getChatRooms() -> e:$e');
+    throw 'Failed to fetch chat rooms: $e';
+  }
+}
+
+
+  Future<List<Message>> getChatRoomMessages(int roomId) async {
+    try {
+      final response = await _dioService.get(path: CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
+      return (response as List).map((json) => Message.fromJson(json)).toList();
+    } catch (e) {
+      Logger.d(TAG, 'getChatRoomMessages() -> e:$e');
+    throw 'Failed to fetch messages: $e';
+    }
+  }
+
+  Future<List<ChatRoomMember>> getChatRoomMembers(int roomId) async {
+    try {
+      final response = await _dioService.get(path: CHAT_ROOM_MEMBERS.replaceFirst('{room_id}', roomId.toString()));
+      return (response as List).map((json) => ChatRoomMember.fromJson(json)).toList();
+    } catch (e) {
+      Logger.d(TAG, 'getChatRoomMembers() -> e:$e');
+    throw 'Failed to fetch chat room members  : $e';
+    }
+  }
+
+  
 
 
   // Future<EventsResponse> getClubEvents() async {

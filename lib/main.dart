@@ -23,6 +23,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:provider/provider.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 import 'package:flutter/services.dart';
+import 'package:urven/wrapper.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -53,7 +54,6 @@ void main() async {
   // await NotificationService.instance.setup();
   // await NotificationService.instance.requestPermissions();
 
-  String initialRoute = Navigation.getIndex();
   // Map<String, dynamic>? notificationData;
 
   // NotificationAppLaunchDetails? appLaunchDetails =
@@ -148,33 +148,12 @@ void main() async {
             locale: provider.locale,
 
             // Routes
-            initialRoute: initialRoute,
+            initialRoute: PreferencesManager.instance.isAuthenticated() ? Navigation.HOME : Navigation.INDEX,
             onGenerateInitialRoutes: (String initialRoute) {
-              Logger.d('main()', 'onGenerateInitialRoutes() -> $initialRoute');
-              // if (initialRoute == Navigation.ORDER_FEEDBACK) {
-              //   if (notificationData != null) {
-              //     int? orderId =
-              //         DynamicUtils.parseNullableInt(notificationData['order_id']);
-              //     if (orderId != null) {
-              //       return [
-              //         MaterialPageRoute(
-              //           builder: (BuildContext context) {
-              //             return OrderFeedbackScreen();
-              //           },
-              //           settings: RouteSettings(
-              //             arguments: OrderFeedbackScreenArguments(
-              //               orderId: orderId,
-              //             ),
-              //           ),
-              //         )
-              //       ];
-              //     }
-              //   }
-
-              return [
-                MaterialPageRoute(builder: (_) => const OrgOptimizeApp())
-              ];
-            },
+        return [
+          MaterialPageRoute(builder: (context) => PreferencesManager.instance.isAuthenticated() ? MainWrapper() : OrgOptimizeApp()),
+        ];
+      },
             // by default open Intro screen
             routes: Navigation.getRoutes(),
 

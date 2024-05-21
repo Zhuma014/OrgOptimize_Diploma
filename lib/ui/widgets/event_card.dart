@@ -10,6 +10,8 @@ class EventCard extends StatelessWidget {
 
   const EventCard({super.key, required this.event});
 
+
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -41,12 +43,14 @@ class EventCard extends StatelessWidget {
                         style: const TextStyle(fontSize: SSC.p14),
                       ),
                     ),
+                    
                   // Date and Time
                   if (event.date != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
-                        DateFormat('dd MMM yyyy').format(event.date!),
+                         DateFormat('dd MMM yyyy HH:mm').format(event.date!),
+
                         style: const TextStyle(
                           fontSize: SSC.p12,
                           color: Colors.grey,
@@ -70,14 +74,23 @@ class EventCard extends StatelessWidget {
                         ],
                       ),
                     ),
+                    // Club Name
+if (event.clubName != null && event.clubName!.isNotEmpty)
+  Padding(
+    padding: const EdgeInsets.only(top: 8.0),
+    child: Text(
+      event.clubName!,
+      style: const TextStyle(fontSize: SSC.p14),
+    ),
+  ),
                   // Handle potential errors
                   if (event.exception != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8.0),
                       child: Text(
                         'Error: ${event.exception}',
-                        style:
-                            const TextStyle(fontSize: SSC.p12, color: Colors.red),
+                        style: const TextStyle(
+                            fontSize: SSC.p12, color: Colors.red),
                       ),
                     ),
                   // Cancel Button
@@ -100,77 +113,87 @@ class EventCard extends StatelessWidget {
         );
       },
       child: SizedBox(
-  width: 200,
-  child: Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15.0), // Adjust the value as needed
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title
-          Text(
-            event.title ?? 'No Title',
-            style: const TextStyle(
-              fontSize: SSC.p16,
-              fontWeight: FontWeight.bold,
-            ),
+        width: 200,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius:
+                BorderRadius.circular(15.0), // Adjust the value as needed
           ),
-          // Description
-          if (event.description != null && event.description!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                event.description!,
-                style: const TextStyle(fontSize: SSC.p14),
-              ),
-            ),
-          // Date and Time
-          if (event.date != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                DateFormat('dd MMM yyyy').format(event.date!),
-                style: const TextStyle(
-                  fontSize: SSC.p12,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          // Location
-          if (event.location != null && event.location!.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Row(
-                children: [
-                  const Icon(Icons.location_on,
-                      size: 16, color: Colors.grey),
-                  const SizedBox(width: 5),
-                  Text(
-                    event.location!,
-                    style: const TextStyle(
-                        fontSize: SSC.p12, color: Colors.grey),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Title
+                Text(
+                  event.title ?? 'No Title',
+                  style: const TextStyle(
+                    fontSize: SSC.p16,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
-            ),
-          // Handle potential errors
-          if (event.exception != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: Text(
-                'Error: ${event.exception}',
-                style: const TextStyle(fontSize: SSC.p12, color: Colors.red),
-              ),
-            ),
-        ],
-      ),
+                ),
+                // Description
+                if (event.description != null && event.description!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      event.description!,
+                      style: const TextStyle(fontSize: SSC.p14),
+                    ),
+                  ),
+                // Date and Time
+                if (event.date != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      DateFormat('dd MMM yyyy HH:mm').format(event.date!),
+                      style: const TextStyle(
+                        fontSize: SSC.p12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                // Location
+                if (event.location != null && event.location!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.location_on,
+                            size: 16, color: Colors.grey),
+                        const SizedBox(width: 5),
+                        Text(
+                          event.location!,
+                          style: const TextStyle(
+                              fontSize: SSC.p12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Club Name
+if (event.clubName != null && event.clubName!.isNotEmpty)
+  Padding(
+    padding: const EdgeInsets.only(top: 8.0),
+    child: Text(
+      event.clubName!,
+      style: const TextStyle(fontSize: SSC.p14),
     ),
   ),
-),
-
+                // Handle potential errors
+                if (event.exception != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Text(
+                      'Error: ${event.exception}',
+                      style:
+                          const TextStyle(fontSize: SSC.p12, color: Colors.red),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

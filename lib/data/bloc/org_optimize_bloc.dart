@@ -1,4 +1,7 @@
 import 'package:rxdart/subjects.dart';
+import 'package:urven/data/models/chat/chat_room.dart';
+import 'package:urven/data/models/chat/chat_room_member.dart';
+import 'package:urven/data/models/chat/message.dart';
 import 'package:urven/data/models/club/club_events.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/data/models/user/join_request.dart';
@@ -25,12 +28,18 @@ class OrgOptimizeBloc {
   BehaviorSubject<Event> eventSubject = BehaviorSubject();
   BehaviorSubject<Club> createClubSubject = BehaviorSubject();
   BehaviorSubject<List<Event>> getAllEventsSubject = BehaviorSubject();
+  BehaviorSubject<List<Event>> getClubEventsSubject = BehaviorSubject();
+  BehaviorSubject<List<Event>> getUserOwnedEventsSubject = BehaviorSubject();
   BehaviorSubject<List<Club>> getAllClubsSubject = BehaviorSubject();
   BehaviorSubject<List<Club>> getUserClubsSubject = BehaviorSubject();
   BehaviorSubject<JoinRequest> joinRequestSubject = BehaviorSubject();
   BehaviorSubject<List<JoinRequest>> joinRequestListSubject = BehaviorSubject();
   BehaviorSubject<JoinRequest> approveJoinRequestSubject = BehaviorSubject();
   BehaviorSubject<JoinRequest> rejectJoinRequestSubject = BehaviorSubject();
+  BehaviorSubject<List<ChatRoom>> getChatRoomsSubject = BehaviorSubject();
+  BehaviorSubject<List<ChatRoomMember>> getChatRoomMembersSubject =
+      BehaviorSubject();
+  BehaviorSubject<List<Message>> getMessagesListSubject = BehaviorSubject();
 
   signIn(String username, String password) async {
     Logger.d(TAG, 'signInMember() -> $username, $password');
@@ -95,6 +104,7 @@ class OrgOptimizeBloc {
     } else {
       userProfileSubject.sink.addError(profile.exception!); // Clear user
     }
+    ooBloc.getUserClubs();
   }
 
   Future<UserProfile?> getUserProfileById(int userId) async {
@@ -114,12 +124,30 @@ class OrgOptimizeBloc {
     }
   }
 
-  getAllUserEvents() async {
-    Logger.d(TAG, 'getAllUserEvents()');
+ getAllUserEvents() async {
+  Logger.d(TAG, 'getAllUserEvents()');
 
-    List<Event> events = await _repository.getAllUserEvents();
-    getAllEventsSubject.sink.add(events);
+  List<Event> events = await _repository.getAllUserEvents();
+  List<Event> userOwnedEvents =
+      events.where((event) => event.clubId == null).toList();
+  List<Event> clubEvents =
+      events.where((event) => event.clubId != null).toList();
+
+  // Get club names for club events
+  for (var event in clubEvents) {
+    var club = await getClubById(event.clubId!);
+    if (club != null) {
+      event.clubName = club.name;
+    } else {
+      event.clubName = 'Club Not Found';
+    }
   }
+
+  // Notify listeners after all club names are fetched
+  getAllEventsSubject.sink.add(events);
+  getClubEventsSubject.sink.add(clubEvents);
+  getUserOwnedEventsSubject.sink.add(userOwnedEvents);
+}
 
   getAllClubs() async {
     Logger.d(TAG, 'getAllClubs()');
@@ -130,9 +158,27 @@ class OrgOptimizeBloc {
 
   getUserClubs() async {
     Logger.d(TAG, 'getUserClubs()');
-
+ try {
     List<Club> clubs = await _repository.getUserClubs();
-    getUserClubsSubject.sink.add(clubs);
+ if (!getUserClubsSubject.isClosed) {
+        getUserClubsSubject.add(clubs);
+      }
+    } catch (error) {
+      if (!getUserClubsSubject.isClosed) {
+        getUserClubsSubject.addError(error);
+      }
+    }  }
+
+  getClubById(int clubId) async {
+    Logger.d(TAG, 'getClubById()');
+
+      try {
+    Club club = await _repository.getClubById(clubId);
+    return club;
+  } catch (e) {
+    Logger.e(TAG, 'Failed to load club: $e');
+    return null;
+  }
   }
 
   signOut() async {
@@ -163,6 +209,33 @@ class OrgOptimizeBloc {
     rejectJoinRequestSubject.sink.add(joinRequest);
   }
 
+  getChatRooms() async {
+    Logger.d(TAG, 'getChatRooms()');
+
+    try {
+      List<ChatRoom> chatRooms = await _repository.getChatRooms();
+      if (!getChatRoomsSubject.isClosed) {
+        getChatRoomsSubject.sink.add(chatRooms);
+      }
+    } catch (e) {
+      Logger.d(TAG, 'getChatRooms() -> e:$e');
+      if (!getChatRoomsSubject.isClosed) {
+        getChatRoomsSubject.sink.addError(e);
+      }
+    }
+  }
+
+  getChatRoomMembers(int roomId) async {
+    List<ChatRoomMember> chatRoomMembers =
+        await _repository.getChatRoomMembers(roomId);
+    getChatRoomMembersSubject.sink.add(chatRoomMembers);
+  }
+
+  getChatRoomMessages(int roomId) async {
+    List<Message> messages = await _repository.getChatRoomMessages(roomId);
+    getMessagesListSubject.sink.add(messages);
+  }
+
   // getClubEvents() async {
   //   clubEventsSubject = BehaviorSubject<EventsResponse>();
   //   clubEventsSubject.sink.add(await _repository.getClubEvents());
@@ -175,7 +248,8 @@ class OrgOptimizeBloc {
       userProfileSubject.close();
       userProfileByIdSubject.close();
       eventSubject.close();
-      getAllEventsSubject.close();
+      getClubEventsSubject.close();
+      getUserOwnedEventsSubject.close();
       createClubSubject.close();
       getAllClubsSubject.close;
       getUserClubsSubject.close();
@@ -184,6 +258,9 @@ class OrgOptimizeBloc {
       joinRequestListSubject.close();
       approveJoinRequestSubject.close();
       rejectJoinRequestSubject.close();
+      getChatRoomsSubject.close();
+      getChatRoomMembersSubject.close();
+      getMessagesListSubject.close();
     } catch (e) {
       Logger.e(TAG, e.toString());
     }

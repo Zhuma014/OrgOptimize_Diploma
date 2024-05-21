@@ -1,0 +1,8 @@
+import 'package:flutter/material.dart';
+
+class DateTimeSelection {
+  final DateTime date;
+  final TimeOfDay time;
+
+  DateTimeSelection({required this.date, required this.time});
+}

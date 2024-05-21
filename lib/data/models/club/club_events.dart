@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:urven/utils/primitive/date_utils.dart';
 import 'package:urven/utils/primitive/string_utils.dart';
 import 'package:urven/utils/primitive/dynamic_utils.dart';
@@ -11,6 +12,8 @@ class Event {
   final dynamic userId;
   final dynamic clubId;
   String? exception;
+    String? clubName; // Add clubName to store the fetched club name
+
 
   Event({
     required this.id,
@@ -21,6 +24,7 @@ class Event {
     required this.userId,
     required this.clubId,
     this.exception,
+    this.clubName,
   });
 
   Event.map(dynamic o)
@@ -28,23 +32,23 @@ class Event {
         title = DynamicUtils.parseNullableString(o['title']).tryTrim(),
         description =
             DynamicUtils.parseNullableString(o['description']).tryTrim(),
-        date = DynamicUtils.parseDateTime(o['date']).ifNull(),
+        date = DynamicUtils.parseDateTime(o['event_date']).ifNull(),
         location = DynamicUtils.parseNullableString(o['location']).tryTrim(),
         userId = o['user_id'],
         clubId = o['club_id'];
 
-  factory Event.fromJson(Map<String, dynamic> json) {
-    return Event(
-      id: json['id'],
-      title: DynamicUtils.parseNullableString(json['title']).tryTrim(),
-      description:
-          DynamicUtils.parseNullableString(json['description']).tryTrim(),
-      date: DynamicUtils.parseDateTime(json['date']).ifNull(),
-      location: DynamicUtils.parseNullableString(json['location']).tryTrim(),
-      userId: json['user_id'],
-      clubId: json['club_id'],
-    );
-  }
+factory Event.fromJson(Map<String, dynamic> json) {
+  return Event(
+    id: json['id'],
+    title: DynamicUtils.parseNullableString(json['title']).tryTrim(),
+    description: DynamicUtils.parseNullableString(json['description']).tryTrim(),
+    date: DateTime.parse(json['event_date']),  
+    location: DynamicUtils.parseNullableString(json['location']).tryTrim(),
+    userId: json['user_id'],
+    clubId: json['club_id'],
+  );
+}
+
 
   factory Event.withError(String errorMessage) {
     return Event(
@@ -64,7 +68,7 @@ class Event {
       'id': id,
       'title': title,
       'description': description,
-      'date': date,
+      'event_date': date,
       'location': location,
       'user_id': userId,
       'club_id': clubId,
@@ -80,7 +84,7 @@ class Event {
       }
       if (date != null) {
         formattedEvent +=
-            ', Date: ${date.toString()}'; // Adjust date format as needed
+            ', Date: ${DateFormat('dd MMM yyyy HH:mm').format(date!)}';
       }
       if (location != null && location!.isNotEmpty) {
         formattedEvent += ', Location: $location';

@@ -294,8 +294,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                               ),
                               trailing: isClubCreatedByUser
                                   ? Text(
-                                      'Member',
-                                      style: TextStyle(color: Colors.green),
+                                      'Admin',
+                                      style: TextStyle(color: Colors.red),
                                     )
                                   : isUserClubMember
                                       ? Text(

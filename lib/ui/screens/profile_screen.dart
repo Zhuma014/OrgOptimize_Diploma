@@ -111,14 +111,12 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
   }
 
   void signOut(BuildContext context) {
-    ooBloc.signOut(); // Sign out first
-    PreferencesManager.instance.wipeOut(); // Clear preferences
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.of(context).pushAndRemoveUntil(
+    ooBloc.signOut(); 
+    PreferencesManager.instance.wipeOut();
+         Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
-        (route) => route.isFirst,
-      );
-      ; // Navigate back to the first route
-    });
+        (route) => false, 
+    );
+    
   }
 }

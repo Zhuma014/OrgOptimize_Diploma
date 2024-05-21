@@ -1,49 +1,66 @@
 import 'package:flutter/material.dart';
-
-import 'package:urven/ui/screens/base/base_screen.dart';
+import 'package:urven/data/bloc/org_optimize_bloc.dart';
+import 'package:urven/data/models/chat/chat_room.dart';
 import 'package:urven/ui/screens/chat_screen.dart';
-import 'package:urven/ui/widgets/toolbar.dart';
-import 'package:urven/utils/lu.dart';
 
 
-class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({super.key});
-
+class ChatRoomsListScreen extends StatefulWidget {
   @override
-  ChatListScreenState createState() => ChatListScreenState();
+  _ChatRoomsListScreenState createState() => _ChatRoomsListScreenState();
 }
 
-class ChatListScreenState extends BaseScreenState<ChatListScreen> {
+class _ChatRoomsListScreenState extends State<ChatRoomsListScreen> {
   @override
   void initState() {
     super.initState();
+    ooBloc.getChatRooms(); // Fetch chat rooms when the screen is initialized
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Toolbar(
-              isBackButtonVisible: false,
-              title: LU.of(context).chat,
-            ),
-          ),
+      appBar: AppBar(
+        title: Text('Chat Rooms'),
+      ),
+      body: StreamBuilder<List<ChatRoom>>(
+        stream: ooBloc.getChatRoomsSubject.stream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No Chat Rooms Available'));
+          }
 
-          ElevatedButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ChatScreen()),
-    );
-  },
-  child: Text('Go to Chat'),
-)
+          List<ChatRoom> chatRooms = snapshot.data!;
 
-        ],
+          return ListView.builder(
+            itemCount: chatRooms.length,
+            itemBuilder: (context, index) {
+              ChatRoom chatRoom = chatRooms[index];
+              return ListTile(
+                title: Text(chatRoom.name ?? 'Unnamed Chat Room'),
+                subtitle: Text(chatRoom.description ?? ''),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(chatRoomId: chatRoom.id!),
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    ooBloc.dispose(); // Clean up the stream subscriptions
   }
 }

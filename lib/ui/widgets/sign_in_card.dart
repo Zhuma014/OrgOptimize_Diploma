@@ -8,6 +8,7 @@ import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/logger.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/ui/widgets/text_field.dart';
+import 'package:urven/wrapper.dart';
 
 class SignInCard extends StatefulWidget {
   const SignInCard({Key? key}) : super(key: key);
@@ -133,12 +134,18 @@ class _SignInCardState extends State<SignInCard> {
           'ssBloc.signInSubject.stream.listen() -> ${value.isValid}');
 
 
-      if (value.isValid) {
-        _usernameController.clear();
-        _passwordController.clear();
-                 Navigator.pushNamed(context, Navigation.HOME);
-                     context.read<BottomNavBarCubit>().changeSelectedIndex(0);
+ if (value.isValid) {
+    _usernameController.clear();
+    _passwordController.clear();
+    
+    // Navigate to MainWrapper and remove all previous routes
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const MainWrapper()),
+        (route) => false, // This will remove all previous routes
+    );
 
+    // Change the selected index of the BottomNavBarCubit
+    context.read<BottomNavBarCubit>().changeSelectedIndex(0);
 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

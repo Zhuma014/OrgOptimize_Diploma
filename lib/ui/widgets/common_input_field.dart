@@ -26,6 +26,8 @@ class CommonInputField extends StatelessWidget {
     this.minLines = 1,
     this.inputFormatters,
     this.validator,
+    this.onTap,
+
   });
 
   final EdgeInsets margin;
@@ -41,6 +43,8 @@ class CommonInputField extends StatelessWidget {
   final int minLines;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String? value)? validator;
+  final VoidCallback? onTap; // Add onTap parameter
+
 
   List<Widget> buildHeaderWidget() {
     String? labelText = this.labelText;
@@ -69,7 +73,7 @@ class CommonInputField extends StatelessWidget {
           text: TextSpan(
             text: labelText,
             style: TextStyle(
-              color: Palette.DARK_BLUE.withOpacity(0.5),
+              color: Palette.MAIN.withOpacity(0.5),
               fontSize: SSC.p14,
               fontWeight: FontWeight.w400,
             ),
@@ -103,6 +107,7 @@ class CommonInputField extends StatelessWidget {
             enableInteractiveSelection: !readOnly,
             textAlign: TextAlign.left,
             validator: validator,
+            onTap: onTap, // Use onTap
             style: TextStyle(
               color: readOnly ? Palette.DARK_GREY_3 : Palette.DARK_BLUE,
             ),
