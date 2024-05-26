@@ -29,21 +29,23 @@ class ApiRepository {
   static const SIGN_IN = '/login';
   static const SIGN_UP = '/register';
   static const EVENTS = '/events/';
+  static const CLUB_EVENTS = '/events/users-club-events';
+  static const OWN_EVENTS = '/events/users-own-events';
   static const CLUBS = '/clubs/';
   static const USER_CLUBS = '/clubs/user-clubs';
   static const USER_PROFILE = '/whoami';
   static const USER_PROFILE_BY_ID = '/users/';
   static const JOIN_REQUEST = '/join/';
   static const JOIN_REQUESTS_LIST = '/join/requests/';
-  static const APPROVE_JOIN_REQUEST = '/join/{club_id}/requests/{request_id}/approve';
-  static const REJECT_JOIN_REQUEST = '/join/{club_id}/requests/{request_id}/reject';
+  static const APPROVE_JOIN_REQUEST =
+      '/join/{club_id}/requests/{request_id}/approve';
+  static const REJECT_JOIN_REQUEST =
+      '/join/{club_id}/requests/{request_id}/reject';
 
   static const CHAT_WS_URL = 'ws://10.0.2.2:8000/chat/ws/';
   static const CHAT_ROOMS = '/chat/rooms';
   static const CHAT_ROOM_MESSAGES = '/chat/rooms/{room_id}/messages';
   static const CHAT_ROOM_MEMBERS = '/chat/rooms/{room_id}/members';
-
-
 
   factory ApiRepository() => _instance;
 
@@ -55,13 +57,12 @@ class ApiRepository {
 
   late DioService _dioService;
 
-  Future<SignIn> signIn(String username, String password) async {
+  Future<SignIn> signIn(String username, String password,
+      {required String fcm_token}) async {
     try {
       //username = email
-      FormData formData = FormData.fromMap({
-        'username': username,
-        'password': password,
-      });
+      FormData formData = FormData.fromMap(
+          {'username': username, 'password': password, 'fcm_token': fcm_token});
 
       final response = await _dioService.post(
         path: SIGN_IN,
@@ -74,8 +75,9 @@ class ApiRepository {
     }
   }
 
-  Future<SignUp> signUp(String email, String password, DateTime birthdate,
-      String fullname) async {
+  Future<SignUp> signUp(
+      String email, String password, DateTime birthdate, String fullname,
+      {required String fcm_token}) async {
     try {
       final response = await _dioService.post(
         path: SIGN_UP,
@@ -84,6 +86,7 @@ class ApiRepository {
           'password': password,
           'birth_date': birthdate.toIso8601String().substring(0, 10),
           'full_name': fullname,
+          'fcm_token':fcm_token
         },
       );
       return SignUp.map(response);
@@ -102,10 +105,11 @@ class ApiRepository {
       return UserProfile.withError(_handleError(e));
     }
   }
-  
+
   Future<UserProfile> getUserProfileById(int userId) async {
     try {
-      return UserProfile.map(await _dioService.get(path: USER_PROFILE_BY_ID + userId.toString()));
+      return UserProfile.map(
+          await _dioService.get(path: USER_PROFILE_BY_ID + userId.toString()));
     } catch (e) {
       Logger.d(TAG, 'getUserProfile() -> e:$e');
       return UserProfile.withError(_handleError(e));
@@ -164,7 +168,7 @@ class ApiRepository {
     }
   }
 
-    Future<Club> getClubById(int clubId) async {
+  Future<Club> getClubById(int clubId) async {
     try {
       return Club.map(await _dioService.get(path: CLUBS + clubId.toString()));
     } catch (e) {
@@ -172,6 +176,7 @@ class ApiRepository {
       return Club.withError(_handleError(e));
     }
   }
+
   Future<Event> createEvent(
       String title, String description, DateTime eventDate, String location,
       {dynamic userId, dynamic clubId}) async {
@@ -198,6 +203,43 @@ class ApiRepository {
     }
   }
 
+  Future<Event> updateEvent(int eventId, String title, String description,
+      DateTime eventDate, String location,
+      {dynamic userId, dynamic clubId}) async {
+    try {
+      Map<String, dynamic> body = {
+        "title": title,
+        "description": description,
+        "event_date": eventDate.toIso8601String(),
+        "location": location,
+      };
+
+      if (userId != null) {
+        body["user_id"] = userId;
+      }
+
+      if (clubId != null) {
+        body["club_id"] = clubId;
+      }
+
+      return Event.map(
+          await _dioService.put(path: '$EVENTS/$eventId', body: body));
+    } catch (e) {
+      Logger.d(TAG, 'updateEvent() -> e:$e');
+      return Event.withError(_handleError(e));
+    }
+  }
+
+  Future<bool> deleteEvent(int eventId) async {
+    try {
+      await _dioService.delete(path: '$EVENTS/$eventId');
+      return true;
+    } catch (e) {
+      Logger.d(TAG, 'deleteEvent() -> e:$e');
+      return false;
+    }
+  }
+
   Future<List<Event>> getAllUserEvents() async {
     try {
       final response = await _dioService.get(path: EVENTS);
@@ -210,6 +252,38 @@ class ApiRepository {
       }
     } catch (e) {
       Logger.d(TAG, 'getEvents() -> e:$e');
+      throw 'Failed to fetch events: $e';
+    }
+  }
+
+  Future<List<Event>> getClubEvents() async {
+    try {
+      final response = await _dioService.get(path: CLUB_EVENTS);
+      if (response is List) {
+        final List<Event> events =
+            response.map<Event>((e) => Event.map(e)).toList();
+        return events;
+      } else {
+        throw 'Response is not a List';
+      }
+    } catch (e) {
+      Logger.d(TAG, 'getClubEvents() -> e:$e');
+      throw 'Failed to fetch events: $e';
+    }
+  }
+
+  Future<List<Event>> getOwnEvents() async {
+    try {
+      final response = await _dioService.get(path: OWN_EVENTS);
+      if (response is List) {
+        final List<Event> events =
+            response.map<Event>((e) => Event.map(e)).toList();
+        return events;
+      } else {
+        throw 'Response is not a List';
+      }
+    } catch (e) {
+      Logger.d(TAG, 'getOWNEvents() -> e:$e');
       throw 'Failed to fetch events: $e';
     }
   }
@@ -230,98 +304,100 @@ class ApiRepository {
     }
   }
 
-Future<List<JoinRequest>> getJoinRequests(int clubId) async {
-  try {
-    final response = await _dioService.get(
-      path: JOIN_REQUESTS_LIST + clubId.toString(),
-    );
+  Future<List<JoinRequest>> getJoinRequests(int clubId) async {
+    try {
+      final response = await _dioService.get(
+        path: JOIN_REQUESTS_LIST + clubId.toString(),
+      );
 
-    if (response is List) {
-      final List<JoinRequest> joinRequests =
-          response.map<JoinRequest>((data) => JoinRequest.map(data)).toList();
-      return joinRequests;
-    } else {
-      throw 'Response is not a List';
+      if (response is List) {
+        final List<JoinRequest> joinRequests =
+            response.map<JoinRequest>((data) => JoinRequest.map(data)).toList();
+        return joinRequests;
+      } else {
+        throw 'Response is not a List';
+      }
+    } catch (e) {
+      Logger.d(TAG, 'getJoinRequests() -> e: $e');
+      throw 'Failed to fetch join requests: $e';
     }
-  } catch (e) {
-    Logger.d(TAG, 'getJoinRequests() -> e: $e');
-    throw 'Failed to fetch join requests: $e';
   }
-}
-  
 
-Future<JoinRequest> approveJoinRequest(int clubId, int requestId) async {
-  try {
-    final response = await _dioService.put(
-      path: APPROVE_JOIN_REQUEST.replaceFirst('{club_id}', clubId.toString())
-                                 .replaceFirst('{request_id}', requestId.toString()),
-    );
-    return JoinRequest.map(response);
-  } catch (e) {
-    Logger.d(TAG, 'approveJoinRequest() -> e: $e');
-    return JoinRequest.withError(_handleError(e));
+  Future<JoinRequest> approveJoinRequest(int clubId, int requestId) async {
+    try {
+      final response = await _dioService.put(
+        path: APPROVE_JOIN_REQUEST
+            .replaceFirst('{club_id}', clubId.toString())
+            .replaceFirst('{request_id}', requestId.toString()),
+      );
+      return JoinRequest.map(response);
+    } catch (e) {
+      Logger.d(TAG, 'approveJoinRequest() -> e: $e');
+      return JoinRequest.withError(_handleError(e));
+    }
   }
-}
 
-Future<JoinRequest> rejectJoinRequest(int clubId, int requestId) async {
-  try {
-    final response = await _dioService.put(
-      path: REJECT_JOIN_REQUEST.replaceFirst('{club_id}', clubId.toString())
-                                 .replaceFirst('{request_id}', requestId.toString()),
-    );
-    return JoinRequest.map(response);
-  } catch (e) {
-    Logger.d(TAG, 'rejectJoinRequest() -> e: $e');
-    return JoinRequest.withError(_handleError(e));
+  Future<JoinRequest> rejectJoinRequest(int clubId, int requestId) async {
+    try {
+      final response = await _dioService.put(
+        path: REJECT_JOIN_REQUEST
+            .replaceFirst('{club_id}', clubId.toString())
+            .replaceFirst('{request_id}', requestId.toString()),
+      );
+      return JoinRequest.map(response);
+    } catch (e) {
+      Logger.d(TAG, 'rejectJoinRequest() -> e: $e');
+      return JoinRequest.withError(_handleError(e));
+    }
   }
-}
 
 // Chat methods
-Future<List<ChatRoom>> getChatRooms() async {
-  try {
-    final response = await _dioService.get(path: CHAT_ROOMS);
+  Future<List<ChatRoom>> getChatRooms() async {
+    try {
+      final response = await _dioService.get(path: CHAT_ROOMS);
 
-    if (response is List) {
-      return response.map((json) => ChatRoom.fromJson(json)).toList();
-    } else if (response is Map<String, dynamic>) {
-      // Assuming the server returns an error message in a map format
-      if (response.containsKey('detail')) {
-        throw Exception(response['detail']);
+      if (response is List) {
+        return response.map((json) => ChatRoom.fromJson(json)).toList();
+      } else if (response is Map<String, dynamic>) {
+        // Assuming the server returns an error message in a map format
+        if (response.containsKey('detail')) {
+          throw Exception(response['detail']);
+        } else {
+          throw Exception('Unexpected response format');
+        }
       } else {
         throw Exception('Unexpected response format');
       }
-    } else {
-      throw Exception('Unexpected response format');
+    } catch (e) {
+      Logger.d(TAG, 'getChatRooms() -> e:$e');
+      throw 'Failed to fetch chat rooms: $e';
     }
-  } catch (e) {
-    Logger.d(TAG, 'getChatRooms() -> e:$e');
-    throw 'Failed to fetch chat rooms: $e';
   }
-}
-
 
   Future<List<Message>> getChatRoomMessages(int roomId) async {
     try {
-      final response = await _dioService.get(path: CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
+      final response = await _dioService.get(
+          path:
+              CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
       return (response as List).map((json) => Message.fromJson(json)).toList();
     } catch (e) {
       Logger.d(TAG, 'getChatRoomMessages() -> e:$e');
-    throw 'Failed to fetch messages: $e';
+      throw 'Failed to fetch messages: $e';
     }
   }
 
   Future<List<ChatRoomMember>> getChatRoomMembers(int roomId) async {
     try {
-      final response = await _dioService.get(path: CHAT_ROOM_MEMBERS.replaceFirst('{room_id}', roomId.toString()));
-      return (response as List).map((json) => ChatRoomMember.fromJson(json)).toList();
+      final response = await _dioService.get(
+          path: CHAT_ROOM_MEMBERS.replaceFirst('{room_id}', roomId.toString()));
+      return (response as List)
+          .map((json) => ChatRoomMember.fromJson(json))
+          .toList();
     } catch (e) {
       Logger.d(TAG, 'getChatRoomMembers() -> e:$e');
-    throw 'Failed to fetch chat room members  : $e';
+      throw 'Failed to fetch chat room members  : $e';
     }
   }
-
-  
-
 
   // Future<EventsResponse> getClubEvents() async {
   //   try {

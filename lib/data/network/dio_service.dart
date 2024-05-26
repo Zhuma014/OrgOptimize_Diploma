@@ -40,16 +40,22 @@ class DioService {
 
   factory DioService() => _instance;
 
+  Future<void> updateToken() async {
+    String? token = PreferencesManager.instance.getAccessToken();
+    if (token != null) {
+      _baseHeaders['Authorization'] = 'Bearer $token';
+      _baseOptions?.headers = _baseHeaders;
+    } else {
+      _baseHeaders.remove('Authorization');
+      _baseOptions?.headers = _baseHeaders;
+    }
+  }
+
   Future get({
     required String path,
     Map<String, dynamic>? requestParams,
   }) async {
-    String? bearerToken = getBearerToken();
-    if (bearerToken != null) {
-      _baseHeaders['authorization'] = bearerToken;
-      _baseOptions?.headers = _baseHeaders;
-    }
-
+    await updateToken();
     return (await _dio.get(
       path,
       queryParameters: requestParams,
@@ -63,12 +69,7 @@ class DioService {
     Map<String, dynamic>? body,
     FormData? data,
   }) async {
-    String? bearerToken = getBearerToken();
-    if (bearerToken != null) {
-      _baseHeaders['Authorization'] = bearerToken;
-      _baseOptions?.headers = _baseHeaders;
-    }
-
+    await updateToken();
     return (await _dio.post(
       path,
       queryParameters: requestParams,
@@ -82,12 +83,7 @@ class DioService {
     Map<String, dynamic>? requestParams,
     FormData? formData,
   }) async {
-    String? bearerToken = getBearerToken();
-    if (bearerToken != null) {
-      _baseHeaders['authorization'] = bearerToken;
-      _baseOptions?.headers = _baseHeaders;
-    }
-
+    await updateToken();
     return (await _dio.post(
       path,
       queryParameters: requestParams,
@@ -101,12 +97,7 @@ class DioService {
     Map<String, dynamic>? requestParams,
     Map<String, dynamic>? body,
   }) async {
-    String? bearerToken = getBearerToken();
-    if (bearerToken != null) {
-      _baseHeaders['Authorization'] = bearerToken;
-      _baseOptions?.headers = _baseHeaders;
-    }
-
+    await updateToken();
     return (await _dio.put(
       path,
       queryParameters: requestParams,
@@ -120,12 +111,7 @@ class DioService {
     Map<String, dynamic>? requestParams,
     Map? body,
   }) async {
-    String? bearerToken = getBearerToken();
-    if (bearerToken != null) {
-      _baseHeaders['authorization'] = bearerToken;
-      _baseOptions?.headers = _baseHeaders;
-    }
-
+    await updateToken();
     return (await _dio.patch(
       path,
       queryParameters: requestParams,
@@ -138,27 +124,16 @@ class DioService {
     required String path,
     Map<String, dynamic>? requestParams,
   }) async {
-    String? bearerToken = getBearerToken();
-    if (bearerToken != null) {
-      _baseHeaders['authorization'] = bearerToken;
-      _baseOptions?.headers = _baseHeaders;
-    }
-
-    FormData formData = FormData();
+    await updateToken();
     return (await _dio.delete(
       path,
       queryParameters: requestParams,
-      data: formData,
+      data: FormData(),
     ))
         .data;
   }
-
-  String? getBearerToken() {
-    String? token = PreferencesManager.instance.getAccessToken();
-    if (token == null) return null;
-    return 'Bearer $token';
-  }
 }
+
 
 
     // Refresh token, when token is expired. And call original endpoint again after refreshing the token

@@ -69,50 +69,49 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
           Navigator.pushNamed(context, Navigation.SETTINGS);
         },
       ),
-      SizedBox(
-        height: 350,
-      ),
+      
 
       /// Button: Выйти
-      RawMaterialButton(
-        disabledElevation: 1,
-        child: Ink(
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(SSC.p4),
+      Expanded(
+        child: RawMaterialButton(
+          disabledElevation: 1,
+          child: Ink(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(SSC.p4),
+              ),
+              color: Palette.SOLITUDE,
             ),
-            color: Palette.SOLITUDE,
-          ),
-          child: Container(
-            height: SSC.p40,
-            alignment: Alignment.center,
-            child: Text(
-              LU.of(context).action_logout,
-              style: const TextStyle(
-                color: Palette.DARK_BLUE,
-                fontSize: SSC.p16,
-                fontWeight: FontWeight.w600,
+            child: Container(
+              height: SSC.p40,
+              alignment: Alignment.center,
+              child: Text(
+                LU.of(context).action_logout,
+                style: const TextStyle(
+                  color: Palette.DARK_BLUE,
+                  fontSize: SSC.p16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
+          onPressed: () {
+            showCustomDialog(
+              context: context,
+              title: LU.of(context).logout_title,
+              description: LU.of(context).logout_from_profile,
+              positiveText: LU.of(context).action_logout,
+              negativeText: LU.of(context).action_cancel,
+              onPositivePressed: () => signOut(context),
+            );
+          },
         ),
-        onPressed: () {
-          showCustomDialog(
-            context: context,
-            title: LU.of(context).logout_title,
-            description: LU.of(context).logout_from_profile,
-            positiveText: LU.of(context).action_logout,
-            negativeText: LU.of(context).action_cancel,
-            onPositivePressed: () => signOut(context),
-          );
-        },
       ),
     ]));
   }
 
   void signOut(BuildContext context) {
     ooBloc.signOut(); 
-    PreferencesManager.instance.wipeOut();
          Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
         (route) => false, 

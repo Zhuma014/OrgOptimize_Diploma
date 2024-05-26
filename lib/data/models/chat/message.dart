@@ -1,41 +1,28 @@
-import 'package:urven/data/models/base/api_result.dart';
-
-class Message extends APIResponse {
+class Message {
   int? id;
   int? chatRoomId;
   int? userId;
   String? content;
   DateTime? timestamp;
-  String? exception;
 
-  Message.map(dynamic o) : super.map(o) {
-    if (o != null) {
-      id = o['id'];
-      chatRoomId = o['chat_room_id'];
-      userId = o['user_id'];
-      content = o['content'];
-      try {
-        timestamp = DateTime.parse(o['timestamp']);
-      } catch (e) {
-        timestamp = null;
-      }
+  Message({
+    this.id,
+    this.chatRoomId,
+    this.userId,
+    this.content,
+    this.timestamp,
+  });
+
+  Message.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    chatRoomId = json['chat_room_id'];
+    userId = json['user_id'];
+    content = json['content'];
+    try {
+      timestamp = DateTime.parse(json['timestamp']);
+    } catch (e) {
+      timestamp = null;
     }
-  }
-
-  Message.withError(String errorValue)
-      : id = null,
-        chatRoomId = null,
-        userId = null,
-        content = null,
-        timestamp = null,
-        exception = errorValue,
-        super.map(null);
-
-  bool get isValid =>
-      id != null && chatRoomId != null && userId != null && content != null;
-
-  factory Message.fromJson(Map<String, dynamic> json) {
-    return Message.map(json);
   }
 
   Map<String, dynamic> toJson() {
@@ -46,5 +33,29 @@ class Message extends APIResponse {
       'content': content,
       'timestamp': timestamp?.toIso8601String(),
     };
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Message &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          chatRoomId == other.chatRoomId &&
+          userId == other.userId &&
+          content == other.content &&
+          timestamp == other.timestamp;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      chatRoomId.hashCode ^
+      userId.hashCode ^
+      content.hashCode ^
+      timestamp.hashCode;
+
+  @override
+  String toString() {
+    return 'Message(id: $id, chatRoomId: $chatRoomId, userId: $userId, content: $content, timestamp: $timestamp)';
   }
 }

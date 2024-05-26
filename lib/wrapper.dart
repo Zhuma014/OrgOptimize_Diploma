@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
-import 'package:urven/ui/screens/chat_list_screen.dart';
+import 'package:urven/ui/screens/chat/chat_list_screen.dart';
 import 'package:urven/ui/screens/events_board_screen.dart';
 import 'package:urven/ui/screens/home_screen.dart';
 import 'package:urven/ui/screens/navigation.dart';
@@ -64,11 +64,7 @@ class _MainWrapperState extends State<MainWrapper> {
                 icon: const Icon(Icons.home_outlined),
                 label: LU.of(context).home,
               ),
-              NavigationDestination(
-                selectedIcon: const Icon(Icons.calendar_month_sharp),
-                icon: const Icon(Icons.calendar_month_sharp),
-                label: LU.of(context).calendar,
-              ),
+             
               NavigationDestination(
                 selectedIcon: const Icon(Icons.chat),
                 icon: const Icon(Icons.chat_bubble_outline),
@@ -88,8 +84,7 @@ class _MainWrapperState extends State<MainWrapper> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const EventsBoardScreen(),
-    ChatRoomsListScreen(),
+    ChatListScreen(),
     const UserProfileScreen()
   ];
 }

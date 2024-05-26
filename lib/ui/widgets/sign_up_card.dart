@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
+import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/email_utils.dart';
@@ -101,6 +102,7 @@ class _SignUpCardState extends State<SignUpCard> {
     String email = _emailController.text.trim();
     String password = _passwordController.text;
     String birthday = _birthdayController.text;
+    String? fcm_token = PreferencesManager.instance.getFirebaseMessagingToken();
 
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
@@ -133,7 +135,7 @@ class _SignUpCardState extends State<SignUpCard> {
       return;
     }
 
-    ooBloc.signUp(email, password, DateTime.parse(birthday), fullName);
+    ooBloc.signUp(email, password, DateTime.parse(birthday), fullName, fcm_token: fcm_token!);
     ooBloc.signUpSubject.stream.listen((value) {
       Logger.d(
           'SignUpCard', 'ooBloc.signUpStream.listen() -> ${value.isValid}');
@@ -143,23 +145,19 @@ class _SignUpCardState extends State<SignUpCard> {
         _emailController.clear();
         _passwordController.clear();
         _birthdayController.clear();
- Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const MainWrapper()),
-      (route) => route.isFirst,
-    );                context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-
-
-       
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainWrapper()),
+          (route) => route.isFirst,
+        );
+        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
       } else {
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Sign Up Failed'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sign Up Failed'),
+            duration: Duration(seconds: 2),
+          ),
+        );
       }
-    );
+    });
   }
 }

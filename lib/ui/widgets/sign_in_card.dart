@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
+import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
 import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
@@ -117,36 +118,35 @@ class _SignInCardState extends State<SignInCard> {
   void _performSignIn() {
     String username = _usernameController.text.trim().replaceAll(' ', '');
     String password = _passwordController.text;
+    String? fcm_token = PreferencesManager.instance.getFirebaseMessagingToken();
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill in all fields'),
-          duration:  Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         ),
       );
       return;
     }
-    ooBloc.signIn(username, password);
+    ooBloc.signIn(username, password,fcm_token: fcm_token!);
 
     ooBloc.signInSubject.stream.listen((value) {
       Logger.d('SignInCard',
           'ssBloc.signInSubject.stream.listen() -> ${value.isValid}');
 
+      if (value.isValid) {
+        _usernameController.clear();
+        _passwordController.clear();
 
- if (value.isValid) {
-    _usernameController.clear();
-    _passwordController.clear();
-    
-    // Navigate to MainWrapper and remove all previous routes
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const MainWrapper()),
-        (route) => false, // This will remove all previous routes
-    );
+        // Navigate to MainWrapper and remove all previous routes
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainWrapper()),
+          (route) => false, // This will remove all previous routes
+        );
 
-    // Change the selected index of the BottomNavBarCubit
-    context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-
+        // Change the selected index of the BottomNavBarCubit
+        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

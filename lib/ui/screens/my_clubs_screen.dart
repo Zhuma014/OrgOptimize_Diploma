@@ -149,20 +149,20 @@ Widget build(BuildContext context) {
                       : 'Member',
                 ),
                 onTap: () async {
-                  if (club.adminId ==
-                      ooBloc.userProfileSubject.value?.id) {
-                    final clubId = club.id!;
-                    await getJoinRequests(clubId);
-                    setState(() {
-                      selectedClubId = clubId;
-                    });
+  if (club.adminId == ooBloc.userProfileSubject.value?.id) {
+    setState(() {
+      selectedClubId = club.id!;
+      joinRequests.clear(); // Clear the previous requests
+    });
+    await getJoinRequests(club.id!);
 
-                    // Show dialog only if there are pending join requests
-                    if (joinRequests.isNotEmpty && !isDialogOpen) {
-                      showUserProfileDialog();
-                    }
-                  }
-                },
+    // Show dialog only if there are pending join requests
+    if (joinRequests.isNotEmpty && !isDialogOpen) {
+      showUserProfileDialog();
+    }
+  }
+},
+
               );
             },
           ),
@@ -176,115 +176,142 @@ Future<void> showUserProfileDialog() async {
   isDialogOpen = true; // Set the dialog state to open
 
   // Filter the join requests to show only pending requests
-  List<JoinRequest> pendingRequests = joinRequests.where((request) => request.status == 'pending').toList();
+  List<JoinRequest> pendingRequests =
+      joinRequests.where((request) => request.status == 'pending').toList();
 
   // Determine the number of pending requests
   int numRequests = pendingRequests.length;
 
   showDialog(
     context: context,
+    barrierDismissible: false, // Prevent dialog from closing on outside tap
     builder: (context) {
-      return AlertDialog(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Join Requests',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-                color: Palette.MAIN, // Use Palette.MAIN as the text color for the title
-              ),
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Join Requests',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    color: Palette.MAIN,
+                  ),
+                ),
+                Text(
+                  '($numRequests)',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    color: Palette.MAIN,
+                  ),
+                ),
+              ],
             ),
-            Text(
-              '($numRequests)',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
-                color: Palette.MAIN, // Use Palette.MAIN as the text color for the title
-              ),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: numRequests == 0
-                ? [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'There are no requests',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    )
-                  ]
-                : pendingRequests.map((request) {
-                    return FutureBuilder<UserProfile?>(
-                      future: ooBloc.getUserProfileById(request.userId!),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return ListTile(
-                            title: Text('Loading user info...'),
-                          );
-                        } else if (snapshot.hasError) {
-                          return ListTile(
-                            title: Text('Error loading user info'),
-                          );
-                        } else if (snapshot.hasData && snapshot.data != null) {
-                          UserProfile userProfile = snapshot.data!;
-                          return ListTile(
-                            title: Text('User: ${userProfile.fullName ?? 'Unknown'}'),
-                            subtitle: Text('Request ID: ${request.id}'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextButton(
-                                  child: Text(
-                                    'Approve',
-                                    style: TextStyle(color: Palette.MAIN), // Use Palette.MAIN as the text color for the button
-                                  ),
-                                  onPressed: () {
-                                    approveJoinRequest(selectedClubId, request.id!);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    'Reject',
-                                    style: TextStyle(color: Palette.MAIN), // Use Palette.MAIN as the text color for the button
-                                  ),
-                                  onPressed: () {
-                                    rejectJoinRequest(selectedClubId, request.id!);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ],
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: numRequests == 0
+                    ? [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'There are no requests',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
                             ),
-                          );
-                        } else {
-                          return ListTile(
-                            title: Text('User not found'),
-                          );
-                        }
-                      },
-                    );
-                  }).toList(),
-          ),
-        ),
+                          ),
+                        )
+                      ]
+                    : pendingRequests.map((request) {
+                        return FutureBuilder<UserProfile?>(
+                          future: ooBloc.getUserProfileById(request.userId!),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return ListTile(
+                                title: Text('Loading user info...'),
+                              );
+                            } else if (snapshot.hasError) {
+                              return ListTile(
+                                title: Text('Error loading user info'),
+                              );
+                            } else if (snapshot.hasData &&
+                                snapshot.data != null) {
+                              UserProfile userProfile = snapshot.data!;
+                              return ListTile(
+                                title: Text(
+                                    'User: ${userProfile.fullName ?? 'Unknown'}'),
+                                subtitle: Text('Request ID: ${request.id}'),
+                                trailing: request.status == 'approved'
+                                    ? Text('Approved')
+                                    : request.status == 'rejected'
+                                        ? Text('Rejected')
+                                        : Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              TextButton(
+                                                child: Text(
+                                                  'Approve',
+                                                  style: TextStyle(
+                                                      color: Palette.MAIN),
+                                                ),
+                                                onPressed: () async {
+                                                  await approveJoinRequest(
+                                                      selectedClubId,
+                                                      request.id!);
+                                                  setState(() {
+                                                    request.status = 'approved';
+                                                  });
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: Text(
+                                                  'Reject',
+                                                  style: TextStyle(
+                                                      color: Palette.MAIN),
+                                                ),
+                                                onPressed: () async {
+                                                  await rejectJoinRequest(
+                                                      selectedClubId,
+                                                      request.id!);
+                                                  setState(() {
+                                                    request.status = 'rejected';
+                                                  });
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                              );
+                            } else {
+                              return ListTile(
+                                title: Text('User not found'),
+                              );
+                            }
+                          },
+                        );
+                      }).toList(),
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  isDialogOpen = false;
+                },
+              ),
+            ],
+          );
+        },
       );
     },
-  ).then((_) {
-    isDialogOpen = false; // Reset the dialog state when closed
-  });
+  );
 }
-
-
-
 
 
 }

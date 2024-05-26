@@ -1,44 +1,33 @@
 import 'package:urven/data/models/base/api_result.dart';
 
-class ChatRoom extends APIResponse {
+class ChatRoom {
   int? id;
   int? clubId;
   String? name;
   String? description;
   String? type;
   DateTime? createdAt;
-  String? exception;
 
-  ChatRoom.map(dynamic o) : super.map(o) {
-    if (o != null) {
-      id = o['id'];
-      clubId = o['club_id'];
-      name = o['name'];
-      description = o['description'];
-      type = o['type'];
-      try {
-        createdAt = DateTime.parse(o['created_at']);
-      } catch (e) {
-        createdAt = null;
-      }
-    }
-  }
-
-  ChatRoom.withError(String errorValue)
-      : id = null,
-        clubId = null,
-        name = null,
-        description = null,
-        type = null,
-        createdAt = null,
-        exception = errorValue,
-        super.map(null);
-
-  bool get isValid =>
-      id != null && name != null && description != null && type != null;
+  ChatRoom({
+    this.id,
+    this.clubId,
+    this.name,
+    this.description,
+    this.type,
+    this.createdAt,
+  });
 
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
-    return ChatRoom.map(json);
+    return ChatRoom(
+      id: json['id'],
+      clubId: json['club_id'],
+      name: json['name'],
+      description: json['description'],
+      type: json['type'],
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'])
+          : null,
+    );
   }
 
   Map<String, dynamic> toJson() {
@@ -51,4 +40,7 @@ class ChatRoom extends APIResponse {
       'created_at': createdAt?.toIso8601String(),
     };
   }
+
+  bool get isValid =>
+      id != null && name != null && description != null && type != null;
 }

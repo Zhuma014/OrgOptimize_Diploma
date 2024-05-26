@@ -12,8 +12,7 @@ class PreferencesManager {
   static const _KEY_LANGUAGE = 'language';
   static const _KEY_ACCESS_TOKEN = 'access_token';
   static const _KEY_USER_PROFILE = 'u_profile';
-
-  // static const _KEY_USER_PROFILE = 'u_profile';
+  static const _KEY_FCM_TOKEN = 'fcm_token';
 
   late SharedPreferences pref;
 
@@ -21,7 +20,7 @@ class PreferencesManager {
 
   static final instance = PreferencesManager._();
 
-  Future init() async {
+  Future<void> init() async {
     pref = await SharedPreferences.getInstance();
   }
 
@@ -31,32 +30,36 @@ class PreferencesManager {
     return pref.setString(_KEY_LANGUAGE, languageCode);
   }
 
-  void saveAuthCredentials(String accessToken) {
-    pref.setString(_KEY_ACCESS_TOKEN, accessToken);
+  Future<void> saveAuthCredentials(String accessToken) async {
+    await pref.setString(_KEY_ACCESS_TOKEN, accessToken);
   }
 
-  bool isAuthenticated() => getAccessToken().isNotNullOrBlank();
+  bool isAuthenticated() => getAccessToken()?.isNotEmpty ?? false;
 
   String? getAccessToken() => pref.getString(_KEY_ACCESS_TOKEN);
 
-  void saveUserProfile(UserProfile profile) {
-    pref.setString(_KEY_USER_PROFILE, json.encode(profile));
+  Future<void> saveUserProfile(UserProfile profile) async {
+    await pref.setString(_KEY_USER_PROFILE, json.encode(profile));
   }
 
-  void clearTokens() {
-    pref.remove(_KEY_ACCESS_TOKEN);
+  Future<void> clearTokens() async {
+    await pref.remove(_KEY_ACCESS_TOKEN);
   }
 
-  void wipeOut() {
-    pref.remove(_KEY_ACCESS_TOKEN);
-    pref.remove(_KEY_USER_PROFILE);
+  Future<void> wipeOut() async {
+    await pref.remove(_KEY_ACCESS_TOKEN);
+    await pref.remove(_KEY_USER_PROFILE);
   }
-
-
 
   UserProfile? getUserProfile() {
     String? profile = pref.getString(_KEY_USER_PROFILE);
     if (profile == null) return null;
     return UserProfile.fromJson(json.decode(profile));
   }
+
+  Future<void> saveFirebaseMessagingToken(String token) async {
+    await pref.setString(_KEY_FCM_TOKEN, token);
+  }
+
+  String? getFirebaseMessagingToken() => pref.getString(_KEY_FCM_TOKEN);
 }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/app.dart';
 import 'package:urven/data/network/general_http_overrider.dart';
+import 'package:urven/data/network/push/notification.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/firebase_options.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
@@ -24,6 +25,9 @@ import 'package:provider/provider.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 import 'package:flutter/services.dart';
 import 'package:urven/wrapper.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -39,17 +43,20 @@ Future<void> _configureLocalTimeZone() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+    await PreferencesManager.instance.init();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationService.instance.setup();
 
   final BottomNavBarCubit bottomNavBarCubit = BottomNavBarCubit();
 
   _configureLocalTimeZone();
 
-  await PreferencesManager.instance.init();
-
   LocaleProvider localeProvider = LocaleProvider();
   await localeProvider.initialize();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+
+
   // FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
   // await NotificationService.instance.setup();
   // await NotificationService.instance.requestPermissions();
@@ -148,12 +155,18 @@ void main() async {
             locale: provider.locale,
 
             // Routes
-            initialRoute: PreferencesManager.instance.isAuthenticated() ? Navigation.HOME : Navigation.INDEX,
+            initialRoute: PreferencesManager.instance.isAuthenticated()
+                ? Navigation.HOME
+                : Navigation.INDEX,
             onGenerateInitialRoutes: (String initialRoute) {
-        return [
-          MaterialPageRoute(builder: (context) => PreferencesManager.instance.isAuthenticated() ? MainWrapper() : OrgOptimizeApp()),
-        ];
-      },
+              return [
+                MaterialPageRoute(
+                    builder: (context) =>
+                        PreferencesManager.instance.isAuthenticated()
+                            ? MainWrapper()
+                            : OrgOptimizeApp()),
+              ];
+            },
             // by default open Intro screen
             routes: Navigation.getRoutes(),
 

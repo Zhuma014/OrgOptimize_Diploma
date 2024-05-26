@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/data/models/club/club_events.dart';
+import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/common_input_field.dart';
 import 'package:urven/ui/widgets/event_card.dart';
@@ -15,6 +16,14 @@ import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+
+import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
+
+
+// Assuming Event and other necessary imports are already added
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -29,14 +38,17 @@ class _HomeScreenState extends State<HomeScreen>
   late TabController _tabController;
   late EventType selectedEventType;
   bool isSortedByDate = false;
-
+  CalendarFormat _calendarFormat = CalendarFormat.week;
+  DateTime _selectedDay = DateTime.now();
+  DateTime _focusedDay = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     selectedEventType = EventType.both;
-    ooBloc.getAllUserEvents();
+    ooBloc.getClubEvents();
+    ooBloc.getOwnEvents();
   }
 
   @override
@@ -45,20 +57,13 @@ class _HomeScreenState extends State<HomeScreen>
     super.dispose();
   }
 
-    void sortEventsByDate(List<Event> events) {
+  void sortEventsByDate(List<Event> events) {
     events.sort((a, b) => a.date!.compareTo(b.date!));
   }
 
-    List<Event> filterEventsByType(List<Event> events) {
-    if (selectedEventType == EventType.userOwned) {
-      return events.where((event) => event.clubId == null).toList();
-    } else if (selectedEventType == EventType.club) {
-      return events.where((event) => event.clubId != null).toList();
-    } else {
-      return events;
-    }
+  List<Event> getEventsForDay(DateTime day, List<Event> events) {
+    return events.where((event) => isSameDay(event.date, day)).toList();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -79,27 +84,6 @@ class _HomeScreenState extends State<HomeScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                
-                Text(
-                  "Upcoming Events",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(
-                  height: 35,
-                  width: 50,
-                  child: IconButton(
-                    onPressed: () {
-                      _showAddEventModal(context);
-                    },
-                    icon: const Icon(
-                      Icons.add,
-                      color: Palette.MAIN,
-                    ),
-                  ),
-                ),
                 DropdownButton<EventType>(
                   value: selectedEventType,
                   onChanged: (value) {
@@ -110,98 +94,144 @@ class _HomeScreenState extends State<HomeScreen>
                   items: [
                     DropdownMenuItem(
                       value: EventType.userOwned,
-                      child: Text('User Owned'),
+                      child: Text('My', style: TextStyle(fontSize: 16)),
                     ),
                     DropdownMenuItem(
                       value: EventType.club,
-                      child: Text('Club'),
+                      child: Text('Clubs', style: TextStyle(fontSize: 16)),
                     ),
                     DropdownMenuItem(
                       value: EventType.both,
-                      child: Text('Both'),
+                      child: Text('All', style: TextStyle(fontSize: 16)),
                     ),
                   ],
                 ),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      isSortedByDate = !isSortedByDate;
-                    });
-                  },
-                  child: Text(
-                    isSortedByDate ? 'Sorted' : 'Sort',
-                    style: TextStyle(color: Colors.blue),
+                Text(
+                  "Upcoming Events",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                Spacer(),
-                // SizedBox(
-                //   height: 35,
-                //   width: 50,
-                //   child: IconButton(
-                //     onPressed: () {
-                //       ooBloc.getAllClubs();
-            
-                //       _openJoinClubModal(context);
-                //     },
-                //     icon: const Icon(
-                //       Icons.class_,
-                //       color: Palette.MAIN,
-                //     ),
-                //   ),
-                // ),
-                // SizedBox(
-                //   height: 35,
-                //   width: 50,
-                //   child: IconButton(
-                //     onPressed: () {
-                //       _openCreateClubModal(context);
-                //     },
-                //     icon: const Icon(
-                //       Icons.class_,
-                //       color: Palette.MAIN,
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
-          SizedBox(
-  height: 200, // Set a fixed height for the container
-  child: StreamBuilder<List<Event>>(
-    stream: ooBloc.getAllEventsSubject,
-    builder: (context, snapshot) {
-      if (snapshot.hasData) {
-        List<Event> events = snapshot.data!;
-        if (isSortedByDate) {
-          sortEventsByDate(events);
-        }
-        events = filterEventsByType(events);
-        if (events.isEmpty) {
-          return const Center(
-            child: Text("You don't have events"),
-          );
-        } else {
-          return ListView(
-            scrollDirection: Axis.horizontal,
-            children: events.map((event) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: EventCard(event: event),
-              );
-            }).toList(),
-          );
-        }
-      } else if (snapshot.hasError) {
-        return Center(child: Text('Error: ${snapshot.error}'));
+          TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay; // update `_focusedDay` here as well
+              });
+            },
+            onFormatChanged: (format) {
+              if (_calendarFormat != format) {
+                setState(() {
+                  _calendarFormat = format;
+                });
+              }
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
+            calendarStyle: CalendarStyle(
+              selectedDecoration: BoxDecoration(
+                color: Palette.MAIN,
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: Palette.MAIN.withOpacity(0.5),
+                shape: BoxShape.circle,
+              ),
+              weekendTextStyle: TextStyle(color: Palette.MAIN),
+              selectedTextStyle: TextStyle(color: Colors.white),
+              todayTextStyle: TextStyle(color: Colors.white),
+            ),
+            daysOfWeekStyle: DaysOfWeekStyle(
+              weekendStyle: TextStyle(color: Palette.MAIN),
+            ),
+            headerStyle: HeaderStyle(
+              titleCentered: true,
+              formatButtonVisible: false,
+              titleTextStyle: TextStyle(color: Palette.MAIN, fontSize: 16),
+              leftChevronIcon: Icon(
+                Icons.chevron_left,
+                color: Palette.MAIN,
+              ),
+              rightChevronIcon: Icon(
+                Icons.chevron_right,
+                color: Palette.MAIN,
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<List<Event>>(
+  stream: selectedEventType == EventType.userOwned
+      ? ooBloc.getUserOwnedEventsSubject.stream
+      : selectedEventType == EventType.club
+          ? ooBloc.getClubEventsSubject.stream
+          : Rx.combineLatest2(
+              ooBloc.getUserOwnedEventsSubject.stream,
+              ooBloc.getClubEventsSubject.stream,
+              (List<Event> userEvents, List<Event> clubEvents) =>
+                  userEvents + clubEvents,
+            ),
+  builder: (context, snapshot) {
+    if (snapshot.hasData) {
+      List<Event> events = snapshot.data!;
+      if (isSortedByDate) {
+        sortEventsByDate(events);
       }
-      return const Center(child: CircularProgressIndicator());
-    },
-  ),
+      List<Event> selectedDayEvents =
+          getEventsForDay(_selectedDay, events);
+      if (selectedDayEvents.isEmpty) {
+        return const Center(
+          child: Text("You don't have events"),
+        );
+      } else {
+        return ListView.builder(
+          itemCount: selectedDayEvents.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: EventCard(event: selectedDayEvents[index]),
+            );
+          },
+        );
+      }
+    } else if (snapshot.hasError) {
+      return Center(child: Text('Error: ${snapshot.error}'));
+    } else {
+      // Check if snapshot.data is not null before accessing its properties
+      if (snapshot.data != null && snapshot.data!.isNotEmpty) {
+        return const Center(child: CircularProgressIndicator());
+      } else {
+        return const Center(child: Text("You don't have events"));
+      }
+    }
+  },
 ),
+
+          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddEventModal(context);
+        },
+        backgroundColor: Palette.MAIN,
+        child: const Icon(Icons.add),
       ),
     );
   }
+
+  
 }
 
 void _showAddEventModal(BuildContext context) {
@@ -214,18 +244,60 @@ void _showAddEventModal(BuildContext context) {
 
   int? selectedClubId; // Variable to hold the selected club ID
 
+
+  String? _validateDescription(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Description is required';
+    }
+    return null;
+  }
+
   Future<void> _selectDateTime(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2000),
       lastDate: DateTime(2101),
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary:
+                  Palette.MAIN, // Use Palette.Main for header background color
+              onPrimary: Colors.white, // Header text color
+              surface: Palette.MAIN, // Body background color (optional)
+              onSurface: Colors.black, // Body text color
+            ),
+            dialogBackgroundColor:
+                Colors.white, // Background color of the dialog
+          ),
+          child: child!,
+        );
+      },
     );
+
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.now(),
+        builder: (BuildContext context, Widget? child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+              colorScheme: ColorScheme.light(
+                primary: Palette
+                    .MAIN, // Use Palette.Main for header background color
+                onPrimary: Colors.white, // Header text color
+                surface: Colors.white, // Body background color (optional)
+                onSurface: Colors.black, // Body text color
+              ),
+              dialogBackgroundColor:
+                  Colors.white, // Background color of the dialog
+            ),
+            child: child!,
+          );
+        },
       );
+
       if (pickedTime != null) {
         final DateTime fullDateTime = DateTime(
           pickedDate.year,
@@ -320,10 +392,7 @@ void _showAddEventModal(BuildContext context) {
                               ),
                               const SizedBox(height: SSC.p6),
                               DropdownButtonFormField<int>(
-                                
                                 decoration: InputDecoration(
-                                  
-                                  
                                   filled: true,
                                   fillColor: Colors.white70,
                                   contentPadding: EdgeInsets.only(
@@ -331,31 +400,30 @@ void _showAddEventModal(BuildContext context) {
                                     top: SSC.p10,
                                     bottom: SSC.p10,
                                   ),
-                                   enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(SSC.p4),
-                  ),
-                  borderSide: BorderSide(
-                    color: Palette.LIGHT_GREY_4,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(SSC.p4),
-                  ),
-                  borderSide: BorderSide(
-                    color: Palette.LIGHT_GREY_4,
-                  ),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(SSC.p4),
-                  ),
-                  borderSide: BorderSide(
-                    color: Colors.red,
-                  ),
-                ),
-
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(SSC.p4),
+                                    ),
+                                    borderSide: BorderSide(
+                                      color: Palette.LIGHT_GREY_4,
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(SSC.p4),
+                                    ),
+                                    borderSide: BorderSide(
+                                      color: Palette.LIGHT_GREY_4,
+                                    ),
+                                  ),
+                                  errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(SSC.p4),
+                                    ),
+                                    borderSide: BorderSide(
+                                      color: Colors.red,
+                                    ),
+                                  ),
                                 ),
                                 value: selectedClubId,
                                 items: [
@@ -393,6 +461,7 @@ void _showAddEventModal(BuildContext context) {
                     isRequired: true,
                     controller: titleController,
                     keyboardType: TextInputType.text,
+                    validator: _validateDescription,
                   ),
                   CommonInputField(
                     labelText: LU.of(context).description,
@@ -400,6 +469,7 @@ void _showAddEventModal(BuildContext context) {
                     controller: descriptionController,
                     keyboardType: TextInputType.multiline,
                     minLines: 3,
+                    validator: _validateDescription,
                   ),
                   CommonInputField(
                     labelText: LU.of(context).date,
@@ -408,13 +478,16 @@ void _showAddEventModal(BuildContext context) {
                     keyboardType: TextInputType.datetime,
                     hintText: 'Choose date and time',
                     readOnly: true,
-                    onTap: () => _selectDateTime(context), // Use onTap to show date and time picker
+                    onTap: () => _selectDateTime(context),
+                    validator: _validateDescription,
+// Use onTap to show date and time picker
                   ),
                   CommonInputField(
                     labelText: LU.of(context).location,
                     isRequired: true,
                     controller: locationController,
                     keyboardType: TextInputType.text,
+                    validator: _validateDescription,
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -438,23 +511,24 @@ void _showAddEventModal(BuildContext context) {
                         onPressed: () {
                           if (formKey.currentState?.validate() ?? false) {
                             String dateString = dateController.text;
-                            DateTime date = DateFormat('dd MMM yyyy HH:mm').parse(dateString);
+                            DateTime date = DateFormat('dd MMM yyyy HH:mm')
+                                .parse(dateString);
 
                             if (selectedClubId == 0) {
                               ooBloc.createEvent(
                                   titleController.text,
                                   descriptionController.text,
                                   date,
-                                  locationController.text);
+                                  locationController.text );
                             } else {
                               ooBloc.createEvent(
-                                  titleController.text,
-                                  descriptionController.text,
-                                  date,
-                                  locationController.text,
-
-                                  clubId: selectedClubId!,
-);
+                                titleController.text,
+                                descriptionController.text,
+                                date,
+                                locationController.text,
+                                clubId: selectedClubId!,
+                              
+                              );
                             }
 
                             Navigator.pop(context); // Close the modal
@@ -476,7 +550,6 @@ void _showAddEventModal(BuildContext context) {
     },
   );
 }
-
 
 void _openJoinClubModal(BuildContext context) {
   showDialog(
@@ -536,6 +609,7 @@ void _openJoinClubModal(BuildContext context) {
     },
   );
 }
+
 
 
 enum EventType {
