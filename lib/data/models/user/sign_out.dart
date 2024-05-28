@@ -1,11 +1,12 @@
-import 'package:urven/data/models/base/api_result.dart';
 
-class SignOut extends APIResponse {
-  String? exception; // #LocalVariable
+class SignOut {
+  String? exception;
 
-  SignOut.map(dynamic o) : super.map(o);
+  SignOut({
+    this.exception,
+  });
 
-  SignOut.withError(String errorValue)
-      : exception = errorValue,
-        super.map(null);
+  SignOut.fromJson(Map<String, dynamic> json) {
+    exception = json['exception'];
+    }
 }

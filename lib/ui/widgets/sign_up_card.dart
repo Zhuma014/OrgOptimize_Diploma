@@ -102,7 +102,7 @@ class _SignUpCardState extends State<SignUpCard> {
     String email = _emailController.text.trim();
     String password = _passwordController.text;
     String birthday = _birthdayController.text;
-    String? fcm_token = PreferencesManager.instance.getFirebaseMessagingToken();
+    String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
 
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
@@ -135,7 +135,7 @@ class _SignUpCardState extends State<SignUpCard> {
       return;
     }
 
-    ooBloc.signUp(email, password, DateTime.parse(birthday), fullName, fcm_token: fcm_token!);
+    ooBloc.signUp(email, password, DateTime.parse(birthday), fullName, fcm_token: fcmToken!);
     ooBloc.signUpSubject.stream.listen((value) {
       Logger.d(
           'SignUpCard', 'ooBloc.signUpStream.listen() -> ${value.isValid}');

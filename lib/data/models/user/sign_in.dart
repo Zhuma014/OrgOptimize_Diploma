@@ -1,24 +1,19 @@
-import 'package:urven/data/models/base/api_result.dart';
 
-class SignIn extends APIResponse {
+class SignIn {
   String? accessToken;
   String? tokenType;
   String? exception;
 
+  SignIn({
+    this.accessToken,
+    this.tokenType,
+    this.exception,
+  });
 
-  SignIn.map(dynamic o) : super.map(o) {
-    if (o != null) {
-      accessToken = o['access_token'];
-      tokenType = o['token_type'];
-
+  SignIn.fromJson(Map<String, dynamic> json) {
+    accessToken = json['access_token'];
+    tokenType = json['token_type'];
     }
-  }
-
-  SignIn.withError(String errorValue)
-      : accessToken = null,
-        tokenType = null,
-        exception = errorValue,
-        super.map(null);
 
   bool get isValid => accessToken != null;
 }

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urven/app.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/club/club.dart';
+import 'package:urven/data/models/user/user_edit.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/ui/screens/base/base_screen.dart';
@@ -27,40 +28,44 @@ class EditProfileScreen extends StatefulWidget {
 
 class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
   final formKey = GlobalKey<FormState>();
-StreamSubscription<Club?>? _clubSubscription;
+  StreamSubscription<List<Club?>>? _clubSubscription;
 
   final TextEditingController controllerFullName = TextEditingController();
   final TextEditingController controllerDateOfBirth = TextEditingController();
   final TextEditingController controllerEmail = TextEditingController();
 
+  List<Club> _clubs = [];
+
   @override
   void initState() {
     super.initState();
 
-
-   
-
     SharedPreferences.getInstance().then((prefs) {
+      if (PreferencesManager.instance.isAuthenticated()) {
+        ooBloc.getUserProfile();
+        ooBloc.getUserClubs();
+      }
+    });
+
+    _clubSubscription = ooBloc.getUserClubsSubject.listen((clubs) {
       setState(() {
-        if (PreferencesManager.instance.isAuthenticated()) {
-          ooBloc.getUserProfile();
-          ooBloc.getUserClubs();
-        }
+        _clubs = clubs;
       });
     });
   }
 
-  @override
+    @override
   void dispose() {
-    _clubSubscription?.cancel();
+    _clubSubscription?.cancel(); // Unsubscribe from the stream
     super.dispose();
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StreamBuilder<UserProfile?>(
-        stream: ooBloc.userProfileSubject.stream,
+        stream: ooBloc.userProfileSubject,
         builder: (context, AsyncSnapshot<UserProfile?> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return buildLoadingWidget();
@@ -103,10 +108,9 @@ StreamSubscription<Club?>? _clubSubscription;
     controllerEmail.text = profile.email ?? '';
     controllerDateOfBirth.text = profile.birthDate ?? '';
 
-    return Stack(
+    return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom:10.0),
+        Expanded(
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,10 +139,10 @@ StreamSubscription<Club?>? _clubSubscription;
                         controller: controllerFullName,
                         keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.next,
-                        readOnly: true,
+                        readOnly: false,
                       ),
                       const SizedBox(height: SSC.p8),
-        
+
                       /// День рождения
                       CommonInputField(
                         margin: const EdgeInsets.fromLTRB(
@@ -151,10 +155,9 @@ StreamSubscription<Club?>? _clubSubscription;
                         controller: controllerDateOfBirth,
                         keyboardType: TextInputType.text,
                         textInputAction: TextInputAction.next,
-                        readOnly: true,
                       ),
                       const SizedBox(height: SSC.p8),
-        
+
                       /// Электронная почта
                       CommonInputField(
                         margin: const EdgeInsets.fromLTRB(
@@ -170,9 +173,31 @@ StreamSubscription<Club?>? _clubSubscription;
                         readOnly: true,
                       ),
                       const SizedBox(height: SSC.p8),
+
+                      /// Button: Сохранить
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          SSC.p15,
+                          0,
+                          SSC.p15,
+                          SSC.p10,
+                        ),
+                        child: ActionButton(
+                          mainText: LU.of(context).save,
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              userEdit(
+                                context,
+                                controllerFullName.text,
+                                controllerDateOfBirth.text,
+                              );
+                            }
+                          },
+                        ),
+                      ),
                       Padding(
                         padding:
-                            EdgeInsets.only(left: 15.0, right: 15, top: 10),
+                            const EdgeInsets.only(left: 15.0, right: 15, top: 10),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -183,19 +208,19 @@ StreamSubscription<Club?>? _clubSubscription;
                                   color: Palette.MAIN.withOpacity(0.5),
                                   fontWeight: FontWeight.w400),
                             ),
-                            SizedBox(height: 5.0),
+                            const SizedBox(height: 5.0),
                             StreamBuilder<List<Club>>(
-                              stream: ooBloc.getUserClubsSubject.stream,
+                              stream: ooBloc.getUserClubsSubject,
                               builder: (context,
                                   AsyncSnapshot<List<Club>> snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return Center(
+                                  return const Center(
                                       child: CircularProgressIndicator());
                                 } else if (snapshot.hasError) {
                                   return Text(
                                     'Failed to fetch clubs: ${snapshot.error}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -219,18 +244,18 @@ StreamSubscription<Club?>? _clubSubscription;
                                     return ListView.separated(
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
+                                      physics: const NeverScrollableScrollPhysics(),
                                       itemCount: adminClubs.length,
                                       separatorBuilder: (context, index) =>
-                                          SizedBox(height: 8.0),
+                                          const SizedBox(height: 8.0),
                                       itemBuilder: (context, index) {
                                         Club club = adminClubs[index];
                                         return GestureDetector(
                                           onTap: () {
-          _onClubTapped(club);
-              },
+                                            _onClubTapped(club);
+                                          },
                                           child: Container(
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             decoration: BoxDecoration(
                                               border: Border.all(
                                                 color: Palette.LIGHT_GREY_4,
@@ -252,7 +277,7 @@ StreamSubscription<Club?>? _clubSubscription;
                                                         .withOpacity(0.7),
                                                   ),
                                                 ),
-                                                SizedBox(height: 4.0),
+                                                const SizedBox(height: 4.0),
                                                 Text(
                                                   club.description!,
                                                   style: TextStyle(
@@ -268,7 +293,7 @@ StreamSubscription<Club?>? _clubSubscription;
                                     );
                                   }
                                 } else {
-                                  return Text(
+                                  return const Text(
                                     "No admin clubs",
                                     style: TextStyle(
                                       color: Colors.grey,
@@ -278,7 +303,7 @@ StreamSubscription<Club?>? _clubSubscription;
                                 }
                               },
                             ),
-                            SizedBox(height: 10.0),
+                            const SizedBox(height: 10.0),
                             Text(
                               "You are member of:",
                               style: TextStyle(
@@ -286,19 +311,19 @@ StreamSubscription<Club?>? _clubSubscription;
                                   color: Palette.MAIN.withOpacity(0.5),
                                   fontWeight: FontWeight.w400),
                             ),
-                            SizedBox(height: 5.0),
+                            const SizedBox(height: 5.0),
                             StreamBuilder<List<Club>>(
-                              stream: ooBloc.getUserClubsSubject.stream,
+                              stream: ooBloc.getUserClubsSubject,
                               builder: (context,
                                   AsyncSnapshot<List<Club>> snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return Center(
+                                  return const Center(
                                       child: CircularProgressIndicator());
                                 } else if (snapshot.hasError) {
                                   return Text(
                                     'Failed to fetch clubs: ${snapshot.error}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.red,
                                       fontWeight: FontWeight.bold,
                                     ),
@@ -309,31 +334,34 @@ StreamSubscription<Club?>? _clubSubscription;
                                           club.adminId !=
                                           ooBloc.userProfileSubject.value?.id)
                                       .toList();
-                                  if (memberClubs.isEmpty) {
-                                    return Text(
-                                      "No member clubs",
-                                      style: TextStyle(
-                                        color: Palette.DARK_GREY_2
-                                            .withOpacity(0.7),
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    );
+                                  if (snapshot.hasData && memberClubs.isEmpty) {
+                                    
+                                    return FutureBuilder(
+          future: Future.delayed(const Duration(seconds: 2)), // Delay for 2 seconds
+          builder: (context, _) => Text(
+            "No member clubs",
+            style: TextStyle(
+              color: Palette.DARK_GREY_2.withOpacity(0.7),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        );
                                   } else {
                                     return ListView.separated(
                                       padding: EdgeInsets.zero,
                                       shrinkWrap: true,
-                                      physics: NeverScrollableScrollPhysics(),
+                                      physics: const NeverScrollableScrollPhysics(),
                                       itemCount: memberClubs.length,
                                       separatorBuilder: (context, index) =>
-                                          SizedBox(height: 8.0),
+                                          const SizedBox(height: 8.0),
                                       itemBuilder: (context, index) {
                                         Club club = memberClubs[index];
                                         return GestureDetector(
                                           onTap: () {
-          _onClubTapped(club);
-              },
+                                            _onClubTapped(club);
+                                          },
                                           child: Container(
-                                            padding: EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(8.0),
                                             decoration: BoxDecoration(
                                               border: Border.all(
                                                 color: Palette.LIGHT_GREY_4,
@@ -355,7 +383,7 @@ StreamSubscription<Club?>? _clubSubscription;
                                                         .withOpacity(0.7),
                                                   ),
                                                 ),
-                                                SizedBox(height: 4.0),
+                                                const SizedBox(height: 4.0),
                                                 Text(
                                                   club.description!,
                                                   style: TextStyle(
@@ -371,7 +399,7 @@ StreamSubscription<Club?>? _clubSubscription;
                                     );
                                   }
                                 } else {
-                                  return Text(
+                                  return const Text(
                                     "No member clubs",
                                     style: TextStyle(
                                       color: Colors.grey,
@@ -395,20 +423,54 @@ StreamSubscription<Club?>? _clubSubscription;
     );
   }
 
-void _onClubTapped(Club club) {
+  void userEdit(
+    BuildContext context,
+    String fullName,
+    String birthdate,
+  ) {
+    ooBloc.updateProfileSubject.listen((UserEdit editedUser) {
+      if (editedUser.fullName != null && editedUser.birthDate != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Your profile updated successfully")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(LU.of(context).unknown_error)),
+        );
+      }
+    });
 
-  _clubSubscription?.cancel();
+    ooBloc.userEdit(fullName, birthdate);
+  }
 
-  // Show the modal immediately
-  _showClubInfoModal(club);
+  void _onClubTapped(Club club) {
+    _clubSubscription?.cancel();
 
-  
-}
+    // Show the modal immediately
+    _showClubInfoModal(club);
+  }
 
-void _showClubInfoModal(Club club) {
-  showModalBottomSheet(
-    context: context,
-    builder: (context) => ClubInfoModal(club: club),
-  );
-}
+  void _handleUpdate(Club updatedClub) {
+    setState(() {
+      final index = _clubs.indexWhere((club) => club.id == updatedClub.id);
+      if (index != -1) {
+        _clubs[index] = updatedClub;
+      }
+    });
+  }
+
+  void _showClubInfoModal(Club club) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => ClubInfoModal(
+          club: club,
+          onUpdate: (updatedClub) {
+            setState(() {
+              // Update the club in your local state
+              club = updatedClub;
+              _handleUpdate(updatedClub);
+            });
+          }),
+    );
+  }
 }

@@ -8,14 +8,15 @@ class ActionButton extends StatelessWidget {
   static const double HEIGHT = SSC.p40;
   static const double CONTENT_PADDING = 10; // Adjust padding as needed
 
-  const ActionButton({super.key, 
+  const ActionButton({
+    Key? key,
     this.isEnabled = true,
     this.decoration,
     required this.mainText,
     this.secondaryText,
     this.textStyle,
     required this.onPressed,
-  });
+  }) : super(key: key);
 
   final bool isEnabled;
   final Decoration? decoration;
@@ -31,12 +32,11 @@ class ActionButton extends StatelessWidget {
       onPressed: isEnabled ? onPressed : null,
       child: Ink(
         decoration: decoration ?? BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(SSC.p4),
-                ),
-                color: isEnabled ? null : Palette.MAIN,
-                
-              ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(SSC.p4),
+          ),
+          color: isEnabled ? Palette.MAIN : Colors.grey,
+        ),
         child: SizedBox(
           height: HEIGHT,
           child: Container(
@@ -49,20 +49,20 @@ class ActionButton extends StatelessWidget {
                   Text(
                     mainText,
                     style: textStyle ?? const TextStyle(
-                            color: Colors.white,
-                            fontSize: SSC.p16,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      color: Colors.white,
+                      fontSize: SSC.p16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   if (secondaryText != null) ...[
                     const SizedBox(width: 15),
                     Text(
                       secondaryText!,
                       style: textStyle ?? const TextStyle(
-                              color: Colors.white,
-                              fontSize: SSC.p16, 
-                              fontWeight: FontWeight.w600,
-                            ),
+                        color: Colors.white,
+                        fontSize: SSC.p16, 
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ],

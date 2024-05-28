@@ -1,4 +1,4 @@
-// ignore_for_file: depend_on_referenced_packages, unnecessary_nullable_for_final_variable_declarations
+// ignore_for_file: depend_on_referenced_packages, unnecessary_nullable_for_final_variable_declarations, prefer_const_constructors
 
 import 'dart:io';
 
@@ -16,7 +16,6 @@ import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/font.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/theme/text.dart';
-import 'package:urven/utils/logger.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -25,8 +24,6 @@ import 'package:provider/provider.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 import 'package:flutter/services.dart';
 import 'package:urven/wrapper.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

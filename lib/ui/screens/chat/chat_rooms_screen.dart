@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/chat/chat_room.dart';
@@ -8,7 +10,7 @@ import 'package:urven/ui/widgets/toolbar.dart';
 class ChatRoomsScreen extends StatefulWidget {
   final int clubId;
 
-  ChatRoomsScreen({required this.clubId});
+  const ChatRoomsScreen({super.key, required this.clubId});
 
   @override
   _ChatRoomsScreenState createState() => _ChatRoomsScreenState();
@@ -27,8 +29,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
             child: Toolbar(
               isBackButtonVisible: true, // Enable back button for this screen
               title: 'Chat Rooms',
@@ -36,14 +38,14 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
           ),
           Expanded(
             child: StreamBuilder<List<ChatRoom>>(
-              stream: ooBloc.getChatRoomsSubject.stream,
+              stream: ooBloc.getChatRoomsSubject,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No Chat Rooms Available'));
+                  return const Center(child: Text('No Chat Rooms Available'));
                 }
 
                 List<ChatRoom> chatRooms = snapshot.data!
@@ -90,7 +92,7 @@ class ChatRoomListItem extends StatelessWidget {
   final ChatRoom chatRoom;
   final VoidCallback onTap;
 
-  ChatRoomListItem({
+  const ChatRoomListItem({super.key, 
     required this.chatRoom,
     required this.onTap,
   });
@@ -98,13 +100,13 @@ class ChatRoomListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       title: Text(
         chatRoom.name ?? 'Unnamed Chat Room',
-        style: TextStyle(fontWeight: FontWeight.bold),
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(chatRoom.description ?? ''),
-      trailing: Icon(Icons.arrow_forward_ios),
+      trailing: const Icon(Icons.arrow_forward_ios),
       onTap: onTap,
     );
   }

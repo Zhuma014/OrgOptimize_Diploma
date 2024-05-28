@@ -1,6 +1,5 @@
-import 'package:urven/data/models/base/api_result.dart';
 
-class UserProfile extends APIResponse {
+class UserProfile {
   int? id;
   String? fullName;
   String? email;
@@ -9,26 +8,24 @@ class UserProfile extends APIResponse {
   bool? isAdmin;
   String? exception;
 
-  UserProfile.map(dynamic o) : super.map(o) {
-    if (o != null) {
-      id = o['id'];
-      fullName = o['full_name'];
-      email = o['email'];
-      birthDate = o['birth_date'];
-      createdAt = o['created_at'];
-      isAdmin = o['is_admin'];
-    }
-  }
+  UserProfile({
+    this.id,
+    this.fullName,
+    this.email,
+    this.birthDate,
+    this.createdAt,
+    this.isAdmin,
+    this.exception,
+  });
 
-  UserProfile.withError(String errorValue)
-      : id = null,
-        fullName = null,
-        email = null,
-        birthDate = null,
-        createdAt = null,
-        isAdmin = null,
-        exception = errorValue,
-        super.map(null);
+  UserProfile.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    fullName = json['full_name'];
+    email = json['email'];
+    birthDate = json['birth_date'];
+    createdAt = json['created_at'];
+    isAdmin = json['is_admin'];
+    }
 
   bool get isValid =>
       id != null &&
@@ -37,10 +34,6 @@ class UserProfile extends APIResponse {
       birthDate != null &&
       createdAt != null &&
       isAdmin != null;
-
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile.map(json);
-  }
 
   Map<String, dynamic> toJson() {
     return {

@@ -1,12 +1,13 @@
 
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api, prefer_const_constructors
+
 import 'package:flutter/material.dart';
-import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 
 class ChatDetailsScreen extends StatefulWidget {
   final int chatRoomId;
 
-  ChatDetailsScreen({required this.chatRoomId});
+  const ChatDetailsScreen({super.key, required this.chatRoomId});
 
   @override
   _ChatDetailsScreenState createState() => _ChatDetailsScreenState();

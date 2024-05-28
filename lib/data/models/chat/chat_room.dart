@@ -1,4 +1,3 @@
-import 'package:urven/data/models/base/api_result.dart';
 
 class ChatRoom {
   int? id;

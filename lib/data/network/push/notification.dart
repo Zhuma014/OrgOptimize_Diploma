@@ -1,3 +1,5 @@
+// ignore_for_file: constant_identifier_names
+
 import 'dart:convert';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -9,7 +11,6 @@ import 'package:urven/firebase_options.dart';
 import 'package:urven/utils/logger.dart';
 
 const String TAG = 'NotificationService';
-const String _KEY_FCM_TOKEN = 'fcm_token';
 
 @pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
@@ -35,7 +36,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   late final AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('ic_launcher');
+      const AndroidInitializationSettings('ic_launcher');
 
   late final DarwinInitializationSettings initializationSettingsDarwin =
       DarwinInitializationSettings(

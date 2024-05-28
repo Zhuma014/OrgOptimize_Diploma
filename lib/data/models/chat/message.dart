@@ -4,6 +4,8 @@ class Message {
   int? userId;
   String? content;
   DateTime? timestamp;
+  String? userName; // Add this line
+
 
   Message({
     this.id,
@@ -11,6 +13,7 @@ class Message {
     this.userId,
     this.content,
     this.timestamp,
+    this.userName
   });
 
   Message.fromJson(Map<String, dynamic> json) {

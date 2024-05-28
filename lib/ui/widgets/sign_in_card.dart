@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
-import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/logger.dart';
 import 'package:urven/utils/lu.dart';
@@ -118,7 +117,7 @@ class _SignInCardState extends State<SignInCard> {
   void _performSignIn() {
     String username = _usernameController.text.trim().replaceAll(' ', '');
     String password = _passwordController.text;
-    String? fcm_token = PreferencesManager.instance.getFirebaseMessagingToken();
+    String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -129,7 +128,7 @@ class _SignInCardState extends State<SignInCard> {
       );
       return;
     }
-    ooBloc.signIn(username, password,fcm_token: fcm_token!);
+    ooBloc.signIn(username, password,fcm_token: fcmToken!);
 
     ooBloc.signInSubject.stream.listen((value) {
       Logger.d('SignInCard',

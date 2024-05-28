@@ -1,4 +1,6 @@
 // ignore: depend_on_referenced_packages
+// ignore_for_file: sort_child_properties_last, depend_on_referenced_packages, duplicate_ignore
+
 import 'package:flutter/material.dart';
 
 showCustomDialog({

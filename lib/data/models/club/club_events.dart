@@ -11,9 +11,7 @@ class Event {
   final String? location;
   final dynamic userId;
   final dynamic clubId;
-  String? exception;
-    String? clubName; // Add clubName to store the fetched club name
-
+  String? clubName; // Add clubName to store the fetched club name
 
   Event({
     required this.id,
@@ -23,7 +21,6 @@ class Event {
     required this.location,
     required this.userId,
     required this.clubId,
-    this.exception,
     this.clubName,
   });
 
@@ -37,29 +34,15 @@ class Event {
         userId = o['user_id'],
         clubId = o['club_id'];
 
-factory Event.fromJson(Map<String, dynamic> json) {
-  return Event(
-    id: json['id'],
-    title: DynamicUtils.parseNullableString(json['title']).tryTrim(),
-    description: DynamicUtils.parseNullableString(json['description']).tryTrim(),
-    date: DateTime.parse(json['event_date']),  
-    location: DynamicUtils.parseNullableString(json['location']).tryTrim(),
-    userId: json['user_id'],
-    clubId: json['club_id'],
-  );
-}
-
-
-  factory Event.withError(String errorMessage) {
+  factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      id: null,
-      title: null,
-      description: null,
-      date: null,
-      location: null,
-      userId: null,
-      clubId: null,
-      exception: errorMessage,
+      id: json['id'],
+      title: DynamicUtils.parseNullableString(json['title']).tryTrim(),
+      description: DynamicUtils.parseNullableString(json['description']).tryTrim(),
+      date: DateTime.parse(json['event_date']),  
+      location: DynamicUtils.parseNullableString(json['location']).tryTrim(),
+      userId: json['user_id'],
+      clubId: json['club_id'],
     );
   }
 

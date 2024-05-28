@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 import 'dart:async';
 
 import 'package:rxdart/subjects.dart';
@@ -6,10 +8,12 @@ import 'package:urven/data/models/chat/chat_room_member.dart';
 import 'package:urven/data/models/chat/message.dart';
 import 'package:urven/data/models/club/club_events.dart';
 import 'package:urven/data/models/club/club.dart';
+import 'package:urven/data/models/user/attendance.dart';
 import 'package:urven/data/models/user/join_request.dart';
 import 'package:urven/data/models/user/sign_in.dart';
 import 'package:urven/data/models/user/sign_out.dart';
 import 'package:urven/data/models/user/sign_up.dart';
+import 'package:urven/data/models/user/user_edit.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/data/network/repository/api_repository.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
@@ -26,9 +30,16 @@ class OrgOptimizeBloc {
   BehaviorSubject<SignUp> signUpSubject = BehaviorSubject();
   BehaviorSubject<UserProfile?> userProfileSubject = BehaviorSubject();
   BehaviorSubject<UserProfile?> userProfileByIdSubject = BehaviorSubject();
+  BehaviorSubject<dynamic> deleteProfileSubject = BehaviorSubject();
+  BehaviorSubject<UserEdit> updateProfileSubject = BehaviorSubject();
   BehaviorSubject<SignOut> signOutSubject = BehaviorSubject();
   BehaviorSubject<Event> eventSubject = BehaviorSubject();
   BehaviorSubject<Club> createClubSubject = BehaviorSubject();
+  BehaviorSubject<Club> updateClubSubject = BehaviorSubject();
+    BehaviorSubject<bool> changeAdminSubject = BehaviorSubject();
+  BehaviorSubject<bool> deleteClubSubject = BehaviorSubject();
+    BehaviorSubject<bool> deleteMemberSubject = BehaviorSubject();
+  BehaviorSubject<bool> leaveClubSubject = BehaviorSubject();
   BehaviorSubject<List<Event>> getAllEventsSubject = BehaviorSubject();
   BehaviorSubject<List<Event>> getClubEventsSubject = BehaviorSubject();
   BehaviorSubject<List<Event>> getUserOwnedEventsSubject = BehaviorSubject();
@@ -41,20 +52,26 @@ class OrgOptimizeBloc {
   BehaviorSubject<List<ChatRoom>> getChatRoomsSubject = BehaviorSubject();
   BehaviorSubject<List<ChatRoomMember>> getChatRoomMembersSubject =
       BehaviorSubject();
-final getMessagesListSubject = StreamController<List<Message>>.broadcast();
-  Stream<List<Message>> getMessagesListStream() => getMessagesListSubject.stream;
+  BehaviorSubject<List<Attendance>> attendancesSubject = BehaviorSubject();
+    BehaviorSubject<List<UserProfile>> membersSubject = BehaviorSubject();
 
+  final getMessagesListSubject = StreamController<List<Message>>.broadcast();
+  Stream<List<Message>> getMessagesListStream() =>
+      getMessagesListSubject.stream;
+  final _attendanceStatusSubject = BehaviorSubject<Map<int, bool>>.seeded({});
+
+  Stream<Map<int, bool>> get attendanceStatusStream =>
+      _attendanceStatusSubject.stream;
+
+  Map<int, bool> get attendanceStatus => _attendanceStatusSubject.value;
 
   signIn(String username, String password, {required String fcm_token}) async {
     Logger.d(TAG, 'signInMember() -> $username, $password');
 
     signInSubject = BehaviorSubject<SignIn>();
 
-    SignIn response = await _repository.signIn(
-      username,
-      password,
-      fcm_token: fcm_token
-    );
+    SignIn response =
+        await _repository.signIn(username, password, fcm_token: fcm_token);
 
     if (response.isValid) {
       PreferencesManager.instance.saveAuthCredentials(response.accessToken!);
@@ -64,15 +81,15 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
     signInSubject.sink.add(response);
   }
 
-  signUp(String email, String password, DateTime birthdate,
-      String fullname,{required String fcm_token}) async {
+  signUp(String email, String password, DateTime birthdate, String fullname,
+      {required String fcm_token}) async {
     Logger.d(
         TAG, 'signUpMember() ->  $email, $password, $birthdate, $fullname');
 
     signUpSubject = BehaviorSubject<SignUp>();
 
-    SignUp response =
-        await _repository.signUp(email, password, birthdate, fullname, fcm_token: fcm_token);
+    SignUp response = await _repository
+        .signUp(email, password, birthdate, fullname, fcm_token: fcm_token);
     if (response.isValid) {
       PreferencesManager.instance.saveAuthCredentials(response.accessToken!);
       getUserProfile(); // Get user's profile after authenticating
@@ -92,6 +109,49 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
     ooBloc.getAllClubs();
   }
 
+  updateClub(
+      {required int clubId,
+      required String name,
+      required String description}) async {
+    Logger.d(TAG, 'updateClub() -> $clubId, $name, $description');
+
+    Club response = await _repository.updateClub(clubId, name, description);
+
+    if (response.isValid) {
+      updateClubSubject.sink.add(response);
+      ooBloc.getAllClubs();
+      return response;
+    } else {
+      return null; // Handle error case appropriately
+    }
+  }
+
+  deleteClub(int clubId) async {
+    Logger.d(TAG, 'deleteClub() -> $clubId');
+
+    try {
+      await _repository.deleteClub(clubId);
+      deleteClubSubject.sink.add(true);
+      ooBloc.getUserClubs();
+    } catch (e) {
+      Logger.d(TAG, 'deleteClub() -> e: $e');
+      deleteClubSubject.sink.addError(e.toString());
+    }
+  }
+
+  leaveClub(int clubId) async {
+    Logger.d(TAG, 'leaveClub() -> $clubId');
+
+    try {
+      await _repository.leaveClub(clubId);
+      leaveClubSubject.sink.add(true);
+      ooBloc.getUserClubs();
+    } catch (e) {
+      Logger.d(TAG, 'leaveClub() -> e: $e');
+      leaveClubSubject.sink.addError(e.toString());
+    }
+  }
+
   createEvent(
       String title, String description, DateTime eventDate, String location,
       {dynamic userId, dynamic clubId}) async {
@@ -105,6 +165,8 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
       eventSubject.sink.add(event);
     }
     ooBloc.getAllUserEvents();
+    ooBloc.getOwnEvents();
+    ooBloc.getClubEvents();
   }
 
   updateEvent(int eventId, String title, String description, DateTime eventDate,
@@ -121,6 +183,8 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
     if (!eventSubject.isClosed) {
       eventSubject.sink.add(event);
     }
+    getOwnEvents();
+    getClubEvents();
   }
 
   deleteEvent(
@@ -133,8 +197,10 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
 
     // Remove the event from your local state if it was successfully deleted
     if (isDeleted && !eventSubject.isClosed) {
-      // eventSubject.sink.add(null); // Update the UI to reflect the deletion
+      eventSubject.sink.addError('Event deleted');
     }
+    getOwnEvents();
+    getClubEvents();
   }
 
   getUserProfile() async {
@@ -156,9 +222,10 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
     try {
       UserProfile profile = await _repository.getUserProfileById(userId);
       if (profile.exception == null) {
-        PreferencesManager.instance.saveUserProfile(profile);
-        userProfileByIdSubject.sink.add(profile);
-        return profile;
+        if (!userProfileByIdSubject.isClosed) {
+          userProfileByIdSubject.sink.add(profile);
+          return profile;
+        }
       } else {
         userProfileByIdSubject.sink.addError(profile.exception!);
         return null;
@@ -167,7 +234,41 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
       userProfileByIdSubject.sink.addError(e);
       return null;
     }
+    return null;
   }
+
+  Future<List<UserProfile>> getClubMembers(int clubId) async {
+  List<UserProfile> members = await _repository.getClubMembers(clubId);
+  if (!membersSubject.isClosed) {
+    membersSubject.sink.add(members);
+  }
+  return members; // Return the list of members
+}
+
+
+  deleteMember(int clubId, int memberId) async {
+  Logger.d(TAG, 'deleteMember() -> clubId: $clubId, memberId: $memberId');
+
+  try {
+    await _repository.deleteMember(clubId, memberId);
+    deleteMemberSubject.sink.add(true);
+    getClubMembers(clubId);
+  } catch (e) {
+    Logger.d(TAG, 'deleteMember() -> e: $e');
+    deleteMemberSubject.sink.addError(e.toString());
+  }
+}
+
+changeAdmin(int clubId, int newAdminId) async {
+  try {
+    await _repository.changeAdmin(clubId, newAdminId);
+    changeAdminSubject.sink.add(true);
+  } catch (e) {
+    Logger.d(TAG, 'changeAdmin() -> e: $e');
+    changeAdminSubject.sink.add(false);
+    throw 'Failed to change admin: $e'; // Rethrow the exception to propagate it up the call stack
+  }
+}
 
   getAllUserEvents() async {
     Logger.d(TAG, 'getAllUserEvents()');
@@ -210,9 +311,14 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
   getAllClubs() async {
     Logger.d(TAG, 'getAllClubs()');
 
-    List<Club> clubs = await _repository.getClubs();
-    if (!getAllClubsSubject.isClosed) {
-      getAllClubsSubject.sink.add(clubs);
+    try {
+      List<Club> clubs = await _repository.getClubs();
+      if (!getAllClubsSubject.isClosed) {
+        getAllClubsSubject.sink.add(clubs);
+      }
+    } catch (e) {
+      Logger.e(TAG, 'Error fetching clubs: $e');
+      throw "$e";
     }
   }
 
@@ -262,7 +368,9 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
 
   getJoinRequests(int clubId) async {
     List<JoinRequest> joinRequests = await _repository.getJoinRequests(clubId);
-    joinRequestListSubject.sink.add(joinRequests);
+    if (!joinRequestListSubject.isClosed) {
+      joinRequestListSubject.sink.add(joinRequests);
+    }
   }
 
   approveJoinRequest(int clubId, int requestId) async {
@@ -309,6 +417,73 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
     }
   }
 
+  deleteAccount() async {
+    if (!deleteProfileSubject.isClosed) {
+      deleteProfileSubject.sink.add(await _repository.deleteProfile());
+      clearSession();
+    }
+  }
+
+  userEdit(
+    String fullName,
+    String birthdate,
+  ) async {
+    updateProfileSubject.sink
+        .add(await _repository.userEdit(fullName, birthdate));
+    getUserProfile();
+  }
+
+  attendEvent(int eventId) async {
+    Logger.d(TAG, 'attendEvent()');
+
+    try {
+      await _repository.attendEvent(eventId);
+      if (!_attendanceStatusSubject.isClosed) {
+        _attendanceStatusSubject.add({...attendanceStatus, eventId: true});
+      }
+    } catch (e) {
+      Logger.e(TAG, 'Failed to attend event: $e');
+      rethrow;
+    }
+  }
+
+  doNotAttendEvent(int eventId) async {
+    Logger.d(TAG, 'doNotAttendEvent()');
+
+    try {
+      await _repository.doNotAttendEvent(eventId);
+      if (!_attendanceStatusSubject.isClosed) {
+        _attendanceStatusSubject.add({...attendanceStatus, eventId: false});
+      }
+    } catch (e) {
+      Logger.e(TAG, 'Failed to cancel attendance: $e');
+      rethrow;
+    }
+  }
+
+  getAttendancesForEvent(int eventId) async {
+    try {
+      List<Attendance> attendances =
+          await _repository.getAttendancesForEvent(eventId);
+      if (!attendancesSubject.isClosed) {
+        attendancesSubject.add(attendances);
+      }
+      return attendances;
+    } catch (e) {
+      Logger.e(TAG, 'Failed to fetch attendances for event: $e');
+      rethrow;
+    }
+  }
+
+  clearSession() {
+    userProfileSubject.sink.add(null); // Clear user profile
+    getClubEventsSubject.sink.add([]);
+    getUserOwnedEventsSubject.sink.add([]);
+    getUserClubsSubject.sink.add([]);
+    getChatRoomsSubject.sink.add([]);
+    getMessagesListSubject.sink.add([]);
+  }
+
   void _closeSubjects(List<BehaviorSubject> subjects) {
     for (var subject in subjects) {
       subject.close();
@@ -335,9 +510,12 @@ final getMessagesListSubject = StreamController<List<Message>>.broadcast();
         rejectJoinRequestSubject,
         getChatRoomsSubject,
         getChatRoomMembersSubject,
+        _attendanceStatusSubject,
+        updateProfileSubject,
+        deleteProfileSubject,
+        attendancesSubject,
       ]);
-              getMessagesListSubject.close();
-
+      getMessagesListSubject.close();
     } catch (e) {
       Logger.e(TAG, e.toString());
     }

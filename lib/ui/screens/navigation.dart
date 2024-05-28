@@ -28,8 +28,8 @@ class Navigation {
       Navigation.AUTHENTICATION: (context) => const AuthenticationScreen(),
       Navigation.EDIT_USER_PROFILE: (context) => const EditProfileScreen(),
       Navigation.SETTINGS: (context) => const SettingsScreen(),
-      Navigation.MYCLUBS: (context) =>  MyClubsScreen(),
-            Navigation.ALLCLUBS: (context) =>  ClubsScreen(),
+      Navigation.MYCLUBS: (context) =>  const MyClubsScreen(),
+            Navigation.ALLCLUBS: (context) =>  const ClubsScreen(),
 
 
     };

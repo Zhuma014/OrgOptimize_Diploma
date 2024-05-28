@@ -1,29 +1,39 @@
-import 'package:urven/data/models/base/api_result.dart';
 
-class JoinRequest extends APIResponse {
+class JoinRequest {
   int? id;
   int? userId;
   int? clubId;
   String? status;
   String? exception;
-  
+  String? message; // Add message property
 
-  JoinRequest.map(dynamic o) : super.map(o) {
-    if (o != null) {
-      id = o['id'];
-      userId = o['user_id'];
-      clubId = o['club_id'];
-      status = o['status'];
-    }
+  JoinRequest({
+    this.id,
+    this.userId,
+    this.clubId,
+    this.status,
+    this.exception,
+    this.message, // Initialize message in the constructor
+  });
+
+  JoinRequest.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    userId = json['user_id'];
+    clubId = json['club_id'];
+    status = json['status'];
+    message = json['message']; // Assign message from JSON
   }
 
-  JoinRequest.withError(String errorValue)
-      : id = null,
-        userId = null,
-        clubId = null,
-        status = null,
-        exception = errorValue,
-        super.map(null);
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {};
+    if (id != null) data['id'] = id;
+    if (userId != null) data['user_id'] = userId;
+    if (clubId != null) data['club_id'] = clubId;
+    if (status != null) data['status'] = status;
+    if (message != null) data['message'] = message; // Include message in JSON
+    return data;
+  }
 
-  bool get isValid => id != null && userId != null && clubId != null && status != null;
+  bool get isValid =>
+      id != null && userId != null && clubId != null && status != null;
 }

@@ -1,45 +1,48 @@
-import 'package:urven/data/models/base/api_result.dart';
 
-class ChatRoomMember extends APIResponse {
-  int? chatRoomId;
-  int? userId;
-  String? role;
-  DateTime? joinedAt;
-  String? exception;
+class ChatRoomMember {
+  int? id;
+  String? fullName;
+  String? email;
+  DateTime? birthDate;
+  DateTime? createdAt;
+  bool? isAdmin;
 
-  ChatRoomMember.map(dynamic o) : super.map(o) {
-    if (o != null) {
-      chatRoomId = o['chat_room_id'];
-      userId = o['user_id'];
-      role = o['role'];
-      try {
-        joinedAt = DateTime.parse(o['joined_at']);
-      } catch (e) {
-        joinedAt = null;
-      }
+  ChatRoomMember({
+    this.id,
+    this.fullName,
+    this.email,
+    this.birthDate,
+    this.createdAt,
+    this.isAdmin,
+  });
+
+  ChatRoomMember.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    fullName = json['full_name'];
+    email = json['email'];
+    try {
+      birthDate = DateTime.parse(json['birth_date']);
+    } catch (e) {
+      birthDate = null;
     }
-  }
-
-  ChatRoomMember.withError(String errorValue)
-      : chatRoomId = null,
-        userId = null,
-        role = null,
-        joinedAt = null,
-        exception = errorValue,
-        super.map(null);
-
-  bool get isValid => chatRoomId != null && userId != null && role != null;
-
-  factory ChatRoomMember.fromJson(Map<String, dynamic> json) {
-    return ChatRoomMember.map(json);
-  }
+    try {
+      createdAt = DateTime.parse(json['created_at']);
+    } catch (e) {
+      createdAt = null;
+    }
+    isAdmin = json['is_admin'];
+    }
 
   Map<String, dynamic> toJson() {
     return {
-      'chat_room_id': chatRoomId,
-      'user_id': userId,
-      'role': role,
-      'joined_at': joinedAt?.toIso8601String(),
+      'id': id,
+      'full_name': fullName,
+      'email': email,
+      'birth_date': birthDate?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
+      'is_admin': isAdmin,
     };
   }
+
+  bool get isValid => id != null && fullName != null && email != null;
 }

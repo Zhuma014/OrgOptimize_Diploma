@@ -1,11 +1,9 @@
-import 'dart:async';
-import 'dart:convert';
+// ignore_for_file: prefer_final_fields
 
-import 'package:urven/data/models/chat/message.dart';
+import 'dart:async';
+
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/status.dart' as status;
 
 
 class WebSocketManager {

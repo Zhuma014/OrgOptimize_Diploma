@@ -1,17 +1,18 @@
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
-import 'package:urven/data/models/chat/chat_room.dart';
-import 'package:urven/data/models/chat/chat_room_member.dart';
 import 'package:urven/data/models/chat/message.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/data/network/websocket/websocket_service.dart';
 import 'package:urven/ui/theme/palette.dart';
+import 'package:urven/ui/widgets/chat_app_bar.dart';
 
 class ChatScreen extends StatefulWidget {
   final int chatRoomId;
 
-  ChatScreen({required this.chatRoomId});
+  const ChatScreen({super.key, required this.chatRoomId});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -23,107 +24,98 @@ class _ChatScreenState extends State<ChatScreen> {
   int? currentUserId;
   List<Message> allMessages = [];
   ScrollController _scrollController = ScrollController();
-  String neighborName = '';
+  Map<int, String> userIdToName = {};
 
   @override
   void initState() {
     super.initState();
     _webSocketManager = WebSocketManager(roomId: widget.chatRoomId);
 
-    // Fetch initial messages from the server
     ooBloc.getChatRoomMessages(widget.chatRoomId);
+    ooBloc.getChatRoomMembers(widget.chatRoomId);
 
-    // Fetch the user profile to get the current userId
+      getChatRoomMembers();
+
+
     ooBloc.getUserProfile();
     _scrollController = ScrollController();
   }
 
+void getChatRoomMembers() {
+  ooBloc.getChatRoomMembersSubject.listen((members) {
+    if (mounted) {
+      setState(() {
+        userIdToName = {
+          for (var member in members)
+            member.id!: member.fullName ?? 'Unknown'
+        };
+      });
+    }
+  });
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Palette.MAIN,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            StreamBuilder<String>(
-              stream: _getChatRoomNameStream(widget.chatRoomId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text('Loading...');
-                } else if (snapshot.hasError) {
-                  return Text('Error');
-                } else if (!snapshot.hasData) {
-                  return Text('Default Chat Room');
-                } else {
-                  return Text(snapshot.data!, style: TextStyle(fontSize: 16));
-                }
-              },
-            ),
-            SizedBox(height: 4),
-            StreamBuilder<String>(
-              stream: _getChatRoomMembersStream(widget.chatRoomId),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Text('Loading members...');
-                } else if (snapshot.hasError) {
-                  return Text('Error fetching members');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Text('No members');
-                } else {
-                  return Text('Members: ${snapshot.data}');
-                }
-              },
-            ),
-          ],
-        ),
+      appBar: ChatAppBar(
+        chatRoomId: widget.chatRoomId,
       ),
       body: StreamBuilder<UserProfile?>(
-          stream: ooBloc.userProfileSubject.stream,
+          stream: ooBloc.userProfileSubject,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(
                   child:
                       Text('Error fetching user profile: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data == null) {
-              return Center(child: Text('No user profile found'));
+              return const Center(child: Text('No user profile found'));
             } else {
               UserProfile userProfile = snapshot.data!;
               currentUserId = userProfile.id;
 
               return Column(children: [
-                StreamBuilder<List<Message>>(
-                  stream: ooBloc.getMessagesListStream(),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      allMessages = snapshot.data!;
-                      _webSocketManager.messageStream.listen((data) {
-                        List<String> messageParts = data.split(':');
-                        if (messageParts.length >= 2) {
-                          int messageUserId =
-                              int.tryParse(messageParts[0]) ?? -1;
-                          neighborName = messageParts[2];
-
-                          String messageContent =
-                              messageParts.skip(1).join(':').trim();
-
-                          if (!allMessages.any((message) =>
-                              message.userId == messageUserId &&
-                              message.content == messageContent)) {
-                            allMessages.add(Message(
-                              userId: messageUserId,
-                              content: messageContent,
-                              timestamp: DateTime
-                                  .now(), // Assuming this is the timestamp of the received message
-                            ));
-                            setState(() {});
-                          }
+                Expanded(
+                  child: StreamBuilder<List<Message>>(
+                    stream: ooBloc.getMessagesListStream(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        if (snapshot.data!.isEmpty) {
+                          return Center(
+                              child: Text(
+                            'Start a conversation...',
+                            style: TextStyle(
+                                color: Palette.DARK_GREY_2.withOpacity(0.6)),
+                          ));
                         }
-                      });
-                      return Expanded(
-                        child: ListView.builder(
+                        allMessages = snapshot.data!;
+                        _webSocketManager.messageStream.listen((data) {
+                          List<String> messageParts = data.split(':');
+                          if (messageParts.length >= 2) {
+                            int messageUserId =
+                                int.tryParse(messageParts[0]) ?? -1;
+                            String messageContent =
+                                messageParts.skip(1).join(':').trim();
+
+                            if (!allMessages.any((message) =>
+                                message.userId == messageUserId &&
+                                message.content == messageContent)) {
+                              String userName =
+                                  userIdToName[messageUserId] ?? 'Unknown';
+                              allMessages.add(Message(
+                                userId: messageUserId,
+                                content: messageContent,
+                                timestamp: DateTime.now(),
+                                userName: userName,
+                              ));
+                              setState(() {});
+                            }
+                          }
+                        });
+
+                        return ListView.builder(
                           controller: _scrollController,
                           itemCount: allMessages.length,
                           itemBuilder: (context, index) {
@@ -165,13 +157,16 @@ class _ChatScreenState extends State<ChatScreen> {
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.center ,
                                               children: [
                                                 Text(
                                                   messageObj.userId ==
                                                           currentUserId
                                                       ? 'You'
-                                                      : neighborName,
-                                                  style: TextStyle(
+                                                      : userIdToName[messageObj
+                                                              .userId] ??
+                                                          'Unknown',
+                                                  style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
@@ -187,8 +182,8 @@ class _ChatScreenState extends State<ChatScreen> {
                                                         BorderRadius.circular(
                                                             12.0),
                                                   ),
-                                                  padding: const EdgeInsets.all(
-                                                      14.0),
+                                                  padding: const EdgeInsets.symmetric(horizontal:20,vertical: 14
+                                                      ),
                                                   child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -209,7 +204,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                                   ? DateFormat('HH:mm').format(
                                                       messageObj.timestamp!)
                                                   : '',
-                                              style: TextStyle(
+                                              style: const TextStyle(
                                                   fontSize: 12.0,
                                                   color: Colors.grey),
                                             ),
@@ -222,15 +217,22 @@ class _ChatScreenState extends State<ChatScreen> {
                               ],
                             );
                           },
-                        ),
-                      );
-                    } else {
-                      return Center(child: CircularProgressIndicator());
-                    }
-                  },
+                        );
+                      } else {
+                        return Center(
+                              child: Text(
+                            'Start a conversation...',
+                            style: TextStyle(
+                                color: Palette.DARK_GREY_2.withOpacity(0.6)),
+                          ));
+                      }
+              
+                     
+                    },
+                  ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
                     children: [
                       Expanded(
@@ -240,8 +242,8 @@ class _ChatScreenState extends State<ChatScreen> {
                             filled: true,
                             fillColor: Colors.white,
                             hintText: 'Type a message...',
-                            hintStyle: TextStyle(color: Colors.grey),
-                            contentPadding: EdgeInsets.symmetric(
+                            hintStyle: const TextStyle(color: Colors.grey),
+                            contentPadding: const EdgeInsets.symmetric(
                                 vertical: 10.0, horizontal: 20.0),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30.0),
@@ -249,18 +251,18 @@ class _ChatScreenState extends State<ChatScreen> {
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30.0),
-                              borderSide: BorderSide(color: Palette.MAIN),
+                              borderSide: const BorderSide(color: Palette.MAIN),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(30.0),
-                              borderSide: BorderSide(color: Palette.MAIN),
+                              borderSide: const BorderSide(color: Palette.MAIN),
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(width: 8.0),
+                      const SizedBox(width: 8.0),
                       Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Palette.MAIN,
                           shape: BoxShape.circle,
                         ),
@@ -275,19 +277,23 @@ class _ChatScreenState extends State<ChatScreen> {
                                 content: message,
                                 timestamp: DateTime.now(),
                               ));
-                              setState(() {});
                               _messageController.clear();
 
-                              _scrollController.animateTo(
-                                _scrollController.position.maxScrollExtent,
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeOut,
-                              );
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+  if (_scrollController.hasClients) {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+});
+                              setState(() {});
+
                               // Update UI immediately
-                              _messageController.clear();
                             }
                           },
-                          icon: Icon(Icons.send, color: Colors.white),
+                          icon: const Icon(Icons.send, color: Colors.white),
                         ),
                       ),
                     ],
@@ -299,44 +305,15 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Stream<String> _getChatRoomNameStream(int roomId) {
-    return ooBloc.getChatRoomsSubject.stream.map((chatRooms) {
-      ChatRoom? chatRoom = chatRooms.firstWhere(
-        (room) => room.id == roomId,
-        orElse: () => ChatRoom(id: -1, name: 'Default Chat Room'),
-      );
-      return chatRoom.name ?? 'Default Chat Room';
-    });
-  }
-
-  Stream<String> _getChatRoomMembersStream(int roomId) {
-    return ooBloc.getChatRoomMembersSubject.stream
-        .asyncMap((List<ChatRoomMember> chatRoomMembers) async {
-      List<int> userIds =
-          chatRoomMembers.map((member) => member.userId ?? -1).toList();
-      print('User IDs: $userIds');
-
-      List<UserProfile?> profiles = await Future.wait(
-          userIds.map((userId) => ooBloc.getUserProfileById(userId)));
-      print('User Profiles: $profiles');
-
-      List<String> memberNames =
-          profiles.map((profile) => profile?.fullName ?? 'Unknown').toList();
-      print('Member Names: $memberNames');
-
-      return memberNames.join(', ');
-    });
-  }
-
   Widget _buildDateWidget(DateTime timestamp) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Center(
         child: Text(
-          DateFormat('MMM d, yyyy - HH:mm').format(timestamp),
+          DateFormat('MMM d, yyyy').format(timestamp),
           style: TextStyle(
             color: Colors.grey[600],
-            fontSize: 12.0,
+            fontSize: 16.0,
           ),
         ),
       ),

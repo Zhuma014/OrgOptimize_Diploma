@@ -1,23 +1,31 @@
-import 'package:urven/data/models/base/api_result.dart';
-class Club extends APIResponse {
+
+class Club {
   String? name;
   String? description;
   int? id;
   int? adminId;
   DateTime? createdAt;
   String? exception;
+  bool? isDeleted;
 
-  Club.map(dynamic o) : super.map(o) {
+  Club({
+    this.name,
+    this.description,
+    this.id,
+    this.adminId,
+    this.createdAt,
+    this.exception,
+    this.isDeleted = false,
+  });
+
+  Club.map(dynamic o) {
     if (o != null) {
       name = o['name'];
       description = o['description'];
       id = o['id'];
       adminId = o['admin_id'];
-      try {
-        createdAt = DateTime.parse(o['created_at']);
-      } catch (e) {
-        createdAt = null;
-      }
+      createdAt =
+          o['created_at'] != null ? DateTime.parse(o['created_at']) : null;
     }
   }
 
@@ -26,23 +34,27 @@ class Club extends APIResponse {
         description = null,
         id = null,
         adminId = null,
-        exception = errorValue,
-        super.map(null);
+        exception = errorValue;
 
   bool get isValid =>
       name != null && description != null && id != null && adminId != null;
 
-  factory Club.fromJson(Map<String, dynamic> json) {
-    return Club.map(json);
-  }
+  factory Club.fromJson(Map<String, dynamic> json) => Club.map(json);
 
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'description': description,
-      'id': id,
-      'admin_id': adminId,
-      'created_at': createdAt?.toIso8601String(),
-    };
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'id': id,
+        'admin_id': adminId,
+        'created_at': createdAt?.toIso8601String(),
+      };
+
+  Club deletedCopy() {
+    return Club(
+      id: id,
+      name: name,
+      description: description,
+      isDeleted: true,
+    );
   }
 }

@@ -5,14 +5,11 @@ import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
 import 'package:urven/ui/screens/chat/chat_list_screen.dart';
-import 'package:urven/ui/screens/events_board_screen.dart';
 import 'package:urven/ui/screens/home_screen.dart';
-import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/screens/profile_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
-import 'package:flutter/services.dart';
 
 
 class MainWrapper extends StatefulWidget {
@@ -84,7 +81,7 @@ class _MainWrapperState extends State<MainWrapper> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    ChatListScreen(),
+    const ChatListScreen(),
     const UserProfileScreen()
   ];
 }

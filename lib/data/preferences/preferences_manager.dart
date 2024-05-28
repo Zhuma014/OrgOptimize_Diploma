@@ -4,7 +4,6 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urven/data/models/user/user_profile.dart';
-import 'package:urven/utils/primitive/string_utils.dart';
 
 const String TAG = 'PreferencesManager';
 
