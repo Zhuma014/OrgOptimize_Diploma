@@ -34,7 +34,7 @@ class DioService {
         responseHeader: true,
         responseBody: true,
         error: true,
-      )); // Logging interceptor
+      ));
     }
   }
 
@@ -135,41 +135,3 @@ class DioService {
 }
 
 
-
-    // Refresh token, when token is expired. And call original endpoint again after refreshing the token
-    // _dio.interceptors
-    //     .add(InterceptorsWrapper(onError: (error, errorInterceptorHandler) async {
-    //       if (error.response?.statusCode == 401 || error.response?.statusCode == 403) {
-    //         await refreshToken();
-    //         return _retry(error.requestOptions);
-    //       }
-    //       return errorInterceptorHandler.next(error);
-    // }));
-  
-
-
-  // Future<SignIn> refreshToken() async {
-  //   try {
-  //     String refreshToken = PreferencesManager.instance.getRefreshToken();
-  //     Map<String, dynamic> data = {
-  //       'refresh_token': refreshToken
-  //     };
-  //     return SignIn.map(await post(path: REFRESH_TOKEN, body: data));
-  //   } catch (error) {
-  //     print("askldjaskldjalksd errrorrr refreshToken" + error.toString());
-  //     return SignIn.withError(error);
-  //   }
-  // }
-  //
-  // Future<Response<dynamic>> _retry(RequestOptions requestOptions) async {
-  //   final options = new Options(
-  //     method: requestOptions.method,
-  //     headers: requestOptions.headers,
-  //   );
-  //   return this._dio.request<dynamic>(requestOptions.path,
-  //       data: requestOptions.data,
-  //       queryParameters: requestOptions.queryParameters,
-  //       options: options);
-  // }
-
- 

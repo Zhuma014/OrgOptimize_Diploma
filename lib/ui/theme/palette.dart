@@ -20,7 +20,6 @@ class Palette {
      static const WHITE_SMOKE =  Color(0xFFF5F5F5);
   static const SOLITUDE =  Color(0xFFEFF2FA);
   static const MERCURY =  Color(0xFFE5E5E5);
-  // static const SONIC_SILVER = const Color(0xFF737373);
 
   static const DARK_BLUE =  Color(0xFF273043);
 

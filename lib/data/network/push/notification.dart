@@ -24,7 +24,6 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
 void onDidReceiveBackgroundNotificationResponse(NotificationResponse response) {
   String? payload = response.payload;
   Logger.d(TAG, 'onDidReceiveBackgroundNotificationResponse() -> payload: $payload');
-  // Handle background notification response
 }
 
 class NotificationService {
@@ -85,7 +84,6 @@ class NotificationService {
       sound: true,
     );
 
-    // Request notification permissions
     await _requestNotificationPermissions();
 
     FirebaseMessaging.onMessage.listen(showForegroundMessage);
@@ -192,10 +190,8 @@ class NotificationService {
 
     switch (response.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
-        // Handle selected notification response
         break;
       case NotificationResponseType.selectedNotificationAction:
-        // Handle selected notification action response
         break;
     }
   }

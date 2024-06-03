@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
+import 'package:urven/data/models/chat/chat_room.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/ui/screens/chat/chat_rooms_screen.dart';
+import 'package:urven/ui/screens/chat/chat_screen.dart';
 import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
-
+import 'package:urven/utils/screen_size_configs.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -17,73 +19,401 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
+
   @override
   void initState() {
     super.initState();
-    ooBloc.getUserClubs(); // Fetch clubs when the screen is initialized
+    ooBloc.getUserProfile();
+    ooBloc.getChatRooms(); 
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(top: 10),
+            padding: EdgeInsets.only(top: SSC.p10),
             child: Toolbar(
               isBackButtonVisible: false,
               title: 'Chats',
             ),
           ),
           Expanded(
-            child: StreamBuilder<List<Club>>(
-              stream: ooBloc.getUserClubsSubject,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text('You are not member of any club'),
-              const SizedBox(height: 16.0),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: Palette.MAIN),
-                onPressed: () {
-                  // Navigate to the allClubsScreen
-                  Navigator.pushNamed(context, Navigation.ALLCLUBS);
-                },
-                child: const Text('Join Clubs'),
-              ),
-            ],
-          ),
-        );                }
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: SSC.p10),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(SSC.p8),
+                      child: Text(
+                        'Club Chats',
+                        style: TextStyle(
+                          fontSize: SSC.p20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StreamBuilder<List<Club>>(
+                          stream: ooBloc.getUserClubsSubject,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(
+                                  child: Text('Error: ${snapshot.error}'));
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Text(
+                                          'You are not a member of any club'),
+                                      const SizedBox(height: SSC.p16),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Palette.MAIN,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pushNamed(
+                                              context, Navigation.ALLCLUBS);
+                                        },
+                                        child: const Text('Join Clubs'),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
 
-                List<Club> clubs = snapshot.data!;
+                            List<Club> clubs = snapshot.data!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: clubs.map((club) {
+                                return ClubListItem(
+                                  club: club,
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ChatRoomsScreen(clubId: club.id!),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }).toList(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(SSC.p8),
+                      child: Text(
+                        'Group Chats',
+                        style: TextStyle(
+                          fontSize: SSC.p20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StreamBuilder<List<ChatRoom>>(
+                          stream: ooBloc.getChatRoomsSubject,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                          'You do not have group chats, start messaging'),
+                                      const SizedBox(height: SSC.p16),
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(SSC.p8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(SSC.p5),
+                                          child: const Icon(
+                                            Icons.queue,
+                                            color: Palette.MAIN,
+                                            size: SSC.p28,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showMessageBottomSheet(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                          'You do not have group chats, start messaging'),
+                                      const SizedBox(height: SSC.p16),
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(SSC.p8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(SSC.p5),
+                                          child: const Icon(
+                                            Icons.queue,
+                                            color: Palette.MAIN,
+                                            size: SSC.p28,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showMessageBottomSheet(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
 
-                return ListView.builder(
-                  padding: EdgeInsets.zero,
-                  itemCount: clubs.length,
-                  itemBuilder: (context, index) {
-                    Club club = clubs[index];
-                    return ClubListItem(
-                      club: club,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ChatRoomsScreen(clubId: club.id!),
+                            List<ChatRoom> chatRooms = snapshot.data ?? [];
+
+                            List<ChatRoom> groupChats = chatRooms
+                                .where((chatRoom) => chatRoom.type == 'group')
+                                .toList();
+                            if (groupChats.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                          'You do not have group chats, start messaging'),
+                                      const SizedBox(height: SSC.p16),
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(SSC.p8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(SSC.p5),
+                                          child: const Icon(
+                                            Icons.queue,
+                                            color: Palette.MAIN,
+                                            size: SSC.p28,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showMessageBottomSheet(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: groupChats.map((chatRoom) {
+                                  return ListTile(
+                                    title: Text(
+                                      chatRoom.name ?? '',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(chatRoom.description ?? '',
+                                        style: const TextStyle(color: Palette.MAIN)),
+                                    trailing:
+                                        const Icon(Icons.arrow_forward_ios),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                              chatRoomId: chatRoom.id!),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                              );
+                            }
+                          },
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(SSC.p8),
+                          child: Text(
+                            'Private Chats',
+                            style: TextStyle(
+                              fontSize: SSC.p20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
+                        ),
+                        StreamBuilder<List<ChatRoom>>(
+                          stream: ooBloc.getChatRoomsSubject,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                          'You do not have private chats, start messaging'),
+                                      const SizedBox(height: SSC.p16),
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(SSC.p8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(SSC.p5),
+                                          child: const Icon(
+                                            Icons.queue,
+                                            color: Palette.MAIN,
+                                            size: SSC.p28,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showMessageBottomSheet(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            } else if (!snapshot.hasData ||
+                                snapshot.data!.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                          'You do not have private chats, start messaging'),
+                                      const SizedBox(height: SSC.p16),
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(SSC.p8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(SSC.p5),
+                                          child: const Icon(
+                                            Icons.queue,
+                                            color: Palette.MAIN,
+                                            size: SSC.p28,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showMessageBottomSheet(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+
+                            List<ChatRoom> chatRooms = snapshot.data ?? [];
+                            List<ChatRoom> privateChats = chatRooms
+                                .where((chatRoom) => chatRoom.type == 'private')
+                                .toList();
+                            if (privateChats.isEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(SSC.p15),
+                                child: Center(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      const Text(
+                                          'You do not have private chats, start messaging'),
+                                      const SizedBox(height: SSC.p16),
+                                      InkWell(
+                                        borderRadius:
+                                            BorderRadius.circular(SSC.p8),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(SSC.p5),
+                                          child: const Icon(
+                                            Icons.queue,
+                                            color: Palette.MAIN,
+                                            size: SSC.p28,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          showMessageBottomSheet(context);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: privateChats.map((chatRoom) {
+                                  return ListTile(
+                                    title: Text(
+                                      chatRoom.name ?? '',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    subtitle: Text(chatRoom.description ?? '',
+                                        style: const TextStyle(color: Palette.MAIN)),
+                                    trailing:
+                                        const Icon(Icons.arrow_forward_ios),
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ChatScreen(
+                                              chatRoomId: chatRoom.id!),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }).toList(),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
@@ -94,11 +424,9 @@ return Center(
   @override
   void dispose() {
     super.dispose();
-    ooBloc.dispose(); // Clean up the stream subscriptions
+    ooBloc.dispose(); 
   }
 }
-
-
 
 class ClubListItem extends StatelessWidget {
   final Club club;
@@ -109,17 +437,16 @@ class ClubListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      leading: const CircleAvatar(
-        radius: 24.0,
-        backgroundImage: AssetImage(              'assets/images/image.png',
-),
-      ),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: SSC.p16, vertical: SSC.p8),
       title: Text(
         club.name ?? 'Unnamed Club',
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text(club.description ?? ''),
+      subtitle: Text(
+        club.description ?? '',
+        style: const TextStyle(color: Palette.MAIN),
+      ),
       trailing: const Icon(Icons.arrow_forward_ios),
       onTap: onTap,
     );

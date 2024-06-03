@@ -2,18 +2,19 @@
 
 import 'dart:async';
 
+import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:web_socket_channel/io.dart';
-
 
 class WebSocketManager {
   final int roomId;
   late IOWebSocketChannel channel;
   String? accessToken = PreferencesManager.instance.getAccessToken();
-  StreamController<String> _messageStreamController = StreamController.broadcast();
+  StreamController<String> _messageStreamController =
+      StreamController.broadcast();
 
   WebSocketManager({required this.roomId}) {
-    connect(); // Connect to WebSocket when WebSocketManager is created
+    connect();
   }
 
   void connect() {
@@ -24,7 +25,6 @@ class WebSocketManager {
     channel.stream.listen(
       (data) {
         print('WebSocket connected! Received: $data');
-        // Split the received message to extract the content
         try {
           String content = data.split(':').skip(1).join(':').trim();
           _messageStreamController.add(content);
@@ -44,14 +44,13 @@ class WebSocketManager {
   Stream<String> get messageStream => _messageStreamController.stream;
 
   void sendMessage(int userId, String message) {
-  // Prevent sending empty messages or messages with just the user ID
-  if (message.isEmpty || message == '$userId:') {
-    return;
-  }
+    if (message.isEmpty || message == '$userId:') {
+      return;
+    }
 
-  // Send the message in the format 'userId:messageContent'
-  channel.sink.add('$userId:$message');
-}
+    channel.sink.add('$userId:$message');
+    ooBloc.getChatRoomMessages(roomId);
+  }
 
   void disconnect() {
     channel.sink.close();

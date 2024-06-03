@@ -1,9 +1,11 @@
+// ignore_for_file: depend_on_referenced_packages, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/common_dialog.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 
 class ClubMembersDialog extends StatefulWidget {
   final int clubId;
@@ -38,7 +40,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.all(50),
+              padding: const EdgeInsets.all(SSC.p50),
               child: Text('No members found in ${widget.clubName}.'),
             ),
           );
@@ -53,21 +55,21 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                     return ListTile(
                       title: Text(member.fullName!),
                       subtitle: Text(member.email!),
-                      trailing: Text("You"),
+                      trailing: const Text("You"),
                     );
                   } else {
                     return ListTile(
                       title: Text(member.fullName!),
                       subtitle: Text(member.email!),
                       trailing: SizedBox(
-                        width: 96,
-                        height: 200,
+                        width: SSC.p96,
+                        height: SSC.p200,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                                icon: Icon(Icons.person_add_alt_1),
+                                icon: const Icon(Icons.person_add_alt_1),
                                 onPressed: () {
                                   showCustomDialog(
                                     context: context,
@@ -80,7 +82,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                                       ooBloc.changeAdmin(
                                           widget.clubId, member.id!);
                                       Navigator.of(context)
-                                          .pop(); // Pop the dialog context
+                                          .pop();
                                     },
                                     onNegativePressed: () {},
                                     positiveButtonColor: Palette.MAIN,
@@ -88,7 +90,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                                   );
                                 }),
                             IconButton(
-                              icon: Icon(Icons.delete),
+                              icon: const Icon(Icons.delete),
                               onPressed: () {
                                 showCustomDialog(
                                   context: context,
@@ -101,7 +103,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                                     ooBloc.deleteMember(
                                         widget.clubId, member.id!);
                                          Navigator.of(context)
-                                          .pop(); // Pop the dialog context
+                                          .pop(); 
                                   },
                                   onNegativePressed: () {},
                                      positiveButtonColor: Palette.MAIN,

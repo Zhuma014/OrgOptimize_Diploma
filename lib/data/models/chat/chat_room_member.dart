@@ -1,4 +1,3 @@
-
 class ChatRoomMember {
   int? id;
   String? fullName;
@@ -6,6 +5,7 @@ class ChatRoomMember {
   DateTime? birthDate;
   DateTime? createdAt;
   bool? isAdmin;
+  String? role;
 
   ChatRoomMember({
     this.id,
@@ -14,6 +14,7 @@ class ChatRoomMember {
     this.birthDate,
     this.createdAt,
     this.isAdmin,
+    this.role
   });
 
   ChatRoomMember.fromJson(Map<String, dynamic> json) {
@@ -31,7 +32,9 @@ class ChatRoomMember {
       createdAt = null;
     }
     isAdmin = json['is_admin'];
-    }
+        role = json['role'];
+
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -41,6 +44,8 @@ class ChatRoomMember {
       'birth_date': birthDate?.toIso8601String(),
       'created_at': createdAt?.toIso8601String(),
       'is_admin': isAdmin,
+            'role': role,
+
     };
   }
 

@@ -4,7 +4,7 @@ class Message {
   int? userId;
   String? content;
   DateTime? timestamp;
-  String? userName; // Add this line
+  String? userName;
 
 
   Message({

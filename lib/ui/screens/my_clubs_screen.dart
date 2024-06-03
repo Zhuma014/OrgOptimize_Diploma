@@ -12,6 +12,7 @@ import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/club_members_dialog.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 
 class MyClubsScreen extends StatefulWidget {
   const MyClubsScreen({super.key});
@@ -23,12 +24,13 @@ class MyClubsScreen extends StatefulWidget {
 class _MyClubsScreenState extends State<MyClubsScreen> {
   List<Club> userClubs = [];
   List<JoinRequest> joinRequests = [];
+  List<JoinRequest> pendingRequests = [];
 
   int selectedClubId = 0;
   StreamSubscription<List<Club>>? userClubsSubscription;
   StreamSubscription<List<JoinRequest>>? joinRequestsSubscription;
 
-  bool isDialogOpen = false; // Track the dialog state
+  bool isDialogOpen = false; 
 
   @override
   void initState() {
@@ -40,52 +42,28 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
         });
       },
       onError: (error) {
-        // Handle any error that occurs during the stream
         print('Failed to fetch user clubs: $error');
       },
     );
     ooBloc.getUserClubs();
+    ooBloc.getUserProfile();
   }
 
   @override
   void dispose() {
     userClubsSubscription?.cancel();
-    joinRequestsSubscription?.cancel(); // Cancel the join requests subscription
+    joinRequestsSubscription?.cancel(); 
     super.dispose();
-  }
-
-  Future<void> getJoinRequests(int clubId) async {
-    try {
-      // Listen for join requests
-      ooBloc.getJoinRequests(clubId);
-
-      joinRequestsSubscription = ooBloc.joinRequestListSubject.listen(
-        (List<JoinRequest> requests) {
-          setState(() {
-            joinRequests = requests;
-          });
-
-          // Show dialog only if there are pending join requests
-          if (joinRequests.isNotEmpty && !isDialogOpen) {
-            showUserProfileDialog();
-          }
-        },
-        onError: (error) {
-          // Handle error
-          print('Failed to fetch join requests: $error');
-        },
-      );
-    } catch (error) {
-      // Handle error
-      print('Failed to fetch join requests: $error');
-    }
   }
 
   Future<void> approveJoinRequest(int clubId, int requestId) async {
     try {
       await ooBloc.approveJoinRequest(clubId, requestId);
+      setState(() {
+        joinRequests.removeWhere((request) => request.id == requestId);
+        pendingRequests.removeWhere((request) => request.id == requestId);
+      });
     } catch (error) {
-      // Handle error
       print('Failed to approve join request: $error');
     }
   }
@@ -93,8 +71,11 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
   Future<void> rejectJoinRequest(int clubId, int requestId) async {
     try {
       await ooBloc.rejectJoinRequest(clubId, requestId);
+      setState(() {
+        joinRequests.removeWhere((request) => request.id == requestId);
+        pendingRequests.removeWhere((request) => request.id == requestId);
+      });
     } catch (error) {
-      // Handle error
       print('Failed to reject join request: $error');
     }
   }
@@ -106,30 +87,30 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Padding(
-            padding: EdgeInsets.only(top: 10),
+            padding: EdgeInsets.only(top: SSC.p10),
             child: Toolbar(
               isBackButtonVisible: true,
               title: "My Clubs",
             ),
           ),
           const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 25.0),
+            padding: EdgeInsets.symmetric(horizontal: SSC.p25),
             child: Row(
               children: [
                 Text(
                   "* ",
                   style: TextStyle(
                     color: Colors.red,
-                    fontSize: 16,
+                    fontSize: SSC.p16,
                   ),
                 ),
                 Expanded(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    padding: EdgeInsets.symmetric(horizontal: SSC.p10),
                     child: Text(
                       "This page is for clubs that you are an admin or member of. If you are an admin, you can view membership requests by clicking on a club.",
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: SSC.p14,
                         color: Colors.grey,
                       ),
                     ),
@@ -149,18 +130,17 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(
                         child: Padding(
-                          padding: const EdgeInsets.all(50),
+                          padding: const EdgeInsets.all(SSC.p50),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Text(
                                   'You are not a member of any club, please create your own club or be the member of'),
-                              const SizedBox(height: 16.0),
+                              const SizedBox(height: SSC.p16),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Palette.MAIN),
                                 onPressed: () {
-                                  // Navigate to the allClubsScreen
                                   Navigator.pushNamed(
                                       context, Navigation.ALLCLUBS);
                                 },
@@ -187,59 +167,63 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      isAdmin
-                                          ? ''
-                                          : 'You are Member',style: TextStyle(color: Palette.MAIN),
+                                      isAdmin ? '' : 'You are Member',
+                                      style:
+                                          const TextStyle(color: Palette.MAIN),
                                     ),
+                                    if (isAdmin) const SizedBox(width: SSC.p8),
                                     if (isAdmin)
-                                      SizedBox(width: 8),
-                                       if (isAdmin)
                                       ElevatedButton(
-                                       style: ElevatedButton.styleFrom(
-    primary: Palette.BACKGROUND, // background color
-    onPrimary: Palette.MAIN, // foreground color
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10), // rounded corners
-    ),
-    elevation: 4, // shadow
-    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // button padding
-  ),
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: Palette.MAIN,
+                                          backgroundColor: Palette
+                                              .BACKGROUND, 
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                SSC.p10), 
+                                          ),
+                                          elevation: SSC.p4, 
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: SSC.p20,
+                                              vertical: SSC.p10), 
+                                        ),
                                         onPressed: () async {
-                                if (club.adminId ==
-                                    ooBloc.userProfileSubject.value?.id) {
-                                  setState(() {
-                                    selectedClubId = club.id!;
-                                    joinRequests
-                                        .clear(); // Clear the previous requests
-                                  });
-                                  await getJoinRequests(club.id!);
+                                          if (club.adminId ==
+                                              ooBloc.userProfileSubject.value
+                                                  ?.id) {
+                                            setState(() {
+                                              selectedClubId = club.id!;
+                                            });
+                                            await ooBloc.getJoinRequests(
+                                                selectedClubId);
 
-                                  // Show dialog only if there are pending join requests
-                                  if (!isDialogOpen && joinRequests.isNotEmpty ) {
-                                    showUserProfileDialog();
-                                  }
-                                  else{
-                                    ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No requests yet")),
-        );
-                                  }
-                                }
-                              },
-                                        child: Text('Requests'),
+                                            if (!isDialogOpen) {
+                                              showUserProfileDialog();
+                                            }
+                                          }
+                                        },
+                                        child: const Text('Requests'),
                                       ),
-                                      if (isAdmin)
-                                      SizedBox(width: 10,),
+                                    if (isAdmin)
+                                      const SizedBox(
+                                        width: SSC.p10,
+                                      ),
                                     if (isAdmin)
                                       ElevatedButton(
-    style: ElevatedButton.styleFrom(
-    primary: Palette.MAIN, // background color
-    onPrimary: Colors.white, // foreground color
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(10), // rounded corners
-    ),
-    elevation: 4, // shadow
-    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10), // button padding
-  ),                                        onPressed: () async {
+                                        style: ElevatedButton.styleFrom(
+                                          foregroundColor: Colors.white,
+                                          backgroundColor:
+                                              Palette.MAIN, 
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                SSC.p10), 
+                                          ),
+                                          elevation: SSC.p4, 
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: SSC.p20,
+                                              vertical: SSC.p10), 
+                                        ),
+                                        onPressed: () async {
                                           await ooBloc.getClubMembers(club.id!);
                                           showDialog(
                                             context: context,
@@ -250,16 +234,12 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                             ),
                                           );
                                         },
-                                        child: Text('Members'),
+                                        child: const Text('Members'),
                                       ),
-
-                                     
                                   ],
                                 ),
                               ),
-                              onTap: () async {
-                               
-                              },
+                              onTap: () async {},
                             );
                           });
                     }
@@ -270,18 +250,21 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
   }
 
   Future<void> showUserProfileDialog() async {
-    isDialogOpen = true; // Set the dialog state to open
+    if (isDialogOpen) {
+      return;
+    }
 
-    // Filter the join requests to show only pending requests
-    List<JoinRequest> pendingRequests =
+    isDialogOpen = true;
+
+    joinRequests = ooBloc.joinRequestListSubject.value;
+    pendingRequests =
         joinRequests.where((request) => request.status == 'pending').toList();
 
-    // Determine the number of pending requests
     int numRequests = pendingRequests.length;
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dialog from closing on outside tap
+      barrierDismissible: false,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setState) {
@@ -293,7 +276,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                     'Join Requests',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
+                      fontSize: SSC.p20,
                       color: Palette.MAIN,
                     ),
                   ),
@@ -301,7 +284,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                     '($numRequests)',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
+                      fontSize: SSC.p20,
                       color: Palette.MAIN,
                     ),
                   ),
@@ -314,7 +297,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                   children: numRequests == 0
                       ? [
                           const Padding(
-                            padding: EdgeInsets.all(16.0),
+                            padding: EdgeInsets.all(SSC.p16),
                             child: Text(
                               'There are no requests',
                               style: TextStyle(
@@ -340,52 +323,51 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                               } else if (snapshot.hasData &&
                                   snapshot.data != null) {
                                 UserProfile userProfile = snapshot.data!;
-                                return ListTile(
-                                  title: Text(
-                                      'User: ${userProfile.fullName ?? 'Unknown'}'),
-                                  subtitle: Text('Request ID: ${request.id}'),
-                                  trailing: request.status == 'approved'
-                                      ? const Text('Approved')
-                                      : request.status == 'rejected'
-                                          ? const Text('Rejected')
-                                          : Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                TextButton(
-                                                  child: const Text(
-                                                    'Approve',
-                                                    style: TextStyle(
-                                                        color: Palette.MAIN),
+                                return StatefulBuilder(
+                                    builder: (context, setState) {
+                                  return ListTile(
+                                    title: Text(
+                                        'User: ${userProfile.fullName ?? 'Unknown'}'),
+                                    subtitle: Text('Request ID: ${request.id}'),
+                                    trailing: request.status == 'approved'
+                                        ? const Text('Approved')
+                                        : request.status == 'rejected'
+                                            ? const Text('Rejected')
+                                            : Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  IconButton(
+                                                    icon:
+                                                        const Icon(Icons.check),
+                                                    color: Colors.green,
+                                                    onPressed: () async {
+                                                      await approveJoinRequest(
+                                                          selectedClubId,
+                                                          request.id!);
+                                                      setState(() {
+                                                        request.status =
+                                                            'approved';
+                                                      });
+                                                    },
                                                   ),
-                                                  onPressed: () async {
-                                                    await approveJoinRequest(
-                                                        selectedClubId,
-                                                        request.id!);
-                                                    setState(() {
-                                                      request.status =
-                                                          'approved';
-                                                    });
-                                                  },
-                                                ),
-                                                TextButton(
-                                                  child: const Text(
-                                                    'Reject',
-                                                    style: TextStyle(
-                                                        color: Palette.MAIN),
+                                                  IconButton(
+                                                    icon:
+                                                        const Icon(Icons.close),
+                                                    color: Colors.red,
+                                                    onPressed: () async {
+                                                      await rejectJoinRequest(
+                                                          selectedClubId,
+                                                          request.id!);
+                                                      setState(() {
+                                                        request.status =
+                                                            'rejected';
+                                                      });
+                                                    },
                                                   ),
-                                                  onPressed: () async {
-                                                    await rejectJoinRequest(
-                                                        selectedClubId,
-                                                        request.id!);
-                                                    setState(() {
-                                                      request.status =
-                                                          'rejected';
-                                                    });
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                );
+                                                ],
+                                              ),
+                                  );
+                                });
                               } else {
                                 return const ListTile(
                                   title: Text('User not found'),
@@ -400,8 +382,10 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                 TextButton(
                   child: const Text('Close'),
                   onPressed: () {
+                    setState(() {
+                      isDialogOpen = false;
+                    });
                     Navigator.of(context).pop();
-                    isDialogOpen = false;
                   },
                 ),
               ],
@@ -409,6 +393,8 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
           },
         );
       },
-    );
+    ).then((_) {
+      isDialogOpen = false;
+    });
   }
 }

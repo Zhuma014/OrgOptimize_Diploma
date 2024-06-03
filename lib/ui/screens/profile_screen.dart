@@ -12,8 +12,7 @@ import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
-// import 'package:urven/ui/widgets/profile_menu_option.dart';
-// import 'package:urven/utils/lu.dart';
+
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -41,7 +40,7 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: const EdgeInsets.only(top: SSC.p10),
                 child: Toolbar(isBackButtonVisible: false, title: LU.of(context).profile),
               ),
               ProfileMenuOption(
@@ -71,7 +70,7 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
             ],
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(SSC.p16),
             child: RawMaterialButton(
               disabledElevation: 1,
               child: Ink(

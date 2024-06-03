@@ -1,37 +1,22 @@
 // ignore: depend_on_referenced_packages
 import 'package:flutter/widgets.dart';
 
-/*
-  This configuration class is used to provide responsive behaviour for the app
-  It is initialized in main.dart file.
-  It takes vertical and horizontal parameters of the screen and calculates corresponding sizes
- */
+
 class SSC {
-  // static double? _heightMultiplier;
-  // static double? _widthMultiplier;
+
   static late MediaQueryData _mediaQueryData;
   static late double screenWidth;
   static late double screenHeight;
-  // static double _blockSizeHorizontal = 0;
-  // static double _blockSizeVertical = 0;
+
 
   void init(BuildContext context) {
     _mediaQueryData = MediaQuery.of(context);
     screenHeight = _mediaQueryData.size.height;
     screenWidth = _mediaQueryData.size.width;
-    // _blockSizeHorizontal = screenWidth / 1000;
-    // _blockSizeVertical = screenHeight / 1000;
-    // _heightMultiplier = _blockSizeVertical;
-    // _widthMultiplier = _blockSizeHorizontal;
+
   }
 
-  // static h(double height) {
-  //   return _heightMultiplier * height;
-  // }
-  //
-  // static w(double width) {
-  //   return _widthMultiplier * width;
-  // }
+
 
   static const double p0 = 0;
   static const double p1 = 1;

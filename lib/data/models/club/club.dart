@@ -1,4 +1,3 @@
-
 class Club {
   String? name;
   String? description;
@@ -18,16 +17,24 @@ class Club {
     this.isDeleted = false,
   });
 
-  Club.map(dynamic o) {
-    if (o != null) {
-      name = o['name'];
-      description = o['description'];
-      id = o['id'];
-      adminId = o['admin_id'];
-      createdAt =
-          o['created_at'] != null ? DateTime.parse(o['created_at']) : null;
-    }
-  }
+  factory Club.fromJson(Map<String, dynamic> json) => Club(
+        name: json['name'],
+        description: json['description'],
+        id: json['id'],
+        adminId: json['admin_id'],
+        createdAt: json['created_at'] != null
+            ? DateTime.parse(json['created_at'])
+            : null,
+        exception: json['detail'], 
+      );
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'description': description,
+        'id': id,
+        'admin_id': adminId,
+        'created_at': createdAt?.toIso8601String(),
+      };
 
   Club.withError(String errorValue)
       : name = null,
@@ -37,17 +44,7 @@ class Club {
         exception = errorValue;
 
   bool get isValid =>
-      name != null && description != null && id != null && adminId != null;
-
-  factory Club.fromJson(Map<String, dynamic> json) => Club.map(json);
-
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'description': description,
-        'id': id,
-        'admin_id': adminId,
-        'created_at': createdAt?.toIso8601String(),
-      };
+      name != null && description != null && id != null && adminId != null && createdAt != null;
 
   Club deletedCopy() {
     return Club(

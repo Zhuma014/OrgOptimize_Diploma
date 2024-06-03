@@ -8,7 +8,7 @@ class Logger {
 
   static d(String tag, String msg) {
     if (AppConfigs.IS_DEBUG) {
-      final pattern = RegExp('.{1,800}'); // 800 is the size of each chunk
+      final pattern = RegExp('.{1,800}'); 
       pattern.allMatches(msg).forEach((match) => developer
           .log('($tag) ${match.group(0)}', name: NAME));
     }

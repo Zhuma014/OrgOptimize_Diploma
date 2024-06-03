@@ -1,4 +1,3 @@
-
 class SignUp {
   int? userId;
   String? accessToken;
@@ -16,13 +15,10 @@ class SignUp {
     userId = json['new_user.id'];
     accessToken = json['access_token'];
     tokenType = json['token_type'];
-    }
+    exception = json['detail'];
+  }
 
-  SignUp.withError(String errorValue)
-      : userId = null,
-        accessToken = null,
-        tokenType = null,
-        exception = errorValue;
 
-  bool get isValid => userId != null && accessToken != null && tokenType != null;
+  bool get isValid =>
+       accessToken != null ;
 }

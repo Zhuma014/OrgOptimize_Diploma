@@ -11,6 +11,7 @@ import 'package:urven/ui/widgets/action_button.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/lu.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 
 class SettingsScreen extends StatefulWidget {
 
@@ -34,7 +35,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     body: Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 10),
+          padding: const EdgeInsets.only(top: SSC.p10),
           child: Toolbar(
             isBackButtonVisible: true,
             title: LU.of(context).settings,
@@ -42,17 +43,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 15),
+            padding: const EdgeInsets.symmetric(horizontal: SSC.p15),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: SSC.p20),
                 Text(
                   LU.of(context).select_language,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: SSC.p18, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: SSC.p10),
                 DropdownButtonHideUnderline(
                   child: DropdownButton<Locale>(
                     icon: const Icon(Icons.keyboard_arrow_down_outlined),
@@ -60,11 +61,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     dropdownColor: Colors.white,
                     style: const TextStyle(
                       color: Palette.DARK_BLUE,
-                      fontSize: 16,
+                      fontSize: SSC.p16,
                       fontWeight: FontWeight.w400,
                     ),
                     underline: Container(
-                      height: 1,
+                      height: SSC.p1,
                       color: Palette.DARK_BLUE,
                     ),
                     onChanged: (value) {
@@ -87,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.all(SSC.p15),
           child: ActionButton(
             mainText:"Delete profile",
             onPressed: () {
@@ -103,11 +104,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _onDeleteAccount() {
     
-      showCustomDialog(
+       showCustomDialog(
         context: context,
-        title: "Delete profile",
-        description: "Do you really want to delete your profile",
-        positiveText: "Delete",
+        title: 'Delete Profile',
+        description: 'Are you sure you want to delete your profile? All clubs that you created will also be deleted.',
+        positiveText: 'Yes, delete',
         negativeText: LU.of(context).action_cancel,
         onPositivePressed: () {
           ooBloc.deleteProfileSubject.listen((event) {
@@ -116,10 +117,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
     (route) => false,
   );
+  
 
           });
           ooBloc.deleteAccount();
         },
+        onNegativePressed: (){},
+        positiveButtonColor: Colors.red,
+        negativeButtonColor: Colors.grey,
       );
     }
 

@@ -8,6 +8,7 @@ import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/data/network/websocket/websocket_service.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/chat_app_bar.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 
 class ChatScreen extends StatefulWidget {
   final int chatRoomId;
@@ -25,6 +26,8 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Message> allMessages = [];
   ScrollController _scrollController = ScrollController();
   Map<int, String> userIdToName = {};
+    Map<int, String> chatRoomIdToName = {};
+
 
   @override
   void initState() {
@@ -33,8 +36,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
     ooBloc.getChatRoomMessages(widget.chatRoomId);
     ooBloc.getChatRoomMembers(widget.chatRoomId);
+        ooBloc.getChatRooms(); 
+
 
       getChatRoomMembers();
+          getChatRooms();
+
 
 
     ooBloc.getUserProfile();
@@ -53,6 +60,19 @@ void getChatRoomMembers() {
     }
   });
 }
+
+  void getChatRooms() {
+    ooBloc.getChatRoomsSubject.listen((chatRooms) {
+      if (mounted) {
+        setState(() {
+          chatRoomIdToName = {
+            for (var room in chatRooms)
+              room.id!: room.name ?? 'Unknown'
+          };
+        });
+      }
+    });
+  }
 
 
   @override
@@ -79,7 +99,7 @@ void getChatRoomMembers() {
               return Column(children: [
                 Expanded(
                   child: StreamBuilder<List<Message>>(
-                    stream: ooBloc.getMessagesListStream(),
+                    stream: ooBloc.chatRoomMessagesStream,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         if (snapshot.data!.isEmpty) {
@@ -123,7 +143,7 @@ void getChatRoomMembers() {
 
                             String messageContent = messageObj.content != null
                                 ? messageObj.content!.split(':').last.trim()
-                                : ''; // Or any default value you want to use
+                                : '';
 
                             bool showDate = true;
                             if (index > 0 &&
@@ -155,9 +175,11 @@ void getChatRoomMembers() {
                                       child: Stack(
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.all(8.0),
+                                            padding: const EdgeInsets.all(SSC.p8),
                                             child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.center ,
+                                              crossAxisAlignment: messageObj.userId == currentUserId
+                                              ? CrossAxisAlignment.end
+                                              :CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   messageObj.userId ==
@@ -182,7 +204,7 @@ void getChatRoomMembers() {
                                                         BorderRadius.circular(
                                                             12.0),
                                                   ),
-                                                  padding: const EdgeInsets.symmetric(horizontal:20,vertical: 14
+                                                  padding: const EdgeInsets.symmetric(horizontal:SSC.p20,vertical: SSC.p14
                                                       ),
                                                   child: Column(
                                                     crossAxisAlignment:
@@ -197,15 +219,18 @@ void getChatRoomMembers() {
                                             ),
                                           ),
                                           Positioned(
+                                            
                                             bottom: 8,
-                                            right: 12,
+                                                right: messageObj.userId == currentUserId ? 12 : null,
+  left: messageObj.userId == currentUserId ? null : 12,
+
                                             child: Text(
                                               messageObj.timestamp != null
                                                   ? DateFormat('HH:mm').format(
                                                       messageObj.timestamp!)
                                                   : '',
                                               style: const TextStyle(
-                                                  fontSize: 12.0,
+                                                  fontSize: SSC.p12,
                                                   color: Colors.grey),
                                             ),
                                           ),
@@ -232,7 +257,7 @@ void getChatRoomMembers() {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(SSC.p8),
                   child: Row(
                     children: [
                       Expanded(
@@ -244,23 +269,23 @@ void getChatRoomMembers() {
                             hintText: 'Type a message...',
                             hintStyle: const TextStyle(color: Colors.grey),
                             contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10.0, horizontal: 20.0),
+                                vertical: SSC.p10, horizontal: SSC.p20),
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(SSC.p30),
                               borderSide: BorderSide.none,
                             ),
                             enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(SSC.p30),
                               borderSide: const BorderSide(color: Palette.MAIN),
                             ),
                             focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30.0),
+                              borderRadius: BorderRadius.circular(SSC.p30),
                               borderSide: const BorderSide(color: Palette.MAIN),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8.0),
+                      const SizedBox(width: SSC.p8),
                       Container(
                         decoration: const BoxDecoration(
                           color: Palette.MAIN,
@@ -290,7 +315,6 @@ void getChatRoomMembers() {
 });
                               setState(() {});
 
-                              // Update UI immediately
                             }
                           },
                           icon: const Icon(Icons.send, color: Colors.white),
@@ -307,13 +331,13 @@ void getChatRoomMembers() {
 
   Widget _buildDateWidget(DateTime timestamp) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: SSC.p8),
       child: Center(
         child: Text(
           DateFormat('MMM d, yyyy').format(timestamp),
           style: TextStyle(
             color: Colors.grey[600],
-            fontSize: 16.0,
+            fontSize: SSC.p16,
           ),
         ),
       ),

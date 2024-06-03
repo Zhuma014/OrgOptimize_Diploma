@@ -54,24 +54,7 @@ void main() async {
 
 
 
-  // FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-  // await NotificationService.instance.setup();
-  // await NotificationService.instance.requestPermissions();
-
-  // Map<String, dynamic>? notificationData;
-
-  // NotificationAppLaunchDetails? appLaunchDetails =
-  //     await NotificationService.instance.getAppLaunchDetails();
-  // if (appLaunchDetails != null) {
-  //   Logger.d('main()',
-  //       'appLaunchDetails.didNotificationLaunchApp: ${appLaunchDetails.didNotificationLaunchApp}');
-  //   String? payload = appLaunchDetails.notificationResponse?.payload;
-  //   if (payload != null) {
-  //     initialRoute = Navigation.ORDER_FEEDBACK;
-  //     notificationData = jsonDecode(payload);
-  //     Logger.d('main()', 'notificationData: $notificationData');
-  //   }
-  // }
+ 
 
   HttpOverrides.global = GeneralHttpOverrider();
 
@@ -83,31 +66,22 @@ void main() async {
         value: localeProvider,
         child: Consumer<LocaleProvider>(builder: (context, provider, _) {
           return MaterialApp(
-            // Flags
-            // debugShowCheckedModeBanner: kReleaseMode ? false : true,
+   
             debugShowCheckedModeBanner: false,
 
-            // Theme
             themeMode: ThemeMode.light,
-            // There is no dark mode support yet
             theme: ThemeData(
               appBarTheme: const AppBarTheme(
                 systemOverlayStyle: SystemUiOverlayStyle.light,
               ),
 
-              // Brightness & Colors
               brightness: Brightness.light,
-              // colorScheme: const ColorScheme.light(
-              //   primary: Colors.white,
-              //   secondary: Palette.OUTRAGEOUS_ORANGE,
-              // ),
+           
               primaryColor: Colors.white,
               scaffoldBackgroundColor: Palette.BACKGROUND,
-              // splashColor: Palette.OUTRAGEOUS_ORANGE,
 
               unselectedWidgetColor: Palette.NOT_OUTRAGEOUS,
 
-              // Font
               fontFamily: Font.NUNITO,
 
               dialogTheme: const DialogTheme(
@@ -133,25 +107,14 @@ void main() async {
                 ),
               ),
 
-              // buttonBarTheme: const ButtonBarThemeData(
-              //   buttonTextTheme: ButtonTextTheme.primary,
-              // ),
-
-              // buttonTheme: const ButtonThemeData(
-              //   buttonColor: Palette.OUTRAGEOUS_ORANGE,
-              // ),
-
-              // Text
               textTheme: textTheme,
             ),
 
-            // Localization
 
             localizationsDelegates: LU.localizationsDelegates,
             supportedLocales: LU.supportedLocales,
             locale: provider.locale,
 
-            // Routes
             initialRoute: PreferencesManager.instance.isAuthenticated()
                 ? Navigation.HOME
                 : Navigation.INDEX,
@@ -164,7 +127,6 @@ void main() async {
                             : OrgOptimizeApp()),
               ];
             },
-            // by default open Intro screen
             routes: Navigation.getRoutes(),
 
             navigatorKey: navigatorKey,

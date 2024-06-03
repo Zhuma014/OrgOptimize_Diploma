@@ -25,13 +25,13 @@ class _SignUpCardState extends State<SignUpCard> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _birthdayController =
-      TextEditingController(); // Add birthday controller
+      TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _birthdayController.dispose(); // Dispose birthday controller
+    _birthdayController.dispose(); 
     super.dispose();
   }
 
@@ -39,7 +39,7 @@ class _SignUpCardState extends State<SignUpCard> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 28),
+        padding: const EdgeInsets.symmetric(horizontal: SSC.p28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
@@ -64,7 +64,7 @@ class _SignUpCardState extends State<SignUpCard> {
             RoundedTextField(
               labelText: LU.of(context).birthday,
               isBirthdayField: true,
-              controller: _birthdayController, // Use birthday controller
+              controller: _birthdayController, 
               onChanged: (value) {
                 setState(() {});
               },
@@ -79,11 +79,11 @@ class _SignUpCardState extends State<SignUpCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Palette.MAIN,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
+                    borderRadius: BorderRadius.circular(SSC.p25),
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18.0),
+                  padding: const EdgeInsets.symmetric(vertical: SSC.p18),
                   child: Text(
                     LU.of(context).registration,
                   ),
@@ -135,29 +135,35 @@ class _SignUpCardState extends State<SignUpCard> {
       return;
     }
 
-    ooBloc.signUp(email, password, DateTime.parse(birthday), fullName, fcm_token: fcmToken!);
-    ooBloc.signUpSubject.stream.listen((value) {
-      Logger.d(
-          'SignUpCard', 'ooBloc.signUpStream.listen() -> ${value.isValid}');
+    ooBloc.signUp(email, password, DateTime.parse(birthday), fullName,
+        fcm_token: fcmToken!);
+ooBloc.signUpSubject.stream.listen((value) {
+  Logger.d('SignUpCard', 'ooBloc.signUpStream.listen() -> ${value.isValid}');
 
-      if (value.isValid) {
-        _nameController.clear();
-        _emailController.clear();
-        _passwordController.clear();
-        _birthdayController.clear();
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MainWrapper()),
-          (route) => route.isFirst,
-        );
-        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign Up Failed'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    });
+  if (value.isValid) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(value.exception ?? 'Sign Up Successful'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    _nameController.clear();
+    _emailController.clear();
+    _passwordController.clear();
+    _birthdayController.clear();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const MainWrapper()),
+      (route) => route.isFirst,
+    );
+    context.read<BottomNavBarCubit>().changeSelectedIndex(0);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(value.exception ?? 'Sign Up Failed'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+});
   }
 }

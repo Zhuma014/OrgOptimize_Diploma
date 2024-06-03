@@ -6,7 +6,7 @@ import 'package:urven/utils/screen_size_configs.dart';
 
 class ActionButton extends StatelessWidget {
   static const double HEIGHT = SSC.p40;
-  static const double CONTENT_PADDING = 10; // Adjust padding as needed
+  static const double CONTENT_PADDING = SSC.p10; 
 
   const ActionButton({
     Key? key,
@@ -55,7 +55,7 @@ class ActionButton extends StatelessWidget {
                     ),
                   ),
                   if (secondaryText != null) ...[
-                    const SizedBox(width: 15),
+                    const SizedBox(width: SSC.p15),
                     Text(
                       secondaryText!,
                       style: textStyle ?? const TextStyle(

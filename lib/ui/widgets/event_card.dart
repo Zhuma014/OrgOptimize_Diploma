@@ -33,12 +33,11 @@ class _EventCardState extends State<EventCard> {
           context: context,
           builder: (BuildContext context) {
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(SSC.p16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Title
                   Text(
                     widget.event.title ?? 'No Title',
                     style: const TextStyle(
@@ -46,21 +45,19 @@ class _EventCardState extends State<EventCard> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  // Description
                   if (widget.event.description != null &&
                       widget.event.description!.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.only(top: SSC.p8),
                       child: Text(
                         widget.event.description!,
                         style: const TextStyle(fontSize: SSC.p14),
                       ),
                     ),
 
-                  // Date and Time
                   if (widget.event.date != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.only(top: SSC.p8),
                       child: Text(
                         DateFormat('dd MMM yyyy HH:mm').format(widget.event.date!),
                         style: const TextStyle(
@@ -69,15 +66,14 @@ class _EventCardState extends State<EventCard> {
                         ),
                       ),
                     ),
-                  // Location
                   if (widget.event.location != null && widget.event.location!.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.only(top: SSC.p8),
                       child: Row(
                         children: [
                           const Icon(Icons.location_on,
-                              size: 16, color: Colors.grey),
-                          const SizedBox(width: 5),
+                              size: SSC.p16, color: Colors.grey),
+                          const SizedBox(width: SSC.p5),
                           Text(
                             widget.event.location!,
                             style: const TextStyle(
@@ -86,10 +82,9 @@ class _EventCardState extends State<EventCard> {
                         ],
                       ),
                     ),
-                  // Club Name
                   if (widget.event.clubName != null && widget.event.clubName!.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
+                      padding: const EdgeInsets.only(top: SSC.p8),
                       child: Text(
                         widget.event.clubName!,
                         style: const TextStyle(fontSize: SSC.p14),
@@ -97,14 +92,14 @@ class _EventCardState extends State<EventCard> {
                     ),
                  if (widget.event.clubId != null)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      padding: const EdgeInsets.symmetric(vertical: SSC.p16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: _attending
-                                  ? Colors.grey // Disable the button if attending
+                                  ? Colors.grey
                                   : Palette.MAIN,
                             ),
                             onPressed: _attending
@@ -122,7 +117,7 @@ class _EventCardState extends State<EventCard> {
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: !_attending
-                                  ? Colors.grey // Disable the button if not attending
+                                  ? Colors.grey 
                                   : Colors.red,
                             ),
                             onPressed: !_attending
@@ -142,7 +137,7 @@ class _EventCardState extends State<EventCard> {
                     ),
                   if (widget.event.userId != null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
+                      padding: const EdgeInsets.only(top: SSC.p16),
                       child: Align(
                         alignment: Alignment.center,
                         child: ElevatedButton(
@@ -161,20 +156,19 @@ class _EventCardState extends State<EventCard> {
         );
       },
       child: SizedBox(
-        width: 200,
+        width: SSC.p200,
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius:
-                BorderRadius.circular(15.0), // Adjust the value as needed
+                BorderRadius.circular(SSC.p15), 
           ),
           child: Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(SSC.p16),
             child: Row(
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Title
                     Text(
                       widget.event.title ?? 'No Title',
                       style: const TextStyle(
@@ -182,20 +176,18 @@ class _EventCardState extends State<EventCard> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    // Description
                     if (widget.event.description != null &&
                         widget.event.description!.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: SSC.p8),
                         child: Text(
                           widget.event.description!,
                           style: const TextStyle(fontSize: SSC.p14),
                         ),
                       ),
-                    // Date and Time
                     if (widget.event.date != null)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: SSC.p8),
                         child: Text(
                           DateFormat('dd MMM yyyy HH:mm').format(widget.event.date!),
                           style: const TextStyle(
@@ -204,15 +196,14 @@ class _EventCardState extends State<EventCard> {
                           ),
                         ),
                       ),
-                    // Location
                     if (widget.event.location != null && widget.event.location!.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: SSC.p8),
                         child: Row(
                           children: [
                             const Icon(Icons.location_on,
-                                size: 16, color: Colors.grey),
-                            const SizedBox(width: 5),
+                                size: SSC.p16, color: Colors.grey),
+                            const SizedBox(width: SSC.p5),
                             Text(
                               widget.event.location!,
                               style: const TextStyle(
@@ -221,10 +212,9 @@ class _EventCardState extends State<EventCard> {
                           ],
                         ),
                       ),
-                    // Club Name
                     if (widget.event.clubName != null && widget.event.clubName!.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: const EdgeInsets.only(top: SSC.p8),
                         child: Text(
                           widget.event.clubName!,
                           style: const TextStyle(fontSize: SSC.p14),
@@ -232,127 +222,127 @@ class _EventCardState extends State<EventCard> {
                       ),
                   ],
                 ),
-                const SizedBox(
-                  width: 150,
+               
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      IconButton(
+                  icon: const Icon(Icons.edit, color: Palette.MAIN),
+                  onPressed: () async {
+                    if (widget.event.clubId != null) {
+                      Club? club = await ooBloc.getClubById(widget.event.clubId!);
+                      if (club != null && club.adminId == ooBloc.userProfileSubject.value?.id) {
+                        _showEditEventModal(context);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('You are not an admin'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    } else {
+                      _showEditEventModal(context);
+                    }
+                  },
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-  icon: const Icon(Icons.edit, color: Palette.MAIN),
-  onPressed: () async {
-    if (widget.event.clubId != null) {
-      Club? club = await ooBloc.getClubById(widget.event.clubId!);
-      if (club != null && club.adminId == ooBloc.userProfileSubject.value?.id) {
-        _showEditEventModal(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You are not an admin'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    } else {
-      _showEditEventModal(context);
-    }
-  },
-),
-                IconButton(
-  icon: const Icon(Icons.delete, color: Colors.red),
-  onPressed: () async {
-    if (widget.event.clubId == null) {
-      // Event doesn't belong to any club, allow deletion
-      ooBloc.deleteEvent(widget.event.id!);
-    } else {
-      Club? club = await ooBloc.getClubById(widget.event.clubId!);
-      if (club != null && club.adminId == ooBloc.userProfileSubject.value?.id) {
-        ooBloc.deleteEvent(widget.event.id!);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You are not an admin'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  },
-),
-
-                        if(widget.event.clubId != null)
-                   IconButton(
-  onPressed: () async {
-    Club? club = await ooBloc.getClubById(widget.event.clubId!);
-                        if (
-                            club != null &&
-                                club.adminId ==
-                                    ooBloc.userProfileSubject.value?.id) {
-      showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-            builder: (BuildContext context, StateSetter setState) {
-              return Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'List of attendees for ${widget.event.title}',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                  IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  onPressed: () async {
+                    if (widget.event.clubId == null) {
+                      ooBloc.deleteEvent(widget.event.id!);
+                    } else {
+                      Club? club = await ooBloc.getClubById(widget.event.clubId!);
+                      if (club != null && club.adminId == ooBloc.userProfileSubject.value?.id) {
+                        ooBloc.deleteEvent(widget.event.id!);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('You are not an admin'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    }
+                  },
+                ),
+                
+                          if(widget.event.clubId != null)
+                     IconButton(
+                  onPressed: () async {
+                    Club? club = await ooBloc.getClubById(widget.event.clubId!);
+                          if (
+                              club != null &&
+                                  club.adminId ==
+                                      ooBloc.userProfileSubject.value?.id) {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return StatefulBuilder(
+                            builder: (BuildContext context, StateSetter setState) {
+                              return Container(
+                  padding: const EdgeInsets.all(SSC.p16),
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(SSC.p20)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'List of attendees for ${widget.event.title}',
+                        style: const TextStyle(
+                          fontSize: SSC.p18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    FutureBuilder<dynamic>(
-                      future: ooBloc.getAttendancesForEvent(widget.event.id!),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (snapshot.hasData) {
-                          List<Attendance> attendances = snapshot.data!;
-                          return ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: attendances.length,
-                            itemBuilder: (context, index) {
-                              Attendance attendance = attendances[index];
-                              return ListTile(
-                                title: Text(attendance.fullName),
+                      const SizedBox(height: SSC.p16),
+                      FutureBuilder<dynamic>(
+                        future: ooBloc.getAttendancesForEvent(widget.event.id!),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else if (snapshot.hasData) {
+                            List<Attendance> attendances = snapshot.data!;
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: attendances.length,
+                              itemBuilder: (context, index) {
+                                Attendance attendance = attendances[index];
+                                return ListTile(
+                                  title: Text(attendance.fullName),
+                                );
+                              },
+                            );
+                          } else {
+                            return const Text('No attendances found');
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                               );
                             },
                           );
-                        } else {
-                          return const Text('No attendances found');
-                        }
-                      },
-                    ),
-                  ],
+                        },
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('You are not an admin'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.visibility, color: Palette.MAIN),
                 ),
-              );
-            },
-          );
-        },
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You are not an admin'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
-  },
-  icon: const Icon(Icons.visibility, color: Palette.MAIN),
-),
-
-
-                  ],
+                
+                
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -375,9 +365,9 @@ class _EventCardState extends State<EventCard> {
         TextEditingController(text: widget.event.location);
 
     int? selectedClubId =
-        widget.event.clubId ?? 0; // Initialize selectedClubId based on event's clubId
+        widget.event.clubId ?? 0; 
     int? userProfileId =
-        ooBloc.userProfileSubject.value?.id; // Initialize userProfile
+        ooBloc.userProfileSubject.value?.id; 
 
     String? _validateDescription(String? value) {
       if (value == null || value.isEmpty) {
@@ -397,13 +387,13 @@ class _EventCardState extends State<EventCard> {
             data: ThemeData.light().copyWith(
               colorScheme: const ColorScheme.light(
                 primary: Palette
-                    .MAIN, // Use Palette.Main for header background color
-                onPrimary: Colors.white, // Header text color
-                surface: Palette.MAIN, // Body background color (optional)
-                onSurface: Colors.black, // Body text color
+                    .MAIN,
+                onPrimary: Colors.white, 
+                surface: Palette.MAIN, 
+                onSurface: Colors.black, 
               ),
               dialogBackgroundColor:
-                  Colors.white, // Background color of the dialog
+                  Colors.white,
             ),
             child: child!,
           );
@@ -419,13 +409,13 @@ class _EventCardState extends State<EventCard> {
               data: ThemeData.light().copyWith(
                 colorScheme: const ColorScheme.light(
                   primary: Palette
-                      .MAIN, // Use Palette.Main for header background color
-                  onPrimary: Colors.white, // Header text color
-                  surface: Colors.white, // Body background color (optional)
-                  onSurface: Colors.black, // Body text color
+                      .MAIN, 
+                  onPrimary: Colors.white, 
+                  surface: Colors.white, 
+                  onSurface: Colors.black, 
                 ),
                 dialogBackgroundColor:
-                    Colors.white, // Background color of the dialog
+                    Colors.white, 
               ),
               child: child!,
             );
@@ -473,19 +463,18 @@ class _EventCardState extends State<EventCard> {
                   children: [
                     Padding(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 8.0, horizontal: 16.0),
+                            vertical: SSC.p8, horizontal: SSC.p16),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 LU.of(context).create_event,
                                 style: const TextStyle(
-                                  fontSize: 20,
+                                  fontSize: SSC.p20,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ])),
-                    // Add Dropdown for selecting Club or My Own Event
                     StreamBuilder<List<Club>>(
                       stream: ooBloc.getUserClubsSubject,
                       builder: (context, snapshot) {
@@ -592,7 +581,7 @@ class _EventCardState extends State<EventCard> {
                         }
                       },
                     ),
-                    const SizedBox(height: 8.0),
+                    const SizedBox(height: SSC.p8),
                     CommonInputField(
                       labelText: LU.of(context).title,
                       isRequired: true,
@@ -617,7 +606,6 @@ class _EventCardState extends State<EventCard> {
                       readOnly: true,
                       onTap: () => _selectDateTime(context),
                       validator: _validateDescription,
-                      // Use onTap to show date and time picker
                     ),
                     CommonInputField(
                       labelText: LU.of(context).location,
@@ -626,7 +614,7 @@ class _EventCardState extends State<EventCard> {
                       keyboardType: TextInputType.text,
                       validator: _validateDescription,
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: SSC.p20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -635,7 +623,7 @@ class _EventCardState extends State<EventCard> {
                               backgroundColor: Palette.BACKGROUND,
                               side: const BorderSide(color: Palette.MAIN)),
                           onPressed: () {
-                            Navigator.pop(context); // Close the modal
+                            Navigator.pop(context); 
                           },
                           child: Text(
                             LU.of(context).action_cancel,
@@ -676,7 +664,6 @@ class _EventCardState extends State<EventCard> {
 
                               Navigator.pop(context);
 
-                              // Close the modal
                             }
                           },
                           child: Text(
@@ -685,7 +672,7 @@ class _EventCardState extends State<EventCard> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: SSC.p20),
                   ],
                 ),
               ),

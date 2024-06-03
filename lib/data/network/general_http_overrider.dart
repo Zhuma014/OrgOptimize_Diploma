@@ -1,6 +1,5 @@
 import 'dart:io';
 
-// Helps to skip the problem of SSL certification and solve the Image.network(url) issue
 class GeneralHttpOverrider extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

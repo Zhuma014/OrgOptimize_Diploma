@@ -1,4 +1,3 @@
-
 class UserProfile {
   int? id;
   String? fullName;
@@ -6,6 +5,7 @@ class UserProfile {
   String? birthDate;
   String? createdAt;
   bool? isAdmin;
+  String? role;
   String? exception;
 
   UserProfile({
@@ -15,6 +15,7 @@ class UserProfile {
     this.birthDate,
     this.createdAt,
     this.isAdmin,
+    this.role,
     this.exception,
   });
 
@@ -25,7 +26,9 @@ class UserProfile {
     birthDate = json['birth_date'];
     createdAt = json['created_at'];
     isAdmin = json['is_admin'];
-    }
+        role = json['role'];
+
+  }
 
   bool get isValid =>
       id != null &&
@@ -33,7 +36,7 @@ class UserProfile {
       email != null &&
       birthDate != null &&
       createdAt != null &&
-      isAdmin != null;
+      isAdmin != null && role!= null;
 
   Map<String, dynamic> toJson() {
     return {
@@ -43,6 +46,8 @@ class UserProfile {
       'birth_date': birthDate,
       'created_at': createdAt,
       'is_admin': isAdmin,
+            'role': role,
+
     };
   }
 }

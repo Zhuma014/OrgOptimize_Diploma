@@ -37,7 +37,7 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(25.0),
+        borderRadius: BorderRadius.circular(SSC.p25),
         color: Colors.grey[200],
       ),
       child: widget.items.isNotEmpty
@@ -51,7 +51,7 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
       value: widget.controller?.text,
       onChanged: widget.onChanged,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: SSC.p16),
         labelText: widget.labelText,
         border: InputBorder.none,
       ),
@@ -69,7 +69,7 @@ class _RoundedTextFieldState extends State<RoundedTextField> {
       controller: widget.controller,
       onTap: widget.isBirthdayField ? _pickDate : null,
       decoration: InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: SSC.p16),
         labelText: widget.labelText,
         border: InputBorder.none,
         suffixIcon: _buildSuffixIcon(),

@@ -8,6 +8,7 @@ import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 
 class ClubsScreen extends StatefulWidget {
   const ClubsScreen({Key? key}) : super(key: key);
@@ -21,31 +22,37 @@ class _ClubsScreenState extends State<ClubsScreen> {
   List<Club> userClubs = [];
   Set<int> pendingRequests = {};
   TextEditingController searchController = TextEditingController();
-
-  
+  StreamSubscription<List<Club>>? userClubsSubscription;
 
   @override
   void initState() {
     super.initState();
-    _loadPendingRequests();
+    ooBloc.getUserProfile();
+
     ooBloc.getAllClubs();
-    ooBloc.getUserClubs(); // Add this line to fetch user clubs
+    ooBloc.getUserClubs();
+    _loadPendingRequests();
     searchController.addListener(_filterClubs);
-   ooBloc.getUserClubsSubject.stream.listen((clubs) {
-    if (mounted) { // Check if the widget is mounted before calling setState
+
+    userClubsSubscription =
+        ooBloc.getUserClubsSubject.stream.listen(_updateUserClubs);
+
+  }
+
+  void _updateUserClubs(List<Club> clubs) {
+    if (mounted) {
       setState(() {
         userClubs = clubs;
       });
     }
-  });
   }
 
   @override
   void dispose() {
+    userClubsSubscription?.cancel();
 
     super.dispose();
   }
-
 
   Future<void> _loadPendingRequests() async {
     final prefs = await SharedPreferences.getInstance();
@@ -68,8 +75,6 @@ class _ClubsScreenState extends State<ClubsScreen> {
     });
   }
 
-
-
   bool isUserMemberOfClub(int clubId) {
     return userClubs.any((userClub) => userClub.id == clubId);
   }
@@ -77,7 +82,6 @@ class _ClubsScreenState extends State<ClubsScreen> {
   bool isRequestPending(int clubId) {
     return pendingRequests.contains(clubId);
   }
-  
 
   void _openJoinClubModal(BuildContext context, int clubId) async {
     final isUserClubMember = isUserMemberOfClub(clubId);
@@ -93,14 +97,14 @@ class _ClubsScreenState extends State<ClubsScreen> {
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-                fontSize: 20,
+                fontSize: SSC.p20,
               ),
             ),
             content: const Text(
               'Do you really want to join this club?',
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 16,
+                fontSize: SSC.p16,
               ),
             ),
             actions: [
@@ -112,7 +116,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   'Cancel',
                   style: TextStyle(
                     color: Colors.grey,
-                    fontSize: 16,
+                    fontSize: SSC.p16,
                   ),
                 ),
               ),
@@ -125,7 +129,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   'Join',
                   style: TextStyle(
                     color: Palette.MAIN,
-                    fontSize: 16,
+                    fontSize: SSC.p16,
                   ),
                 ),
               ),
@@ -140,27 +144,24 @@ class _ClubsScreenState extends State<ClubsScreen> {
     late StreamSubscription subscription;
 
     subscription = ooBloc.joinRequestSubject.listen((response) {
-
       if (response.isValid) {
         setState(() {
           pendingRequests.add(clubId);
         });
-        _savePendingRequests(); // Save the pending requests
+        _savePendingRequests(); 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Your join request is pending."),
           ),
         );
-      } 
-      else {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Your join request already exists."),
           ),
         );
       }
-  
-      // Cancel the subscription after handling the response
+
       subscription.cancel();
     });
 
@@ -175,16 +176,16 @@ class _ClubsScreenState extends State<ClubsScreen> {
           Column(
             children: [
               const Padding(
-                padding: EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only(top: SSC.p10),
                 child: Toolbar(
                   isBackButtonVisible: true,
                   title: "Clubs",
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 5.0, right: 5.0),
+                padding: const EdgeInsets.only(left: SSC.p5, right: SSC.p5),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: SSC.p10),
                   child: Row(
                     children: [
                       Expanded(
@@ -212,8 +213,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                               color: Palette.MAIN,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                              horizontal: SSC.p16,
+                              vertical: SSC.p12,
                             ),
                           ),
                         ),
@@ -231,141 +232,126 @@ class _ClubsScreenState extends State<ClubsScreen> {
               ),
             ],
           ),
-           Expanded(
-  child: Padding(
-    padding: const EdgeInsets.only(left: 5.0, right: 5.0),
-    child: StreamBuilder<List<Club>>(
-      stream: ooBloc.getAllClubsSubject,
-      builder: (context, snapshot) {
-        
+          Expanded(
+            child: Padding(
+                padding: const EdgeInsets.only(left: SSC.p5, right: SSC.p5),
+                child: StreamBuilder<List<Club>>(
+                  stream: ooBloc.getAllClubsSubject.stream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'Error: ${snapshot.error}',
+                          style: const TextStyle(
+                            color: Palette.MAIN,
+                          ),
+                        ),
+                      );
+                    }
 
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          final clubs = snapshot.data!;
-          List<Club> filteredClubs = clubs.where((club) {
-            return club.name!
-                .toLowerCase()
-.contains(searchText?.toLowerCase() ?? '');
-          }).toList();
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
 
-          // Sort clubs: admin, member, other
-          filteredClubs.sort((a, b) {
-            final isAdminA =
-                a.adminId == ooBloc.userProfileSubject.value?.id;
-            final isMemberA = isUserMemberOfClub(a.id!);
-            final isAdminB =
-                b.adminId == ooBloc.userProfileSubject.value?.id;
-            final isMemberB = isUserMemberOfClub(b.id!);
+                    final clubs = snapshot.data!;
+                    List<Club> filteredClubs = clubs.where((club) {
+                      return club.name!
+                          .toLowerCase()
+                          .contains(searchText?.toLowerCase() ?? '');
+                    }).toList();
 
-            if (isAdminA && !isAdminB) {
-              return -1;
-            } else if (!isAdminA && isAdminB) {
-              return 1;
-            } else {
-              if (isMemberA && !isMemberB) {
-                return -1;
-              } else if (!isMemberA && isMemberB) {
-                return 1;
-              } else {
-                return a.name!
-                    .toLowerCase()
-                    .compareTo(b.name!.toLowerCase());
-              }
-            }
-          });
-           if (snapshot.data!.isEmpty){
-            return Center(
-            child: Text(
-              'No clubs available',
-              style: TextStyle(
-                color: Palette.MAIN,
-              ),
-            ),
-          );
-           }
-          if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error}',
-              style: TextStyle(
-                color: Palette.MAIN,
-              ),
-            ),
-          );
-         }
+                    filteredClubs.sort((a, b) {
+                      final isAdminA =
+                          a.adminId == ooBloc.userProfileSubject.value?.id;
+                      final isMemberA = isUserMemberOfClub(a.id!);
+                      final isAdminB =
+                          b.adminId == ooBloc.userProfileSubject.value?.id;
+                      final isMemberB = isUserMemberOfClub(b.id!);
 
-          if (filteredClubs.isEmpty) {
-            return Center(
-              child: Text('No clubs available'),
-            );
-          } else {
-            return ListView.builder(
-              itemCount: filteredClubs.length,
-              itemBuilder: (context, index) {
-                final club = filteredClubs[index];
-                final isUserClubMember =
-                    isUserMemberOfClub(club.id!);
-                final isPending = isRequestPending(club.id!);
-                final isClubCreatedByUser = club.adminId ==
-                    ooBloc.userProfileSubject.value?.id;
+                      if (isAdminA && !isAdminB) {
+                        return -1;
+                      } else if (!isAdminA && isAdminB) {
+                        return 1;
+                      } else {
+                        if (isMemberA && !isMemberB) {
+                          return -1;
+                        } else if (!isMemberA && isMemberB) {
+                          return 1;
+                        } else {
+                          return a.name!
+                              .toLowerCase()
+                              .compareTo(b.name!.toLowerCase());
+                        }
+                      }
+                    });
 
-                return ListTile(
-                  title: Text(
-                    club.name!,
-                    style: TextStyle(
-                      color: Palette.MAIN,
-                      fontSize: 18,
-                    ),
-                  ),
-                  subtitle: Text(
-                    club.description!,
-                    style: TextStyle(
-                      color: Palette.DARK_BLUE,
-                      fontSize: 14,
-                    ),
-                  ),
-                  trailing: isClubCreatedByUser
-                      ? Text(
-                          'Admin',
-                          style: TextStyle(color: Colors.red),
-                        )
-                      : isUserClubMember
-                          ? Text(
-                              'Member',
-                              style: TextStyle(color: Colors.green),
-                            )
-                          : isPending
-                              ? Text(
-                                  'Requested',
-                                  style: TextStyle(color: Colors.grey),
+                    if (filteredClubs.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No clubs available',
+                          style: TextStyle(
+                            color: Palette.MAIN,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: filteredClubs.length,
+                      itemBuilder: (context, index) {
+                        final club = filteredClubs[index];
+                        final isUserClubMember = isUserMemberOfClub(club.id!);
+                        final isPending = isRequestPending(club.id!);
+                        final isClubCreatedByUser =
+                            club.adminId == ooBloc.userProfileSubject.value?.id;
+
+                        return ListTile(
+                          title: Text(
+                            club.name!,
+                            style: const TextStyle(
+                              color: Palette.MAIN,
+                              fontSize: SSC.p18,
+                            ),
+                          ),
+                          subtitle: Text(
+                            club.description!,
+                            style: const TextStyle(
+                              color: Palette.DARK_BLUE,
+                              fontSize: SSC.p14,
+                            ),
+                          ),
+                          trailing: isClubCreatedByUser
+                              ? const Text(
+                                  'Admin',
+                                  style: TextStyle(color: Colors.red),
                                 )
-                              : TextButton(
-                                  onPressed: () {
-                                    _openJoinClubModal(
-                                        context, club.id!);
-                                  },
-                                  child: Text('Join'),
-                                ),
-                  onTap: isUserClubMember || isPending || isClubCreatedByUser
-                      ? null
-                      : () {
-                          _openJoinClubModal(context, club.id!);
-                        },
-                );
-              },
-            );
-          }
-         }
-
-        // This should never be reached, but just in case
-        else
-        return Center(
-          child: Text('Unexpected state'),
-        );
-      },
-    ),
-  ),
-),
-
+                              : isUserClubMember
+                                  ? const Text(
+                                      'Member',
+                                      style: TextStyle(color: Colors.green),
+                                    )
+                                  : isPending
+                                      ? const Text(
+                                          'Requested',
+                                          style: TextStyle(color: Colors.grey),
+                                        )
+                                      : const Text('Join',
+                                          style: TextStyle(color: Colors.blue)),
+                          onTap: isUserClubMember ||
+                                  isPending ||
+                                  isClubCreatedByUser
+                              ? null
+                              : () {
+                                  _openJoinClubModal(context, club.id!);
+                                },
+                        );
+                      },
+                    );
+                  },
+                )),
+          ),
         ],
       ),
     );
@@ -374,7 +360,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
   void _openCreateClubModal(BuildContext context) {
     String clubName = '';
     String clubDescription = '';
-    bool isButtonEnabled = false; // Track button enable state
+    bool isButtonEnabled = false;
 
     showDialog(
       context: context,
@@ -382,9 +368,9 @@ class _ClubsScreenState extends State<ClubsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text(
+              title: const Text(
                 'Create a Club',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: SSC.p20, fontWeight: FontWeight.bold),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -399,23 +385,23 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     },
                     decoration: InputDecoration(
                       labelText: 'Club Name',
-                      labelStyle: TextStyle(
+                      labelStyle: const TextStyle(
                         color: Palette.MAIN,
-                        fontSize: 16,
+                        fontSize: SSC.p16,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Palette.MAIN),
+                        borderSide: const BorderSide(color: Palette.MAIN),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Palette.MAIN),
+                        borderSide: const BorderSide(color: Palette.MAIN),
                       ),
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: SSC.p10, horizontal: SSC.p16),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: SSC.p10),
                   TextField(
                     onChanged: (value) {
                       clubDescription = value;
@@ -426,20 +412,20 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     },
                     decoration: InputDecoration(
                       labelText: 'Club Description',
-                      labelStyle: TextStyle(
+                      labelStyle: const TextStyle(
                         color: Palette.MAIN,
-                        fontSize: 16,
+                        fontSize: SSC.p16,
                       ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Palette.MAIN),
+                        borderSide: const BorderSide(color: Palette.MAIN),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: Palette.MAIN),
+                        borderSide: const BorderSide(color: Palette.MAIN),
                       ),
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: SSC.p10, horizontal: SSC.p16),
                     ),
                   ),
                 ],
@@ -452,28 +438,22 @@ class _ClubsScreenState extends State<ClubsScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text(
+                      child: const Text(
                         'Cancel',
-                        style: TextStyle(color: Colors.grey, fontSize: 16),
+                        style: TextStyle(color: Colors.grey, fontSize: SSC.p16),
                       ),
                     ),
                     TextButton(
                       onPressed: isButtonEnabled
                           ? () {
-                              // Handle create club logic
-                              // Replace ooBloc with your actual Bloc instance
-                              ooBloc.createClub(
-                                name: clubName,
-                                description: clubDescription,
-                              );
+                              _performCreateClub(clubName, clubDescription);
 
                               Navigator.pop(context);
-                              
                             }
-                          : null, // Disable button if not all fields are filled
-                      child: Text(
+                          : null,
+                      child: const Text(
                         'Create',
-                        style: TextStyle(color: Palette.MAIN, fontSize: 16),
+                        style: TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
                       ),
                     ),
                   ],
@@ -484,5 +464,27 @@ class _ClubsScreenState extends State<ClubsScreen> {
         );
       },
     );
+  }
+
+  void _performCreateClub(String name, String description) {
+    ooBloc.createClub(name: name, description: description);
+
+    ooBloc.createClubSubject.stream.listen((value) {
+      if (value.isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Club created successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value.exception ?? 'Failed to create club'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    });
   }
 }

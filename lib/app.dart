@@ -5,6 +5,7 @@ import 'package:urven/ui/screens/authentication_screen.dart';
 
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/lu.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 import 'package:urven/wrapper.dart';
 
 class OrgOptimizeApp extends StatelessWidget {
@@ -23,37 +24,37 @@ if (PreferencesManager.instance.isAuthenticated()) {
           children: [
             Image.asset(
               'assets/images/image.png',
-              width: 300,
-              height: 300,
+              width: SSC.p300,
+              height: SSC.p300,
               fit: BoxFit.contain,
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: SSC.p80),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  height: 50,
+                  height: SSC.p50,
                   child: Text(
                     LU.of(context).app_name,
                     style: const TextStyle(
-                        fontSize: 30,
+                        fontSize: SSC.p30,
                         fontWeight: FontWeight.w500,
                         color: Palette.MAIN),
                   ),
                 ),
                 SizedBox(
-                  height: 50,
+                  height: SSC.p50,
                   child: Text(
                     LU.of(context).slogan,
                     style: const TextStyle(
-                        fontSize: 16,
+                        fontSize: SSC.p16,
                         fontWeight: FontWeight.w400,
                         color: Colors.grey),
                   ),
                 ),
-                const SizedBox(height: 120),
+                const SizedBox(height: SSC.p120),
                 SizedBox(
-                  width: 120,
+                  width: SSC.p120,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -66,7 +67,7 @@ if (PreferencesManager.instance.isAuthenticated()) {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Palette.MAIN,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25.0),
+                        borderRadius: BorderRadius.circular(SSC.p25),
                       ),
                     ),
                     child: Text(

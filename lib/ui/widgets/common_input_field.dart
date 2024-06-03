@@ -38,12 +38,12 @@ class CommonInputField extends StatelessWidget {
   final String? hintText;
   final TextInputType keyboardType;
   final TextCapitalization textCapitalization;
-  final TextInputAction textInputAction; // Next, Done
+  final TextInputAction textInputAction; 
   final bool readOnly;
   final int minLines;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String? value)? validator;
-  final VoidCallback? onTap; // Add onTap parameter
+  final VoidCallback? onTap; 
 
 
   List<Widget> buildHeaderWidget() {
@@ -107,7 +107,7 @@ class CommonInputField extends StatelessWidget {
             enableInteractiveSelection: !readOnly,
             textAlign: TextAlign.left,
             validator: validator,
-            onTap: onTap, // Use onTap
+            onTap: onTap, 
             style: TextStyle(
               color: readOnly ? Palette.DARK_GREY_3 : Palette.DARK_BLUE,
             ),

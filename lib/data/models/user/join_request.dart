@@ -5,7 +5,7 @@ class JoinRequest {
   int? clubId;
   String? status;
   String? exception;
-  String? message; // Add message property
+  String? message; 
 
   JoinRequest({
     this.id,
@@ -13,7 +13,7 @@ class JoinRequest {
     this.clubId,
     this.status,
     this.exception,
-    this.message, // Initialize message in the constructor
+    this.message,
   });
 
   JoinRequest.fromJson(Map<String, dynamic> json) {
@@ -21,7 +21,7 @@ class JoinRequest {
     userId = json['user_id'];
     clubId = json['club_id'];
     status = json['status'];
-    message = json['message']; // Assign message from JSON
+    message = json['message']; 
   }
 
   Map<String, dynamic> toJson() {
@@ -30,7 +30,7 @@ class JoinRequest {
     if (userId != null) data['user_id'] = userId;
     if (clubId != null) data['club_id'] = clubId;
     if (status != null) data['status'] = status;
-    if (message != null) data['message'] = message; // Include message in JSON
+    if (message != null) data['message'] = message; 
     return data;
   }
 

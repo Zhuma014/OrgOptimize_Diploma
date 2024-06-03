@@ -33,7 +33,7 @@ class AuthenticationScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(
-                  height: 20,
+                  height: SSC.p20,
                 ),
                 Text(
                   LU.of(context).login_or_create_account,

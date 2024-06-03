@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/chat/chat_room.dart';
 import 'package:urven/ui/screens/chat/chat_screen.dart';
+import 'package:urven/ui/widgets/chat_room_list_item.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 
 
 class ChatRoomsScreen extends StatefulWidget {
@@ -20,7 +22,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
   @override
   void initState() {
     super.initState();
-    ooBloc.getChatRooms(); // Fetch chat rooms when the screen is initialized
+    ooBloc.getChatRooms(); 
   }
 
   @override
@@ -30,15 +32,15 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
-            padding: EdgeInsets.only(top: 10),
+            padding: EdgeInsets.only(top: SSC.p10),
             child: Toolbar(
-              isBackButtonVisible: true, // Enable back button for this screen
+              isBackButtonVisible: true, 
               title: 'Chat Rooms',
             ),
           ),
           Expanded(
             child: StreamBuilder<List<ChatRoom>>(
-              stream: ooBloc.getChatRoomsSubject,
+              stream: ooBloc.getChatRoomsSubject.stream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -79,35 +81,8 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    ooBloc.dispose(); // Clean up the stream subscriptions
-  }
+
 }
 
 
 
-class ChatRoomListItem extends StatelessWidget {
-  final ChatRoom chatRoom;
-  final VoidCallback onTap;
-
-  const ChatRoomListItem({super.key, 
-    required this.chatRoom,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      title: Text(
-        chatRoom.name ?? 'Unnamed Chat Room',
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(chatRoom.description ?? ''),
-      trailing: const Icon(Icons.arrow_forward_ios),
-      onTap: onTap,
-    );
-  }
-}

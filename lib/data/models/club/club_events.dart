@@ -11,7 +11,7 @@ class Event {
   final String? location;
   final dynamic userId;
   final dynamic clubId;
-  String? clubName; // Add clubName to store the fetched club name
+  String? clubName; 
 
   Event({
     required this.id,

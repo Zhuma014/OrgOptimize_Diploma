@@ -8,6 +8,7 @@ import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/logger.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/ui/widgets/text_field.dart';
+import 'package:urven/utils/screen_size_configs.dart';
 import 'package:urven/wrapper.dart';
 
 class SignInCard extends StatefulWidget {
@@ -32,24 +33,23 @@ class _SignInCardState extends State<SignInCard> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 28),
+        padding: const EdgeInsets.symmetric(horizontal: SSC.p28),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            const SizedBox(height: 20),
+            const SizedBox(height: SSC.p20),
             RoundedTextField(
               labelText: LU.of(context).email,
               controller: _usernameController,
             ),
-            const SizedBox(height: 18),
+            const SizedBox(height: SSC.p18),
             RoundedTextField(
               labelText: LU.of(context).password,
               obscureText: true,
               controller: _passwordController,
-              // Add accessibility label for screen readers
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: SSC.p35),
             Container(
               alignment: Alignment.centerLeft,
               child: TextButton(
@@ -63,20 +63,20 @@ class _SignInCardState extends State<SignInCard> {
                 },
                 style: ButtonStyle(
                   padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
-                    const EdgeInsets.symmetric(horizontal: 19),
+                    const EdgeInsets.symmetric(horizontal: SSC.p19),
                   ),
                 ),
                 child: Text(
                   LU.of(context).forgot_password,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 14,
+                    fontSize: SSC.p14,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: SSC.p35),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -96,64 +96,63 @@ class _SignInCardState extends State<SignInCard> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Palette.MAIN,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25.0),
+                    borderRadius: BorderRadius.circular(SSC.p25),
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18.0),
+                  padding: const EdgeInsets.symmetric(vertical: SSC.p18),
                   child: Text(
                     LU.of(context).login,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: SSC.p20),
           ],
         ),
       ),
     );
   }
 
-  void _performSignIn() {
-    String username = _usernameController.text.trim().replaceAll(' ', '');
-    String password = _passwordController.text;
-    String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
+void _performSignIn() {
+  String username = _usernameController.text.trim().replaceAll(' ', '');
+  String password = _passwordController.text;
+  String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
 
-    if (username.isEmpty || password.isEmpty) {
+  if (username.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please fill in all fields'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    return;
+  }
+
+  ooBloc.signIn(username, password, fcm_token: fcmToken!);
+
+  ooBloc.signInSubject.stream.listen((value) {
+    Logger.d('SignInCard', 'ooBloc.signInSubject.stream.listen() -> ${value.isValid}');
+
+    if (value.isValid) {
+      _usernameController.clear();
+      _passwordController.clear();
+
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (context) => const MainWrapper()),
+        (route) => false, 
+      );
+
+      context.read<BottomNavBarCubit>().changeSelectedIndex(0);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all fields'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(value.exception ?? 'Sign In Failed'),
+          duration: const Duration(seconds: 2),
         ),
       );
-      return;
     }
-    ooBloc.signIn(username, password,fcm_token: fcmToken!);
+  });
+}
 
-    ooBloc.signInSubject.stream.listen((value) {
-      Logger.d('SignInCard',
-          'ssBloc.signInSubject.stream.listen() -> ${value.isValid}');
-
-      if (value.isValid) {
-        _usernameController.clear();
-        _passwordController.clear();
-
-        // Navigate to MainWrapper and remove all previous routes
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MainWrapper()),
-          (route) => false, // This will remove all previous routes
-        );
-
-        // Change the selected index of the BottomNavBarCubit
-        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Sign In Failed'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    });
-  }
 }

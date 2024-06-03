@@ -12,9 +12,9 @@ showCustomDialog({
   required Function onPositivePressed,
   Function? onNegativePressed,
   bool barrierDismissible = true,
-  WidgetBuilder? builder, // Add this line to include the 'builder' parameter
-  Color? positiveButtonColor, // Add this line to include the 'positiveButtonColor' parameter
-  Color? negativeButtonColor, // Add this line to include the 'negativeButtonColor' parameter
+  WidgetBuilder? builder, 
+  Color? positiveButtonColor, 
+  Color? negativeButtonColor, 
 }) {
   List<TextButton> actions = [];
   if (negativeText != null) {
@@ -34,6 +34,7 @@ showCustomDialog({
     child: Text(positiveText),
     onPressed: () {
       Navigator.of(context, rootNavigator: true).pop();
+      Navigator.pop(context);
       onPositivePressed();
     },
     style: ButtonStyle(
