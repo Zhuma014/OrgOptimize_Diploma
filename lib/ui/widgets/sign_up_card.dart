@@ -83,9 +83,13 @@ class _SignUpCardState extends State<SignUpCard> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: SSC.p18),
+                  padding: const EdgeInsets.symmetric(vertical: SSC.p12),
                   child: Text(
                     LU.of(context).registration,
+                    style: const TextStyle(
+                        color: Palette.BACKGROUND,
+                        fontWeight: FontWeight.w600,
+                        fontSize: SSC.p16),
                   ),
                 ),
               ),
