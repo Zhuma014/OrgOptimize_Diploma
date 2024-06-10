@@ -84,7 +84,7 @@ class NotificationService {
       sound: true,
     );
 
-    await _requestNotificationPermissions();
+    await requestNotificationPermissions();
 
     FirebaseMessaging.onMessage.listen(showForegroundMessage);
 
@@ -93,7 +93,7 @@ class NotificationService {
     await _getAndSaveFirebaseMessagingToken();
   }
 
-  Future<void> _requestNotificationPermissions() async {
+  Future<void> requestNotificationPermissions() async {
     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,

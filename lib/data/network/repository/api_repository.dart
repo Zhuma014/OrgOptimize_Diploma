@@ -1,6 +1,7 @@
 // ignore_for_file: constant_identifier_names, non_constant_identifier_names
 
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:urven/data/models/chat/chat_room.dart';
 import 'package:urven/data/models/chat/chat_room_member.dart';
 import 'package:urven/data/models/chat/message.dart';
@@ -13,6 +14,7 @@ import 'package:urven/data/models/user/user_edit.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/data/network/dio_service.dart';
 import 'package:urven/data/network/exceptions/api_exception.dart';
+import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/utils/logger.dart';
 import 'package:urven/utils/primitive/dynamic_utils.dart';
 import 'package:urven/utils/primitive/string_utils.dart';
@@ -24,6 +26,7 @@ const String TAG = 'ApiRepository';
 class ApiRepository {
 
   static const SIGN_IN = '/login';
+  static const SIGN_OUT = '/signout';
   static const SIGN_UP = '/register';
   static const EVENTS = '/events/';
   static const CLUB_EVENTS = '/events/users-club-events';
@@ -93,6 +96,19 @@ class ApiRepository {
       throw 'Failed to sign up: $e';
     }
   }
+  Future<void> signOut() async {
+  final fcmToken =  PreferencesManager.instance.getFirebaseMessagingToken();
+  try {
+         FormData formData = FormData.fromMap(
+          {'fcm_token': fcmToken});
+    await _dioService.delete(
+      path: SIGN_OUT,
+      data: formData, 
+    );
+  } catch (e) {
+    print('An error occurred while signing out: $e');
+  }
+}
 
   Future<UserProfile> getUserProfile() async {
     try {
@@ -231,15 +247,22 @@ class ApiRepository {
     }
   }
 
-    Future<ChatRoom> updateChatRoom(int roomId, String name, String description) async {
+    Future<ChatRoom> updateChatRoom(int roomId, String name, String description,String type, List<int>? chosenMembers ) async {
+       final Map<String, dynamic> data = {
+    'name': name,
+    'description': description,
+    'type': type,
+  };
+
+  if (chosenMembers != null) {
+    data['chosen_members'] = chosenMembers;
+  }
+
     try {
       final response = await _dioService.put(
         path: '$CHAT_ROOMS/$roomId',
-        body: {
-          'name': name,
-          'description': description,
-          'type': "group",
-        },
+             body: data,
+
       );
       return ChatRoom.fromJson(response);
     } catch (e) {
@@ -551,17 +574,31 @@ class ApiRepository {
     }
   }
 
-  Future<List<Message>> getChatRoomMessages(int roomId) async {
-    try {
-      final response = await _dioService.get(
-          path:
-              CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
-      return (response as List).map((json) => Message.fromJson(json)).toList();
-    } catch (e) {
-      Logger.d(TAG, 'getChatRoomMessages() -> e:$e');
-      throw 'Failed to fetch messages: $e';
+
+Future<List<Message>> getChatRoomMessages(int roomId) async {
+  try {
+    final response = await _dioService.get(
+        path: CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
+
+    Logger.d(TAG, 'getChatRoomMessages() -> response: $response');
+
+    if (response is List) {
+      return response.map((json) => Message.fromJson(json)).toList();
+    } else if (response is Map<String, dynamic>) {
+      List<dynamic> messageList = response['messages'];
+      return messageList.map((json) => Message.fromJson(json)).toList();
+    } else if (response == null) {
+      return [];
+    } else {
+      throw 'Unexpected response format';
     }
+  } catch (e) {
+    Logger.d(TAG, 'getChatRoomMessages() -> e:$e');
+    return [];  
   }
+}
+
+
 
   Future<List<ChatRoomMember>> getChatRoomMembers(int roomId) async {
     try {

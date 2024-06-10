@@ -5,6 +5,9 @@ class ChatRoom {
   String? description;
   String? type;
   List<int>? chosenMembers;
+  String? lastMessage;
+  String? messager;
+  int? ownerId;
   DateTime? createdAt;
   String? exception;
 
@@ -15,6 +18,9 @@ class ChatRoom {
     this.description,
     this.type,
     this.chosenMembers,
+    this.lastMessage,
+    this.messager,
+    this.ownerId,
     this.createdAt,
     this.exception,
   });
@@ -30,6 +36,9 @@ class ChatRoom {
       chosenMembers: json['chosen_members'] != null
           ? List<int>.from(json['chosen_members'])
           : null,
+      lastMessage: json['last_message'],
+      messager: json['messager'],
+      ownerId: json['owner_id'],
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'])
           : null,

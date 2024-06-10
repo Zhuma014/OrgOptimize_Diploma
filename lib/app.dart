@@ -16,6 +16,7 @@ class OrgOptimizeApp extends StatelessWidget {
 if (PreferencesManager.instance.isAuthenticated()) {
       return const MainWrapper();
     }
+    
     return Scaffold(
       backgroundColor: Palette.BACKGROUND,
       body: Center(

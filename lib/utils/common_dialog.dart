@@ -2,6 +2,7 @@
 // ignore_for_file: sort_child_properties_last, depend_on_referenced_packages, duplicate_ignore
 
 import 'package:flutter/material.dart';
+import 'package:urven/ui/theme/palette.dart';
 
 showCustomDialog({
   required BuildContext context,
@@ -12,11 +13,13 @@ showCustomDialog({
   required Function onPositivePressed,
   Function? onNegativePressed,
   bool barrierDismissible = true,
-  WidgetBuilder? builder, 
-  Color? positiveButtonColor, 
-  Color? negativeButtonColor, 
+  WidgetBuilder? builder,
+  Color? positiveButtonColor,
+  Color? negativeButtonColor,
 }) {
   List<TextButton> actions = [];
+
+  // Add negative button with color
   if (negativeText != null) {
     actions.add(TextButton(
       child: Text(negativeText),
@@ -25,20 +28,20 @@ showCustomDialog({
         onNegativePressed?.call();
       },
       style: ButtonStyle(
-        foregroundColor: MaterialStateProperty.all(negativeButtonColor),
+        foregroundColor: MaterialStateProperty.all(negativeButtonColor ?? Colors.grey),
       ),
     ));
   }
 
+  // Add positive button with color
   actions.add(TextButton(
     child: Text(positiveText),
     onPressed: () {
       Navigator.of(context, rootNavigator: true).pop();
-      Navigator.pop(context);
       onPositivePressed();
     },
     style: ButtonStyle(
-      foregroundColor: MaterialStateProperty.all(positiveButtonColor),
+      foregroundColor: MaterialStateProperty.all(positiveButtonColor ?? Palette.MAIN),
     ),
   ));
 

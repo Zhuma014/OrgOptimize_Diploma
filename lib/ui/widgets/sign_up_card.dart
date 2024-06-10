@@ -24,14 +24,14 @@ class _SignUpCardState extends State<SignUpCard> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _birthdayController =
-      TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _birthdayController.dispose(); 
+    _birthdayController.dispose();
     super.dispose();
   }
 
@@ -64,13 +64,17 @@ class _SignUpCardState extends State<SignUpCard> {
             RoundedTextField(
               labelText: LU.of(context).birthday,
               isBirthdayField: true,
-              controller: _birthdayController, 
+              controller: _birthdayController,
               onChanged: (value) {
                 setState(() {});
               },
             ),
             const SizedBox(height: SSC.p51),
-            SizedBox(
+            _isLoading
+            ? const Center(
+                child: CircularProgressIndicator(color: Palette.MAIN,),
+              )
+           : SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
@@ -111,6 +115,7 @@ class _SignUpCardState extends State<SignUpCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(LU.of(context).please_fill_all_fields),
+          backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
       );
@@ -120,6 +125,7 @@ class _SignUpCardState extends State<SignUpCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(LU.of(context).enter_correct_email),
+          backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
       );
@@ -129,41 +135,52 @@ class _SignUpCardState extends State<SignUpCard> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(LU.of(context).enter_valid_password),
+          backgroundColor: Colors.red,
           duration: const Duration(seconds: 2),
         ),
       );
       return;
     }
+    setState(() {
+      _isLoading = true;
+    });
 
     ooBloc.signUp(email, password, DateTime.parse(birthday), fullName,
         fcm_token: fcmToken!);
-ooBloc.signUpSubject.stream.listen((value) {
-  Logger.d('SignUpCard', 'ooBloc.signUpStream.listen() -> ${value.isValid}');
+    ooBloc.signUpSubject.stream.listen((value) {
+      Logger.d(
+          'SignUpCard', 'ooBloc.signUpStream.listen() -> ${value.isValid}');
 
-  if (value.isValid) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(value.exception ?? 'Sign Up Successful'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    _nameController.clear();
-    _emailController.clear();
-    _passwordController.clear();
-    _birthdayController.clear();
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const MainWrapper()),
-      (route) => route.isFirst,
-    );
-    context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(value.exception ?? 'Sign Up Failed'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-});
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (value.isValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value.exception ?? 'Sign Up Successful'),
+            backgroundColor: Palette.MAIN,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        _nameController.clear();
+        _emailController.clear();
+        _passwordController.clear();
+        _birthdayController.clear();
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainWrapper()),
+          (route) => route.isFirst,
+        );
+        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value.exception ?? 'Sign Up Failed'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    });
   }
 }

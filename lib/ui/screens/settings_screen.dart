@@ -123,8 +123,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ooBloc.deleteAccount();
         },
         onNegativePressed: (){},
-        positiveButtonColor: Colors.red,
-        negativeButtonColor: Colors.grey,
+              positiveButtonColor: Colors.red, // Set the color for the positive button
+
+       
       );
     }
 

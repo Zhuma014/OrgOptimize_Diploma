@@ -85,8 +85,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                                           .pop();
                                     },
                                     onNegativePressed: () {},
-                                    positiveButtonColor: Palette.MAIN,
-                                    negativeButtonColor: Colors.grey,
+                                    
                                   );
                                 }),
                             IconButton(
@@ -106,8 +105,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                                           .pop(); 
                                   },
                                   onNegativePressed: () {},
-                                     positiveButtonColor: Palette.MAIN,
-                                    negativeButtonColor: Colors.grey,
+                                    
                                 );
                               },
                             ),

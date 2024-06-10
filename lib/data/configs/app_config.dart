@@ -3,7 +3,7 @@
 import 'package:flutter/foundation.dart';
 
 class AppConfigs {
-  static const String API_BASE_URL = 'http://10.0.2.2:8000/';
+  static const String API_BASE_URL = 'https://fastapi-backend-diploma-f151c1772bca.herokuapp.com/';
 
   static const bool IS_DEBUG = kDebugMode;
 }

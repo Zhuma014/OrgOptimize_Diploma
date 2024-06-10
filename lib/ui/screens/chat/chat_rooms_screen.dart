@@ -23,6 +23,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
   void initState() {
     super.initState();
     ooBloc.getChatRooms(); 
+    
   }
 
   @override
@@ -68,7 +69,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                           MaterialPageRoute(
                             builder: (context) => ChatScreen(chatRoomId: chatRoom.id!),
                           ),
-                        );
+                        ).then((_) => ooBloc.getChatRooms()).then((_) => ooBloc.getChatRoomMessages(chatRoom.id!));
                       },
                     );
                   },

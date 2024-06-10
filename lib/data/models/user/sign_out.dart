@@ -7,6 +7,6 @@ class SignOut {
   });
 
   SignOut.fromJson(Map<String, dynamic> json) {
-    exception = json['exception'];
+    exception = json['detail'];
     }
 }

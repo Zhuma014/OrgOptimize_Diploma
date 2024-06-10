@@ -149,31 +149,52 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
         ),
         if (ooBloc.userProfileSubject.value?.id == widget.club.adminId) ...[
           Expanded(
-            child: Column(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                IconButton(
-                  onPressed: () {
-                    _openEditClubModal(
-                      context,
-                      widget.onUpdate,
-                    );
-                  },
-                  icon: const Icon(Icons.edit),
-                  padding: EdgeInsets.zero,
-                  tooltip: 'Edit',
-                  color: Palette.MAIN,
-                ),
-                IconButton(
-                  onPressed: () {
-                    ooBloc.deleteClub(widget.club.id!);
-                    widget.onUpdate(Club(id: widget.club.id, isDeleted: true));
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.delete),
-                  padding: EdgeInsets.zero,
-                  tooltip: 'Delete',
-                  color: Colors.red,
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        _openEditClubModal(
+                          context,
+                          widget.onUpdate,
+                        );
+                      },
+                      icon: const Icon(Icons.edit),
+                      padding: EdgeInsets.zero,
+                      tooltip: 'Edit',
+                      color: Palette.MAIN,
+                    ),
+                   IconButton(
+                        onPressed: () {
+                        showCustomDialog(
+                          context: context,
+                          title: 'Delete Club',
+                          description: 'Are you sure you want to delete this club?',
+                          positiveText: 'Delete',
+                          negativeText: 'Cancel',
+                          onPositivePressed: () {
+                            ooBloc.deleteClub(widget.club.id!);
+                            widget.onUpdate(Club(id: widget.club.id, isDeleted: true));
+
+                                                                Navigator.pop(context);
+
+                          },
+                          onNegativePressed: () {
+                            // Optionally handle the cancel action here
+                          },
+                          positiveButtonColor: Colors.red, // Set the color for the positive button
+                        );
+                        },
+                        icon: const Icon(Icons.delete),
+                        padding: EdgeInsets.zero,
+                        tooltip: 'Delete',
+                        color: Colors.red,
+                      ),
+                  ],
                 ),
               ],
             ),
@@ -191,13 +212,13 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
                 onPositivePressed: () {
                   ooBloc.leaveClub(widget.club.id!);
                   widget.onUpdate(Club(id: widget.club.id, isDeleted: true));
+    
+                                    Navigator.pop(context);
 
-                  Navigator.pop(context);
                 },
                 onNegativePressed: () {
                 },
-                positiveButtonColor: Colors.red,
-                negativeButtonColor: Colors.grey,
+               
               );
             },
             child: const Text('Leave the club'),

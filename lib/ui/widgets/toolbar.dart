@@ -1,7 +1,11 @@
 // ignore: depend_on_referenced_packages
 import 'package:flutter/material.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
+import 'package:urven/data/models/chat/chat_room.dart';
+import 'package:urven/data/models/chat/message.dart';
 import 'package:urven/data/models/user/user_profile.dart';
+import 'package:urven/ui/screens/chat/chat_screen.dart';
+import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/local_asset_image.dart';
 import 'package:urven/utils/primitive/string_utils.dart';
@@ -28,7 +32,7 @@ class Toolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: SSC.p80,
-      color: Palette.BACKGROUND, 
+      color: Palette.BACKGROUND,
       padding: EdgeInsets.fromLTRB(
         isBackButtonVisible ? SSC.p5 : SSC.p15,
         SSC.p0,
@@ -98,13 +102,14 @@ class Toolbar extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(SSC.p5),
                   child: const Icon(
-                    Icons.notifications,
+                    Icons.person,
                     color: Palette.MAIN,
                     size: SSC.p28,
                   ),
                 ),
                 onTap: () {
-                
+                   Navigator.pushNamed(
+                                      context, Navigation.EDIT_USER_PROFILE);
                 },
               ),
           ],
@@ -117,111 +122,220 @@ class Toolbar extends StatelessWidget {
 void showMessageBottomSheet(BuildContext context) {
   List<UserProfile> selectedUsers = [];
   bool isSelecting = false;
+  String searchQuery = '';
 
   ooBloc.getAllUsers();
 
   showModalBottomSheet(
     context: context,
+    backgroundColor: Palette.BACKGROUND,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
     builder: (BuildContext context) {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           return Padding(
-            padding: const EdgeInsets.all(SSC.p8),
+            padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text('Select a user to message',
-                    style: TextStyle(fontSize: 18)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Select a user to message',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Palette.MAIN,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isSelecting ? Icons.check_circle : Icons.select_all,
+                        color: Palette.MAIN,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isSelecting = !isSelecting;
+                          selectedUsers.clear();
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 5),
+                TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Enter a name',
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: Icon(Icons.search, color: Palette.MAIN),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value.toLowerCase();
+                    });
+                  },
+                ),
+                SizedBox(height: 5),
                 StreamBuilder<List<UserProfile>>(
                   stream: ooBloc.usersSubject,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (snapshot.hasError) {
-                      return Center(child: Text('Error: ${snapshot.error}'));
+                      return Center(
+                        child: Text(
+                          'Error: ${snapshot.error}',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      );
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text('No users found'));
+                      return Center(
+                        child: Text(
+                          'No users found',
+                          style: TextStyle(color: Palette.MAIN),
+                        ),
+                      );
                     }
 
                     List<UserProfile> users = snapshot.data!;
                     users = users
                         .where((user) =>
-                            user.id != ooBloc.userProfileSubject.value?.id)
+                            user.id != ooBloc.userProfileSubject.value?.id &&
+                            user.fullName!.toLowerCase().contains(searchQuery))
                         .toList();
+                    return Expanded(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 16),
+                          Expanded(
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: [
+                                if (isSelecting)
+                                  ...users.map((user) {
+                                    return Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 2,
+                                      child: CheckboxListTile(
+                                        activeColor: Palette.MAIN,
+                                        title: Text(
+                                          user.fullName!,
+                                          style: TextStyle(color: Palette.MAIN),
+                                        ),
+                                        value: selectedUsers.contains(user),
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            if (value == true) {
+                                              selectedUsers.add(user);
+                                            } else {
+                                              selectedUsers.remove(user);
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    );
+                                  }).toList()
+                                else
+                                  ...users.map((user) {
+                                    return Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 2,
+                                      child: ListTile(
+                                        title: Text(
+                                          user.fullName!,
+                                          style: TextStyle(color: Palette.MAIN),
+                                        ),
+                                        onTap: () async {
+  if (!isSelecting) {
+    Navigator.pop(context);
+    ChatRoom? existingChatRoom = await ooBloc.getExistingPrivateChatRoom(user.id!);
+    if (existingChatRoom != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(chatRoomId: existingChatRoom.id!),
+        ),
+      ).then((_) async {
+        await ooBloc.getChatRooms();
+        await ooBloc.getChatRoomMessages(existingChatRoom.id!);
+      });
+    } else {
+      // Create the new chat room
+      String roomName = '${ooBloc.userProfileSubject.value?.fullName}:${user.fullName!}';
+      String roomDescription = '${ooBloc.userProfileSubject.value?.id}:${user.id!}';
 
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isSelecting = !isSelecting;
-                              selectedUsers.clear();
-                            });
-                          },
-                          child: Text(
-                              isSelecting ? 'Done Selecting' : 'Select Users'),
-                        ),
-                        if (isSelecting)
-                          ...users.map((user) {
-                            return CheckboxListTile(
-                              title: Text(user.fullName!),
-                              value: selectedUsers.contains(user),
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  if (value == true) {
-                                    selectedUsers.add(user);
-                                  } else {
-                                    selectedUsers.remove(user);
-                                  }
-                                });
-                              },
-                            );
-                          }).toList()
-                        else
-                          ...users.map((user) {
-                            return ListTile(
-                              title: Text(user.fullName!),
-                              onTap: () {
-                                if (!isSelecting) {
-                                  Navigator.pop(context);
-                                  if (user.id != null) {
-                                    selectedUsers.clear();
-                                    selectedUsers.add(user);
-                                    ooBloc.createChatRoom(user.fullName!, "",
-                                        "private", [user.id!]);
-                                  }
-                                }
-                              },
-                            );
-                          }).toList(),
-                      ],
+      ChatRoom newChatRoom = await ooBloc.createChatRoom(
+        roomName,
+        roomDescription,
+        "private",
+        [user.id!],
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(chatRoomId: newChatRoom.id!),
+        ),
+      ).then((_) async {
+        await ooBloc.getChatRooms();
+        List<Message> messages = await ooBloc.getChatRoomMessages(newChatRoom.id!);
+        if (messages.isEmpty) {
+          await ooBloc.deleteChatRoom(newChatRoom.id!);
+          await ooBloc.getChatRooms(); // Refresh the chat rooms list after deletion
+        }
+      });
+    }
+  }
+}
+
+
+                                      ),
+                                    );
+                                  }).toList(),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
                 if (isSelecting)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        child: const Text('Cancel'),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                      ElevatedButton(
-                        onPressed: selectedUsers.isNotEmpty
-                            ? () {
-                                setState(() {
-                                  isSelecting = false;
-                                });
-                                showCreateChatRoomDialog(
-                                    context, selectedUsers);
-                              }
-                            : null,
-                        child: const Text('Create Chat Room'),
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                       
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Palette.MAIN),
+                          child: Text("Start messaging"),
+                          onPressed: selectedUsers.isNotEmpty
+                              ? () {
+                                  setState(() {
+                                    isSelecting = false;
+                                  });
+                                  showCreateChatRoomDialog(
+                                      context, selectedUsers);
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -241,41 +355,81 @@ void showCreateChatRoomDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: const Text('Create Chat Room'),
+        title: Text('Create Chat Room', style: TextStyle(color: Palette.MAIN)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Chat Room Name'),
+              decoration: InputDecoration(
+                labelText: 'Chat Room Name',
+                labelStyle: TextStyle(color: Palette.MAIN),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Palette.MAIN),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Palette.MAIN, width: 2.0),
+                ),
+              ),
             ),
+            SizedBox(height: 16),
             TextField(
               controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Chat Room Description'),
+              decoration: InputDecoration(
+                labelText: 'Chat Room Description',
+                labelStyle: TextStyle(color: Palette.MAIN),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Palette.MAIN),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                  borderSide: BorderSide(color: Palette.MAIN, width: 2.0),
+                ),
+              ),
             ),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty &&
-                  descriptionController.text.isNotEmpty) {
-                List<int> chosenMembers =
-                    selectedUsers.map((user) => user.id!).toList();
-                ooBloc.createChatRoom(nameController.text,
-                    descriptionController.text, "group", chosenMembers);
-                Navigator.of(context).pop();
-                Navigator.of(context)
-                    .pop();
-              }
-            },
-            child: const Text('Finish'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Cancel', style: TextStyle(color: Palette.MAIN)),
+                style: TextButton.styleFrom(
+                  primary: Palette.MAIN,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty &&
+                      descriptionController.text.isNotEmpty) {
+                    List<int> chosenMembers =
+                        selectedUsers.map((user) => user.id!).toList();
+                    // Assuming ooBloc is defined and createChatRoom is a method of it
+                    ooBloc.createChatRoom(nameController.text,
+                        descriptionController.text, "group", chosenMembers);
+                    Navigator.of(context).pop();
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: Text('Finish'),
+                style: ElevatedButton.styleFrom(
+                  primary: Palette.MAIN,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       );

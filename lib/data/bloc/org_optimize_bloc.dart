@@ -27,7 +27,6 @@ class OrgOptimizeBloc {
   BehaviorSubject<SignIn> signInSubject = BehaviorSubject();
   BehaviorSubject<SignUp> signUpSubject = BehaviorSubject();
   BehaviorSubject<SignOut> signOutSubject = BehaviorSubject();
-  
 
   // User
   BehaviorSubject<UserProfile?> userProfileSubject = BehaviorSubject();
@@ -35,7 +34,7 @@ class OrgOptimizeBloc {
   BehaviorSubject<dynamic> deleteProfileSubject = BehaviorSubject();
   BehaviorSubject<UserEdit> updateProfileSubject = BehaviorSubject();
   BehaviorSubject<List<UserProfile>> usersSubject = BehaviorSubject();
-  
+
   // Club
   BehaviorSubject<Club> createClubSubject = BehaviorSubject();
   BehaviorSubject<Club> updateClubSubject = BehaviorSubject();
@@ -45,19 +44,16 @@ class OrgOptimizeBloc {
   BehaviorSubject<List<Club>> getUserClubsSubject = BehaviorSubject();
   BehaviorSubject<List<Club>> adminClubsSubject = BehaviorSubject<List<Club>>();
   BehaviorSubject<List<Club>> memberClubsSubject =
-  BehaviorSubject<List<Club>>();
+      BehaviorSubject<List<Club>>();
   BehaviorSubject<bool> changeAdminSubject = BehaviorSubject();
   BehaviorSubject<bool> deleteMemberSubject = BehaviorSubject();
   BehaviorSubject<List<UserProfile>> membersSubject = BehaviorSubject();
-
-
 
   // Event
   BehaviorSubject<List<Event>> getAllEventsSubject = BehaviorSubject();
   BehaviorSubject<List<Event>> getClubEventsSubject = BehaviorSubject();
   BehaviorSubject<List<Event>> getUserOwnedEventsSubject = BehaviorSubject();
   BehaviorSubject<Event> eventSubject = BehaviorSubject();
-  
 
   // ChatRoom
   BehaviorSubject<ChatRoom> updateChatRoomSubject = BehaviorSubject();
@@ -68,8 +64,10 @@ class OrgOptimizeBloc {
   BehaviorSubject<List<ChatRoom>> getChatRoomsSubject = BehaviorSubject();
   BehaviorSubject<ChatRoom> chatRoomSubject = BehaviorSubject();
   Stream<List<ChatRoom>> get getChatRoomsStream => getChatRoomsSubject.stream;
-  BehaviorSubject<List<ChatRoomMember>> getChatRoomMembersSubject = BehaviorSubject();
-  BehaviorSubject<List<Message>> _chatRoomMessagesSubject =  BehaviorSubject<List<Message>>();
+  BehaviorSubject<List<ChatRoomMember>> getChatRoomMembersSubject =
+      BehaviorSubject();
+  BehaviorSubject<List<Message>> _chatRoomMessagesSubject =
+      BehaviorSubject<List<Message>>();
   Stream<List<Message>> get chatRoomMessagesStream =>
       _chatRoomMessagesSubject.stream;
 
@@ -85,8 +83,6 @@ class OrgOptimizeBloc {
   Stream<Map<int, bool>> get attendanceStatusStream =>
       _attendanceStatusSubject.stream;
   Map<int, bool> get attendanceStatus => _attendanceStatusSubject.value;
-
-
 
   signIn(String username, String password, {required String fcm_token}) async {
     Logger.d(TAG, 'signInMember() -> $username, $password');
@@ -115,7 +111,7 @@ class OrgOptimizeBloc {
         .signUp(email, password, birthdate, fullname, fcm_token: fcm_token);
     if (response.isValid) {
       PreferencesManager.instance.saveAuthCredentials(response.accessToken!);
-      getUserProfile(); 
+      getUserProfile();
       signUpSubject.sink.add(response);
     }
   }
@@ -162,15 +158,17 @@ class OrgOptimizeBloc {
     }
   }
 
-    updateChatRoom({
-    required int roomId,
-    required String name,
-    required String description,
-  }) async {
+  updateChatRoom(
+      {required int roomId,
+      required String name,
+      required String description,
+      required String type,
+      List<int>? chosen_members}) async {
     try {
       Logger.d(TAG, 'updateChatRoom() -> $roomId, $name, $description');
 
-      ChatRoom chatRoom = await _repository.updateChatRoom(roomId, name, description,);
+      ChatRoom chatRoom = await _repository.updateChatRoom(
+          roomId, name, description, type, chosen_members);
       if (updateChatRoomSubject.isClosed) {
         updateChatRoomSubject = BehaviorSubject<ChatRoom>();
       }
@@ -202,7 +200,7 @@ class OrgOptimizeBloc {
     getUserClubs();
   }
 
-    deleteChatRoom(int roomId) async {
+  deleteChatRoom(int roomId) async {
     Logger.d(TAG, 'deleteChatRoom() -> $roomId');
 
     try {
@@ -233,7 +231,7 @@ class OrgOptimizeBloc {
     }
   }
 
-    leaveChatRoom(int roomId) async {
+  leaveChatRoom(int roomId) async {
     try {
       if (leaveChatRoomSubject.isClosed) {
         leaveChatRoomSubject = BehaviorSubject<bool>();
@@ -241,7 +239,7 @@ class OrgOptimizeBloc {
 
       await _repository.leaveChatRoom(roomId);
       leaveChatRoomSubject.sink.add(true);
-      ooBloc.getUserClubs();
+      ooBloc.getChatRooms();
     } catch (e) {
       leaveChatRoomSubject.sink.addError(e.toString());
     }
@@ -265,6 +263,9 @@ class OrgOptimizeBloc {
 
       List<Event> clubEvents = await _repository.getClubEvents();
       getClubEventsSubject.sink.add(clubEvents);
+
+      getOwnEvents();
+      getClubEvents();
     } catch (e) {
       if (!eventSubject.isClosed) {
         eventSubject.sink.addError(e.toString());
@@ -302,8 +303,7 @@ class OrgOptimizeBloc {
   ) async {
     Logger.d(TAG, 'deleteEvent() -> $eventId');
 
-    bool isDeleted =
-        await _repository.deleteEvent(eventId); 
+    bool isDeleted = await _repository.deleteEvent(eventId);
 
     if (isDeleted && !eventSubject.isClosed) {
       eventSubject.sink.addError('Event deleted');
@@ -392,7 +392,8 @@ class OrgOptimizeBloc {
   }
 
   deleteChatRoomMember(int roomId, int memberId) async {
-    Logger.d(TAG, 'deleteChatRoomMember() -> roomId: $roomId, memberId: $memberId');
+    Logger.d(
+        TAG, 'deleteChatRoomMember() -> roomId: $roomId, memberId: $memberId');
 
     try {
       await _repository.deleteChatRoomMember(roomId, memberId);
@@ -415,7 +416,7 @@ class OrgOptimizeBloc {
     }
   }
 
-    changeChatRoomOwner(int roomId, int newOwnerId) async {
+  changeChatRoomOwner(int roomId, int newOwnerId) async {
     try {
       await _repository.changeChatRoomOwner(roomId, newOwnerId);
       changeOwnerSubject.sink.add(true);
@@ -539,21 +540,27 @@ class OrgOptimizeBloc {
   }
 
   signOut() async {
+    await _repository.signOut();
     if (!userProfileSubject.isClosed) {
       userProfileSubject.sink.add(null);
-    } 
+      // joinRequestListSubject.sink.add([]);
+    }
     PreferencesManager.instance.wipeOut();
   }
 
   joinClub(int clubId) async {
     Logger.d(TAG, 'joinClub()');
 
-    if (joinRequestSubject.isClosed) {
+     if (joinRequestSubject.isClosed) {
       joinRequestSubject = BehaviorSubject<JoinRequest>();
     }
 
-    JoinRequest joinRequest = await _repository.joinClub(clubId);
-    joinRequestSubject.sink.add(joinRequest);
+    try {
+      JoinRequest joinRequest = await _repository.joinClub(clubId);
+      joinRequestSubject.sink.add(joinRequest);
+    } catch (e) {
+      joinRequestSubject.sink.addError('Failed to join a club: $e');
+    }
   }
 
   getJoinRequests(int clubId) async {
@@ -581,7 +588,34 @@ class OrgOptimizeBloc {
     rejectJoinRequestSubject.sink.add(joinRequest);
   }
 
-  createChatRoom(String name, String description, String type,
+  Future<ChatRoom?> getExistingPrivateChatRoom(int userId) async {
+    try {
+      // Ensure the chat rooms are fetched
+      if (getChatRoomsSubject.valueOrNull == null ||
+          getChatRoomsSubject.valueOrNull!.isEmpty) {
+        await getChatRooms();
+      }
+      final List<ChatRoom> chatRooms = getChatRoomsSubject.valueOrNull ?? [];
+
+      String user1 = ooBloc.userProfileSubject.value?.id.toString() ?? '';
+      String user2 = userId.toString();
+      print(chatRooms);
+
+      for (ChatRoom chatRoom in chatRooms) {
+        if (chatRoom.type == 'private' &&
+            (chatRoom.description == '$user1:$user2' ||
+                chatRoom.description == '$user2:$user1')) {
+          return chatRoom;
+        }
+      }
+      return null;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<ChatRoom> createChatRoom(String name, String description, String type,
       List<int> chosenMembers) async {
     try {
       if (chatRoomSubject.isClosed) {
@@ -591,11 +625,13 @@ class OrgOptimizeBloc {
       ChatRoom chatRoom = await _repository.createChatRoom(
           name, description, type, chosenMembers);
       chatRoomSubject.sink.add(chatRoom);
-      getChatRooms();
+      await getChatRooms();
+      return chatRoom;
     } catch (e) {
       if (!chatRoomSubject.isClosed) {
         chatRoomSubject.sink.addError(e.toString());
       }
+      rethrow;
     }
   }
 
@@ -627,7 +663,7 @@ class OrgOptimizeBloc {
     getChatRoomMembersSubject.sink.add(chatRoomMembers);
   }
 
-  getChatRoomMessages(int roomId) async {
+  Future<List<Message>> getChatRoomMessages(int roomId) async {
     if (_chatRoomMessagesSubject.isClosed) {
       _chatRoomMessagesSubject = BehaviorSubject<List<Message>>();
     }
@@ -635,6 +671,8 @@ class OrgOptimizeBloc {
     List<Message> messages = await _repository.getChatRoomMessages(roomId);
 
     _chatRoomMessagesSubject.sink.add(messages);
+
+    return messages;
   }
 
   deleteAccount() async {
@@ -697,7 +735,7 @@ class OrgOptimizeBloc {
   }
 
   clearSession() {
-    userProfileSubject.sink.add(null); 
+    userProfileSubject.sink.add(null);
     getClubEventsSubject.sink.add([]);
     getUserOwnedEventsSubject.sink.add([]);
     getUserClubsSubject.sink.add([]);

@@ -19,12 +19,11 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-
   @override
   void initState() {
     super.initState();
     ooBloc.getUserProfile();
-    ooBloc.getChatRooms(); 
+    ooBloc.getChatRooms();
   }
 
   @override
@@ -247,8 +246,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    subtitle: Text(chatRoom.description ?? '',
-                                        style: const TextStyle(color: Palette.MAIN)),
+                                    subtitle: Text(
+                                        getLastMessageText(
+                                            chatRoom.lastMessage),
+                                        style: const TextStyle(
+                                            color: Palette.MAIN)),
                                     trailing:
                                         const Icon(Icons.arrow_forward_ios),
                                     onTap: () {
@@ -258,7 +260,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           builder: (context) => ChatScreen(
                                               chatRoomId: chatRoom.id!),
                                         ),
-                                      );
+                                      ).then((_) => ooBloc.getChatRooms());
                                     },
                                   );
                                 }).toList(),
@@ -384,14 +386,26 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: privateChats.map((chatRoom) {
+                                     List<String> memberNames = chatRoom?.name?.split(':') ?? [];
+      memberNames.removeWhere((name) => name.trim().isEmpty);
+
+    String? neighborName;
+    if (ooBloc.userProfileSubject.value?.fullName == memberNames[0]) {
+      neighborName = memberNames[1];
+    } else if (ooBloc.userProfileSubject.value?.fullName == memberNames[1]) {
+      neighborName = memberNames[0];
+    }
                                   return ListTile(
                                     title: Text(
-                                      chatRoom.name ?? '',
+                                      neighborName! ,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    subtitle: Text(chatRoom.description ?? '',
-                                        style: const TextStyle(color: Palette.MAIN)),
+                                    subtitle: Text(
+                                        getLastMessageText(
+                                            chatRoom.lastMessage),
+                                        style: const TextStyle(
+                                            color: Palette.MAIN)),
                                     trailing:
                                         const Icon(Icons.arrow_forward_ios),
                                     onTap: () {
@@ -401,7 +415,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           builder: (context) => ChatScreen(
                                               chatRoomId: chatRoom.id!),
                                         ),
-                                      );
+                                      ).then((_) => ooBloc.getChatRooms()).then((_) => ooBloc.getChatRoomMessages(chatRoom.id!));
                                     },
                                   );
                                 }).toList(),
@@ -421,12 +435,40 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
+
+
   @override
   void dispose() {
     super.dispose();
-    ooBloc.dispose(); 
+    ooBloc.dispose();
   }
 }
+
+  String getLastMessageText(String? lastMessage) {
+        final currentUserId = ooBloc.userProfileSubject.value?.id.toString();
+    print(currentUserId);
+
+    if (lastMessage == null || lastMessage.isEmpty) {
+      return 'No messages yet';
+    }
+
+    final parts = lastMessage.split(':');
+
+    if (parts.length >= 3) {
+      final name = parts[0];
+      final id = parts[1].trim();
+      final message = parts.sublist(2).join(':');
+
+
+      if (id == currentUserId) {
+        return 'You: $message';
+      }
+
+      return '$name: $message';
+    }
+
+    return lastMessage;
+  }
 
 class ClubListItem extends StatelessWidget {
   final Club club;

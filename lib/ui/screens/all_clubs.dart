@@ -23,20 +23,37 @@ class _ClubsScreenState extends State<ClubsScreen> {
   Set<int> pendingRequests = {};
   TextEditingController searchController = TextEditingController();
   StreamSubscription<List<Club>>? userClubsSubscription;
+  bool isLoading = false;
+  Map<int, bool> loadingClubs = {}; 
+  StreamSubscription? _createClubSubscription;
 
   @override
   void initState() {
     super.initState();
     ooBloc.getUserProfile();
-
     ooBloc.getAllClubs();
     ooBloc.getUserClubs();
-    _loadPendingRequests();
     searchController.addListener(_filterClubs);
+    _loadPendingRequests(); 
 
     userClubsSubscription =
         ooBloc.getUserClubsSubject.stream.listen(_updateUserClubs);
+  }
 
+  Future<void> _loadPendingRequests() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? savedRequests = prefs.getStringList('pendingRequests');
+    if (savedRequests != null) {
+      setState(() {
+        pendingRequests = savedRequests.map((id) => int.parse(id)).toSet();
+      });
+    }
+  }
+
+  Future<void> _savePendingRequests() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        'pendingRequests', pendingRequests.map((id) => id.toString()).toList());
   }
 
   void _updateUserClubs(List<Club> clubs) {
@@ -52,21 +69,6 @@ class _ClubsScreenState extends State<ClubsScreen> {
     userClubsSubscription?.cancel();
 
     super.dispose();
-  }
-
-  Future<void> _loadPendingRequests() async {
-    final prefs = await SharedPreferences.getInstance();
-    final pendingRequestsList = prefs.getStringList('pendingRequests') ?? [];
-    setState(() {
-      pendingRequests = pendingRequestsList.map(int.parse).toSet();
-    });
-  }
-
-  Future<void> _savePendingRequests() async {
-    final prefs = await SharedPreferences.getInstance();
-    final pendingRequestsList =
-        pendingRequests.map((id) => id.toString()).toList();
-    await prefs.setStringList('pendingRequests', pendingRequestsList);
   }
 
   void _filterClubs() {
@@ -141,31 +143,33 @@ class _ClubsScreenState extends State<ClubsScreen> {
   }
 
   void _handleJoinClub(int clubId) {
-    late StreamSubscription subscription;
-
-    subscription = ooBloc.joinRequestSubject.listen((response) {
-      if (response.isValid) {
-        setState(() {
-          pendingRequests.add(clubId);
-        });
-        _savePendingRequests(); 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Your join request is pending."),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Your join request already exists."),
-          ),
-        );
-      }
-
-      subscription.cancel();
+    setState(() {
+      loadingClubs[clubId] = true; // Set loading state for the specific club
     });
 
-    ooBloc.joinClub(clubId);
+    ooBloc.joinClub(clubId).then((_) {
+      setState(() {
+        loadingClubs[clubId] =
+            false; // Update loading state after successful request
+        pendingRequests.add(clubId); // Add the club to pending requests
+      });
+      _savePendingRequests(); // Save pending requests to SharedPreferences
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Your join request is pending."),
+          backgroundColor: Palette.MAIN,
+        ),
+      );
+    }).catchError((error) {
+      setState(() {
+        loadingClubs[clubId] = false; // Update loading state if request fails
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString()),
+        ),
+      );
+    });
   }
 
   @override
@@ -337,11 +341,32 @@ class _ClubsScreenState extends State<ClubsScreen> {
                                           'Requested',
                                           style: TextStyle(color: Colors.grey),
                                         )
-                                      : const Text('Join',
-                                          style: TextStyle(color: Colors.blue)),
+                                      : loadingClubs[club.id] == true
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                        Color>(Palette.MAIN),
+                                              ),
+                                            )
+                                          : TextButton(
+                                              onPressed: () {
+                                                _openJoinClubModal(
+                                                    context, club.id!);
+                                              },
+                                              child: const Text(
+                                                'Join',
+                                                style: TextStyle(
+                                                    color: Colors.blue),
+                                              ),
+                                            ),
                           onTap: isUserClubMember ||
                                   isPending ||
-                                  isClubCreatedByUser
+                                  isClubCreatedByUser ||
+                                  loadingClubs[club.id] == true
                               ? null
                               : () {
                                   _openJoinClubModal(context, club.id!);
@@ -370,7 +395,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
             return AlertDialog(
               title: const Text(
                 'Create a Club',
-                style: TextStyle(fontSize: SSC.p20, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(fontSize: SSC.p20, fontWeight: FontWeight.bold),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -453,7 +479,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                           : null,
                       child: const Text(
                         'Create',
-                        style: TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
+                        style:
+                            TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
                       ),
                     ),
                   ],
@@ -467,13 +494,19 @@ class _ClubsScreenState extends State<ClubsScreen> {
   }
 
   void _performCreateClub(String name, String description) {
+
+
+    // Call the createClub method
     ooBloc.createClub(name: name, description: description);
 
-    ooBloc.createClubSubject.stream.listen((value) {
+    // Set up a new subscription to handle the response
+    _createClubSubscription = ooBloc.createClubSubject.stream.listen((value) {
+
       if (value.isValid) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Club created successfully'),
+            backgroundColor: Palette.MAIN,
             duration: Duration(seconds: 2),
           ),
         );
@@ -481,10 +514,14 @@ class _ClubsScreenState extends State<ClubsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value.exception ?? 'Failed to create club'),
+            backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),
         );
       }
+
+      // Cancel the subscription after handling the response
+      _createClubSubscription?.cancel();
     });
   }
 }

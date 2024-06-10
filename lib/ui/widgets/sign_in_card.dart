@@ -21,6 +21,7 @@ class SignInCard extends StatefulWidget {
 class _SignInCardState extends State<SignInCard> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -77,7 +78,11 @@ class _SignInCardState extends State<SignInCard> {
               ),
             ),
             const SizedBox(height: SSC.p35),
-            SizedBox(
+            _isLoading
+             ? const Center(
+                child: CircularProgressIndicator(color: Palette.MAIN,),
+              )
+           : SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
@@ -86,6 +91,7 @@ class _SignInCardState extends State<SignInCard> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(LU.of(context).please_fill_all_fields),
+                        backgroundColor: Colors.red,
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -114,45 +120,54 @@ class _SignInCardState extends State<SignInCard> {
     );
   }
 
-void _performSignIn() {
-  String username = _usernameController.text.trim().replaceAll(' ', '');
-  String password = _passwordController.text;
-  String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
+  void _performSignIn() {
+    String username = _usernameController.text.trim().replaceAll(' ', '');
+    String password = _passwordController.text;
+    String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
 
-  if (username.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please fill in all fields'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    return;
-  }
-
-  ooBloc.signIn(username, password, fcm_token: fcmToken!);
-
-  ooBloc.signInSubject.stream.listen((value) {
-    Logger.d('SignInCard', 'ooBloc.signInSubject.stream.listen() -> ${value.isValid}');
-
-    if (value.isValid) {
-      _usernameController.clear();
-      _passwordController.clear();
-
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const MainWrapper()),
-        (route) => false, 
-      );
-
-      context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-    } else {
+    if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(value.exception ?? 'Sign In Failed'),
-          duration: const Duration(seconds: 2),
+        const SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
         ),
       );
+      return;
     }
-  });
-}
+    setState(() {
+      _isLoading = true;
+    });
 
+    ooBloc.signIn(username, password, fcm_token: fcmToken!);
+
+    ooBloc.signInSubject.stream.listen((value) {
+      Logger.d('SignInCard',
+          'ooBloc.signInSubject.stream.listen() -> ${value.isValid}');
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (value.isValid) {
+        _usernameController.clear();
+        _passwordController.clear();
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const MainWrapper()),
+          (route) => false,
+        );
+
+        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value.exception ?? 'Sign In Failed'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    });
+  }
 }

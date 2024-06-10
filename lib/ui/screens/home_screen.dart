@@ -241,7 +241,7 @@ void _showAddEventModal(BuildContext context) {
 
   String? _validateDescription(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Description is required';
+      return 'The field is required';
     }
     return null;
   }
@@ -250,7 +250,7 @@ void _showAddEventModal(BuildContext context) {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
+      firstDate:  DateTime.now(),
       lastDate: DateTime(2101),
       builder: (BuildContext context, Widget? child) {
         return Theme(

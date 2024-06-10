@@ -20,6 +20,7 @@ class Navigation {
 
 
 
+
   static getIndex() {
     return Navigation.INDEX;
   }
@@ -34,6 +35,7 @@ class Navigation {
       Navigation.MYCLUBS: (context) =>  const MyClubsScreen(),
       Navigation.ALLCLUBS: (context) =>  const ClubsScreen(),
       Navigation.PROFILE: (context) =>  const UserProfileScreen(),
+
 
 
 

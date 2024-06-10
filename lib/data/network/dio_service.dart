@@ -123,12 +123,13 @@ class DioService {
   Future delete({
     required String path,
     Map<String, dynamic>? requestParams,
+     FormData? data,
   }) async {
     await updateToken();
     return (await _dio.delete(
       path,
       queryParameters: requestParams,
-      data: FormData(),
+      data: data,
     ))
         .data;
   }

@@ -9,6 +9,7 @@ import 'package:urven/data/models/club/club_events.dart';
 import 'package:urven/data/models/user/attendance.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/common_input_field.dart';
+import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 
@@ -228,117 +229,145 @@ class _EventCardState extends State<EventCard> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      IconButton(
-                  icon: const Icon(Icons.edit, color: Palette.MAIN),
-                  onPressed: () async {
-                    if (widget.event.clubId != null) {
-                      Club? club = await ooBloc.getClubById(widget.event.clubId!);
-                      if (club != null && club.adminId == ooBloc.userProfileSubject.value?.id) {
-                        _showEditEventModal(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('You are not an admin'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    } else {
-                      _showEditEventModal(context);
-                    }
-                  },
-                ),
-                  IconButton(
+                      FutureBuilder<dynamic?>(
+        future: widget.event.clubId != null
+            ? ooBloc.getClubById(widget.event.clubId!)
+            : Future.value(null),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            Club? club = snapshot.data;
+            bool isAdmin = widget.event.clubId == null || club?.adminId == ooBloc.userProfileSubject.value?.id;
+            if (isAdmin) {
+              return IconButton(
+                icon: const Icon(Icons.edit, color: Palette.MAIN),
+                onPressed: () {
+                  _showEditEventModal(context);
+                },
+              );
+            } else {
+              // If the user is not an admin, return an empty container or another placeholder
+              return Container(); // or SizedBox.shrink()
+            }
+          } else {
+            // Return a placeholder widget while waiting for the future to complete
+ return Container();          }
+        },
+      ),
+        FutureBuilder<dynamic?>(
+          future: widget.event.clubId != null
+            ? ooBloc.getClubById(widget.event.clubId!)
+            : Future.value(null),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              Club? club = snapshot.data;
+              bool isAdmin = widget.event.clubId == null || club?.adminId == ooBloc.userProfileSubject.value?.id;
+              if (isAdmin) {
+                return IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () async {
-                    if (widget.event.clubId == null) {
-                      ooBloc.deleteEvent(widget.event.id!);
-                    } else {
-                      Club? club = await ooBloc.getClubById(widget.event.clubId!);
-                      if (club != null && club.adminId == ooBloc.userProfileSubject.value?.id) {
+                  onPressed: () {
+                    showCustomDialog(
+                      context: context,
+                      title: 'Delete Event',
+                      description: 'Are you sure you want to delete this event?',
+                      positiveText: 'Delete',
+                      negativeText: 'Cancel',
+                      onPositivePressed: () {
                         ooBloc.deleteEvent(widget.event.id!);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('You are not an admin'),
-                            duration: Duration(seconds: 2),
-                          ),
-                        );
-                      }
-                    }
+                      },
+                      onNegativePressed: () {
+                        // Optionally handle the cancel action here
+                      },
+                            positiveButtonColor: Colors.red, // Set the color for the positive button
+
+                  // Set the color for the negative button
+                    );
                   },
-                ),
+                );
+              } else {
+                // If the user is not an admin, return an empty container or another placeholder
+                return Container(); // or SizedBox.shrink()
+              }
+            } else {
+              // Return a placeholder widget while waiting for the future to complete
+            return Container();
+            }
+          },
+        ),
                 
-                          if(widget.event.clubId != null)
-                     IconButton(
-                  onPressed: () async {
-                    Club? club = await ooBloc.getClubById(widget.event.clubId!);
-                          if (
-                              club != null &&
-                                  club.adminId ==
-                                      ooBloc.userProfileSubject.value?.id) {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return StatefulBuilder(
-                            builder: (BuildContext context, StateSetter setState) {
-                              return Container(
-                  padding: const EdgeInsets.all(SSC.p16),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(SSC.p20)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'List of attendees for ${widget.event.title}',
-                        style: const TextStyle(
-                          fontSize: SSC.p18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: SSC.p16),
-                      FutureBuilder<dynamic>(
-                        future: ooBloc.getAttendancesForEvent(widget.event.id!),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (snapshot.hasError) {
-                            return Text('Error: ${snapshot.error}');
-                          } else if (snapshot.hasData) {
-                            List<Attendance> attendances = snapshot.data!;
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: attendances.length,
-                              itemBuilder: (context, index) {
-                                Attendance attendance = attendances[index];
-                                return ListTile(
-                                  title: Text(attendance.fullName),
-                                );
-                              },
+                              if (widget.event.clubId != null)
+        FutureBuilder<dynamic?>(
+          future: ooBloc.getClubById(widget.event.clubId!),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              Club? club = snapshot.data;
+              bool isAdmin = club != null && club.adminId == ooBloc.userProfileSubject.value?.id;
+              if (isAdmin) {
+                return IconButton(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return StatefulBuilder(
+                          builder: (BuildContext context, StateSetter setState) {
+                            return Container(
+                              padding: const EdgeInsets.all(SSC.p16),
+                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(SSC.p20)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'List of attendees for ${widget.event.title}',
+                                    style: const TextStyle(
+                                      fontSize: SSC.p18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: SSC.p16),
+                                  FutureBuilder<dynamic>(
+                                    future: ooBloc.getAttendancesForEvent(widget.event.id!),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState == ConnectionState.waiting) {
+                                        return const CircularProgressIndicator();
+                                      } else if (snapshot.hasError) {
+                                        return Text('Error: ${snapshot.error}');
+                                      } else if (snapshot.hasData) {
+                                        List<Attendance> attendances = snapshot.data!;
+                                        return ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: attendances.length,
+                                          itemBuilder: (context, index) {
+                                            Attendance attendance = attendances[index];
+                                            return ListTile(
+                                              title: Text(attendance.fullName),
+                                            );
+                                          },
+                                        );
+                                      } else {
+                                        return const Text('No attendances found');
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             );
-                          } else {
-                            return const Text('No attendances found');
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('You are not an admin'),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    }
+                          },
+                        );
+                      },
+                    );
                   },
                   icon: const Icon(Icons.visibility, color: Palette.MAIN),
-                ),
+                );
+              } else {
+                // If the user is not an admin, return an empty container or another placeholder
+                return Container(); // or SizedBox.shrink()
+              }
+            } else {
+              // Return a placeholder widget while waiting for the future to complete
+              return Container();
+            }
+          },
+        ),
                 
                 
                     ],

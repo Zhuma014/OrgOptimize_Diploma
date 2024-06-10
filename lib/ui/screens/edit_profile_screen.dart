@@ -407,11 +407,14 @@ StreamBuilder<List<Club>>(
     ooBloc.updateProfileSubject.listen((UserEdit editedUser) {
       if (editedUser.fullName != null && editedUser.birthDate != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Your profile updated successfully")),
+          const SnackBar(content: Text("Your profile updated successfully"),            backgroundColor: Palette.MAIN,
+),
+          
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(LU.of(context).unknown_error)),
+          SnackBar(content: Text(LU.of(context).unknown_error),                    backgroundColor: Colors.red,
+),
         );
       }
     });

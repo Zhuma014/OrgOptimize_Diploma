@@ -111,8 +111,8 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
   }
 }
 
-void signOut(BuildContext context) {
-  ooBloc.signOut();
+void signOut(BuildContext context) async {
+  await ooBloc.signOut();
   Navigator.of(context).pushAndRemoveUntil(
     MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
     (route) => false,
