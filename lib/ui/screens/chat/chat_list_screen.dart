@@ -10,6 +10,7 @@ import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:flutter/gestures.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -185,26 +186,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 padding: const EdgeInsets.all(SSC.p15),
                                 child: Center(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You do not have group chats, start messaging'),
-                                      const SizedBox(height: SSC.p16),
-                                      InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(SSC.p8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(SSC.p5),
-                                          child: const Icon(
-                                            Icons.queue,
-                                            color: Palette.MAIN,
-                                            size: SSC.p28,
-                                          ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'You do not have group chats, ',
+                                          style: DefaultTextStyle.of(context)
+                                              .style,
+                                          children: [
+                                            TextSpan(
+                                              text: 'start messaging',
+                                              style: const TextStyle(
+                                                color: Palette.MAIN,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  showMessageBottomSheet(
+                                                      context);
+                                                },
+                                            ),
+                                          ],
                                         ),
-                                        onTap: () {
-                                          showMessageBottomSheet(context);
-                                        },
                                       ),
                                     ],
                                   ),
@@ -216,26 +220,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 padding: const EdgeInsets.all(SSC.p15),
                                 child: Center(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You do not have group chats, start messaging'),
-                                      const SizedBox(height: SSC.p16),
-                                      InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(SSC.p8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(SSC.p5),
-                                          child: const Icon(
-                                            Icons.queue,
-                                            color: Palette.MAIN,
-                                            size: SSC.p28,
-                                          ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'You do not have group chats, ',
+                                          style: DefaultTextStyle.of(context)
+                                              .style,
+                                          children: [
+                                            TextSpan(
+                                              text: 'start messaging',
+                                              style: const TextStyle(
+                                                color: Palette.MAIN,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  showMessageBottomSheet(
+                                                      context);
+                                                },
+                                            ),
+                                          ],
                                         ),
-                                        onTap: () {
-                                          showMessageBottomSheet(context);
-                                        },
                                       ),
                                     ],
                                   ),
@@ -253,26 +260,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 padding: const EdgeInsets.all(SSC.p15),
                                 child: Center(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You do not have group chats, start messaging'),
-                                      const SizedBox(height: SSC.p16),
-                                      InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(SSC.p8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(SSC.p5),
-                                          child: const Icon(
-                                            Icons.queue,
-                                            color: Palette.MAIN,
-                                            size: SSC.p28,
-                                          ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'You do not have group chats, ',
+                                          style: DefaultTextStyle.of(context)
+                                              .style,
+                                          children: [
+                                            TextSpan(
+                                              text: 'start messaging',
+                                              style: const TextStyle(
+                                                color: Palette.MAIN,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  showMessageBottomSheet(
+                                                      context);
+                                                },
+                                            ),
+                                          ],
                                         ),
-                                        onTap: () {
-                                          showMessageBottomSheet(context);
-                                        },
                                       ),
                                     ],
                                   ),
@@ -351,26 +361,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 padding: const EdgeInsets.all(SSC.p15),
                                 child: Center(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You do not have private chats, start messaging'),
-                                      const SizedBox(height: SSC.p16),
-                                      InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(SSC.p8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(SSC.p5),
-                                          child: const Icon(
-                                            Icons.queue,
-                                            color: Palette.MAIN,
-                                            size: SSC.p28,
-                                          ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'You do not have private chats, ',
+                                          style: DefaultTextStyle.of(context)
+                                              .style,
+                                          children: [
+                                            TextSpan(
+                                              text: 'start messaging',
+                                              style: const TextStyle(
+                                                color: Palette.MAIN,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  showMessageBottomSheet(
+                                                      context);
+                                                },
+                                            ),
+                                          ],
                                         ),
-                                        onTap: () {
-                                          showMessageBottomSheet(context);
-                                        },
                                       ),
                                     ],
                                   ),
@@ -382,26 +395,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 padding: const EdgeInsets.all(SSC.p15),
                                 child: Center(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You do not have private chats, start messaging'),
-                                      const SizedBox(height: SSC.p16),
-                                      InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(SSC.p8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(SSC.p5),
-                                          child: const Icon(
-                                            Icons.queue,
-                                            color: Palette.MAIN,
-                                            size: SSC.p28,
-                                          ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'You do not have private chats, ',
+                                          style: DefaultTextStyle.of(context)
+                                              .style,
+                                          children: [
+                                            TextSpan(
+                                              text: 'start messaging',
+                                              style: const TextStyle(
+                                                color: Palette.MAIN,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  showMessageBottomSheet(
+                                                      context);
+                                                },
+                                            ),
+                                          ],
                                         ),
-                                        onTap: () {
-                                          showMessageBottomSheet(context);
-                                        },
                                       ),
                                     ],
                                   ),
@@ -418,26 +434,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                 padding: const EdgeInsets.all(SSC.p15),
                                 child: Center(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You do not have private chats, start messaging'),
-                                      const SizedBox(height: SSC.p16),
-                                      InkWell(
-                                        borderRadius:
-                                            BorderRadius.circular(SSC.p8),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(SSC.p5),
-                                          child: const Icon(
-                                            Icons.queue,
-                                            color: Palette.MAIN,
-                                            size: SSC.p28,
-                                          ),
+                                      RichText(
+                                        text: TextSpan(
+                                          text: 'You do not have private chats, ',
+                                          style: DefaultTextStyle.of(context)
+                                              .style,
+                                          children: [
+                                            TextSpan(
+                                              text: 'start messaging',
+                                              style: const TextStyle(
+                                                color: Palette.MAIN,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  showMessageBottomSheet(
+                                                      context);
+                                                },
+                                            ),
+                                          ],
                                         ),
-                                        onTap: () {
-                                          showMessageBottomSheet(context);
-                                        },
                                       ),
                                     ],
                                   ),

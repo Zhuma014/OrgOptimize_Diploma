@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen>
           _showAddEventModal(context);
         },
         backgroundColor: Palette.MAIN,
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
