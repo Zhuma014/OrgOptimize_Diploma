@@ -13,7 +13,6 @@ import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 
-
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
@@ -30,9 +29,10 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
     }
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Palette.BACKGROUND,
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -41,57 +41,67 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: SSC.p10),
-                child: Toolbar(isBackButtonVisible: false, title: LU.of(context).profile),
+                child: Toolbar(
+                    isBackButtonVisible: false, title: LU.of(context).profile),
               ),
-              ProfileMenuOption(
-                title: "Join the clubs",
-                onPressed: () {
-                  Navigator.pushNamed(context, Navigation.ALLCLUBS);
-                },
-              ),
-              ProfileMenuOption(
-                title: "My clubs",
-                onPressed: () {
-                  Navigator.pushNamed(context, Navigation.MYCLUBS);
-                },
-              ),
-              ProfileMenuOption(
-                title: LU.of(context).personal_data,
-                onPressed: () {
-                  Navigator.pushNamed(context, Navigation.EDIT_USER_PROFILE);
-                },
-              ),
-              ProfileMenuOption(
-                title: LU.of(context).settings,
-                onPressed: () {
-                  Navigator.pushNamed(context, Navigation.SETTINGS);
-                },
-              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: SSC.p14, vertical: SSC.p8),
+                child: Column(
+                  children: [
+                    _buildProfileOption(
+                      context,
+                      icon: Icons.person,
+                      title: LU.of(context).personal_data,
+                      onPressed: () {
+                        Navigator.pushNamed(
+                            context, Navigation.EDIT_USER_PROFILE);
+                      },
+                    ),
+                    const Divider(),
+                    _buildProfileOption(
+                      context,
+                      icon: Icons.group_work,
+                      title: "My clubs",
+                      onPressed: () {
+                        Navigator.pushNamed(context, Navigation.MYCLUBS);
+                      },
+                    ),
+                    const Divider(),
+                    _buildProfileOption(
+                      context,
+                      icon: Icons.group,
+                      title: "Join the clubs",
+                      onPressed: () {
+                        Navigator.pushNamed(context, Navigation.ALLCLUBS);
+                      },
+                    ),
+                    const Divider(),
+                    _buildProfileOption(
+                      context,
+                      icon: Icons.settings,
+                      title: LU.of(context).settings,
+                      onPressed: () {
+                        Navigator.pushNamed(context, Navigation.SETTINGS);
+                      },
+                    ),
+                  ],
+                ),
+              )
             ],
           ),
           Padding(
             padding: const EdgeInsets.all(SSC.p16),
-            child: RawMaterialButton(
-              disabledElevation: 1,
-              child: Ink(
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(SSC.p4),
-                  ),
-                  color: Palette.SOLITUDE,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Palette.DARK_BLUE,
+                backgroundColor: Palette.SOLITUDE,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(SSC.p8),
                 ),
-                child: Container(
-                  height: SSC.p40,
-                  alignment: Alignment.center,
-                  child: Text(
-                    LU.of(context).action_logout,
-                    style: const TextStyle(
-                      color: Palette.DARK_BLUE,
-                      fontSize: SSC.p16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                padding: const EdgeInsets.symmetric(
+                    vertical: SSC.p10, horizontal: SSC.p22),
+                elevation: 1,
               ),
               onPressed: () {
                 showCustomDialog(
@@ -103,10 +113,37 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
                   onPositivePressed: () => signOut(context),
                 );
               },
+              child: Text(
+                LU.of(context).action_logout,
+                style: const TextStyle(
+                  color: Palette.DARK_BLUE,
+                  fontSize: SSC.p16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProfileOption(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onPressed}) {
+    return ListTile(
+      leading: Icon(icon, color: Palette.MAIN),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: SSC.p16,
+          fontWeight: FontWeight.w500,
+          color: Palette.DARK_BLUE,
+        ),
+      ),
+      onTap: onPressed,
+      trailing: const Icon(Icons.arrow_right, color: Palette.DARK_BLUE),
     );
   }
 }

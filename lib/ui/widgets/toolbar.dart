@@ -63,9 +63,9 @@ class Toolbar extends StatelessWidget {
               )
             else
               const LocalAssetImage(
-                name: 'image.png',
-                height: SSC.p80,
-                fit: BoxFit.cover,
+                name: 'logo-text.png',
+                width: SSC.p90,
+                fit: BoxFit.fitWidth,
               ),
             if (title.isNotNullOrBlank())
               Expanded(

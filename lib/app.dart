@@ -13,7 +13,7 @@ class OrgOptimizeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-if (PreferencesManager.instance.isAuthenticated()) {
+    if (PreferencesManager.instance.isAuthenticated()) {
       return const MainWrapper();
     }
     
@@ -24,7 +24,7 @@ if (PreferencesManager.instance.isAuthenticated()) {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/images/image.png',
+              'assets/images/logo.png',
               width: SSC.p300,
               height: SSC.p300,
               fit: BoxFit.contain,
@@ -33,16 +33,16 @@ if (PreferencesManager.instance.isAuthenticated()) {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                  height: SSC.p50,
-                  child: Text(
-                    LU.of(context).app_name,
-                    style: const TextStyle(
-                        fontSize: SSC.p30,
-                        fontWeight: FontWeight.w500,
-                        color: Palette.MAIN),
-                  ),
-                ),
+                // SizedBox(
+                //   height: SSC.p50,
+                //   child: Text(
+                //     LU.of(context).app_name,
+                //     style: const TextStyle(
+                //         fontSize: SSC.p30,
+                //         fontWeight: FontWeight.w500,
+                //         color: Palette.MAIN),
+                //   ),
+                // ),
                 SizedBox(
                   height: SSC.p50,
                   child: Text(
@@ -55,7 +55,7 @@ if (PreferencesManager.instance.isAuthenticated()) {
                 ),
                 const SizedBox(height: SSC.p120),
                 SizedBox(
-                  width: SSC.p120,
+                  width: SSC.p140,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -71,8 +71,12 @@ if (PreferencesManager.instance.isAuthenticated()) {
                         borderRadius: BorderRadius.circular(SSC.p25),
                       ),
                     ),
-                    child: Text(
-                      LU.of(context).get_started,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        LU.of(context).get_started,
+                        style: const TextStyle(color: Palette.BACKGROUND),
+                      ),
                     ),
                   ),
                 ),
