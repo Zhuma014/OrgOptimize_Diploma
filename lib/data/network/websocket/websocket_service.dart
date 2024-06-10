@@ -20,7 +20,7 @@ class WebSocketManager {
   void connect() {
     print('Connecting to WebSocket...');
     channel = IOWebSocketChannel.connect(
-      Uri.parse('ws://10.0.2.2:8000/chat/ws/$roomId?token=$accessToken'),
+      Uri.parse('ws://fastapi-backend-diploma-f151c1772bca.herokuapp.com/chat/ws/$roomId?token=$accessToken'),
     );
     channel.stream.listen(
       (data) {

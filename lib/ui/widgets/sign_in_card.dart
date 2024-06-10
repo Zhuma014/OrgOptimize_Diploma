@@ -106,13 +106,9 @@ class _SignInCardState extends State<SignInCard> {
                   ),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: SSC.p12),
+                  padding: const EdgeInsets.symmetric(vertical: SSC.p18),
                   child: Text(
                     LU.of(context).login,
-                    style: const TextStyle(
-                        color: Palette.BACKGROUND,
-                        fontWeight: FontWeight.w600,
-                        fontSize: SSC.p16),
                   ),
                 ),
               ),
@@ -129,20 +125,29 @@ class _SignInCardState extends State<SignInCard> {
     String password = _passwordController.text;
     String? fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
 
-  if (username.isEmpty || password.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please fill in all fields'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-    return;
-  }
+    if (username.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _isLoading = true;
+    });
 
     ooBloc.signIn(username, password, fcm_token: fcmToken!);
 
-  ooBloc.signInSubject.stream.listen((value) {
-    Logger.d('SignInCard', 'ooBloc.signInSubject.stream.listen() -> ${value.isValid}');
+    ooBloc.signInSubject.stream.listen((value) {
+      Logger.d('SignInCard',
+          'ooBloc.signInSubject.stream.listen() -> ${value.isValid}');
+
+      setState(() {
+        _isLoading = false;
+      });
 
       if (value.isValid) {
         _usernameController.clear();
@@ -153,16 +158,16 @@ class _SignInCardState extends State<SignInCard> {
           (route) => false,
         );
 
-      context.read<BottomNavBarCubit>().changeSelectedIndex(0);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(value.exception ?? 'Sign In Failed'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  });
-}
-
+        context.read<BottomNavBarCubit>().changeSelectedIndex(0);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value.exception ?? 'Sign In Failed'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    });
+  }
 }
