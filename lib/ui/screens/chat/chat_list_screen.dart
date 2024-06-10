@@ -46,14 +46,33 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(SSC.p8),
-                      child: Text(
-                        'Club Chats',
-                        style: TextStyle(
-                          fontSize: SSC.p20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.group, color: Colors.purple),
+                          SizedBox(width: 8.0),
+                          Text(
+                            'Club Chats',
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Column(
@@ -79,7 +98,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       const Text(
                                           'You are not a member of any club'),
-                                      const SizedBox(height: SSC.p16),
+                                      const SizedBox(height: SSC.p12),
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Palette.MAIN,
@@ -88,7 +107,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           Navigator.pushNamed(
                                               context, Navigation.ALLCLUBS);
                                         },
-                                        child: const Text('Join Clubs'),
+                                        child: const Text(
+                                          'Join Clubs',
+                                          style: TextStyle(
+                                              color: Palette.BACKGROUND),
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -118,14 +141,33 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         ),
                       ],
                     ),
-                    const Padding(
-                      padding: EdgeInsets.all(SSC.p8),
-                      child: Text(
-                        'Group Chats',
-                        style: TextStyle(
-                          fontSize: SSC.p20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            spreadRadius: 1,
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.groups, color: Colors.purple),
+                          SizedBox(width: 8.0),
+                          Text(
+                            'Group Chats',
+                            style: TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Column(
@@ -268,14 +310,33 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             }
                           },
                         ),
-                        const Padding(
-                          padding: EdgeInsets.all(SSC.p8),
-                          child: Text(
-                            'Private Chats',
-                            style: TextStyle(
-                              fontSize: SSC.p20,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Container(
+                          padding: const EdgeInsets.all(8.0),
+                          decoration: BoxDecoration(
+                            color: Colors.purple.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.person, color: Colors.purple),
+                              SizedBox(width: 8.0),
+                              Text(
+                                'Private Chats',
+                                style: TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         StreamBuilder<List<ChatRoom>>(
@@ -386,18 +447,24 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: privateChats.map((chatRoom) {
-                                     List<String> memberNames = chatRoom?.name?.split(':') ?? [];
-      memberNames.removeWhere((name) => name.trim().isEmpty);
+                                  List<String> memberNames =
+                                      chatRoom?.name?.split(':') ?? [];
+                                  memberNames.removeWhere(
+                                      (name) => name.trim().isEmpty);
 
-    String? neighborName;
-    if (ooBloc.userProfileSubject.value?.fullName == memberNames[0]) {
-      neighborName = memberNames[1];
-    } else if (ooBloc.userProfileSubject.value?.fullName == memberNames[1]) {
-      neighborName = memberNames[0];
-    }
+                                  String? neighborName;
+                                  if (ooBloc
+                                          .userProfileSubject.value?.fullName ==
+                                      memberNames[0]) {
+                                    neighborName = memberNames[1];
+                                  } else if (ooBloc
+                                          .userProfileSubject.value?.fullName ==
+                                      memberNames[1]) {
+                                    neighborName = memberNames[0];
+                                  }
                                   return ListTile(
                                     title: Text(
-                                      neighborName! ,
+                                      neighborName!,
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -415,7 +482,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           builder: (context) => ChatScreen(
                                               chatRoomId: chatRoom.id!),
                                         ),
-                                      ).then((_) => ooBloc.getChatRooms()).then((_) => ooBloc.getChatRoomMessages(chatRoom.id!));
+                                      ).then((_) => ooBloc.getChatRooms()).then(
+                                          (_) => ooBloc.getChatRoomMessages(
+                                              chatRoom.id!));
                                     },
                                   );
                                 }).toList(),
@@ -435,8 +504,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-
-
   @override
   void dispose() {
     super.dispose();
@@ -444,31 +511,30 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 }
 
-  String getLastMessageText(String? lastMessage) {
-        final currentUserId = ooBloc.userProfileSubject.value?.id.toString();
-    print(currentUserId);
+String getLastMessageText(String? lastMessage) {
+  final currentUserId = ooBloc.userProfileSubject.value?.id.toString();
+  print(currentUserId);
 
-    if (lastMessage == null || lastMessage.isEmpty) {
-      return 'No messages yet';
-    }
-
-    final parts = lastMessage.split(':');
-
-    if (parts.length >= 3) {
-      final name = parts[0];
-      final id = parts[1].trim();
-      final message = parts.sublist(2).join(':');
-
-
-      if (id == currentUserId) {
-        return 'You: $message';
-      }
-
-      return '$name: $message';
-    }
-
-    return lastMessage;
+  if (lastMessage == null || lastMessage.isEmpty) {
+    return 'No messages yet';
   }
+
+  final parts = lastMessage.split(':');
+
+  if (parts.length >= 3) {
+    final name = parts[0];
+    final id = parts[1].trim();
+    final message = parts.sublist(2).join(':');
+
+    if (id == currentUserId) {
+      return 'You: $message';
+    }
+
+    return '$name: $message';
+  }
+
+  return lastMessage;
+}
 
 class ClubListItem extends StatelessWidget {
   final Club club;
