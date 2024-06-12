@@ -10,6 +10,7 @@ import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/local_asset_image.dart';
 import 'package:urven/utils/primitive/string_utils.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class Toolbar extends StatelessWidget {
   const Toolbar({
@@ -108,8 +109,7 @@ class Toolbar extends StatelessWidget {
                   ),
                 ),
                 onTap: () {
-                   Navigator.pushNamed(
-                                      context, Navigation.EDIT_USER_PROFILE);
+                  Navigator.pushNamed(context, Navigation.EDIT_USER_PROFILE);
                 },
               ),
           ],
@@ -144,8 +144,8 @@ void showMessageBottomSheet(BuildContext context) {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Select a user to message',
-                      style: TextStyle(
+                      LU.of(context).select_user_to_message,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Palette.MAIN,
@@ -201,7 +201,7 @@ void showMessageBottomSheet(BuildContext context) {
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                       return Center(
                         child: Text(
-                          'No users found',
+                          LU.of(context).no_users_found,
                           style: TextStyle(color: Palette.MAIN),
                         ),
                       );
@@ -255,55 +255,74 @@ void showMessageBottomSheet(BuildContext context) {
                                       ),
                                       elevation: 2,
                                       child: ListTile(
-                                        title: Text(
-                                          user.fullName!,
-                                          style: TextStyle(color: Palette.MAIN),
-                                        ),
-                                        onTap: () async {
-  if (!isSelecting) {
-    Navigator.pop(context);
-    ChatRoom? existingChatRoom = await ooBloc.getExistingPrivateChatRoom(user.id!);
-    if (existingChatRoom != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(chatRoomId: existingChatRoom.id!),
-        ),
-      ).then((_) async {
-        await ooBloc.getChatRooms();
-        await ooBloc.getChatRoomMessages(existingChatRoom.id!);
-      });
-    } else {
-      // Create the new chat room
-      String roomName = '${ooBloc.userProfileSubject.value?.fullName}:${user.fullName!}';
-      String roomDescription = '${ooBloc.userProfileSubject.value?.id}:${user.id!}';
+                                          title: Text(
+                                            user.fullName!,
+                                            style:
+                                                TextStyle(color: Palette.MAIN),
+                                          ),
+                                          onTap: () async {
+                                            if (!isSelecting) {
+                                              Navigator.pop(context);
+                                              ChatRoom? existingChatRoom =
+                                                  await ooBloc
+                                                      .getExistingPrivateChatRoom(
+                                                          user.id!);
+                                              if (existingChatRoom != null) {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ChatScreen(
+                                                            chatRoomId:
+                                                                existingChatRoom
+                                                                    .id!),
+                                                  ),
+                                                ).then((_) async {
+                                                  await ooBloc.getChatRooms();
+                                                  await ooBloc
+                                                      .getChatRoomMessages(
+                                                          existingChatRoom.id!);
+                                                });
+                                              } else {
+                                                // Create the new chat room
+                                                String roomName =
+                                                    '${ooBloc.userProfileSubject.value?.fullName}:${user.fullName!}';
+                                                String roomDescription =
+                                                    '${ooBloc.userProfileSubject.value?.id}:${user.id!}';
 
-      ChatRoom newChatRoom = await ooBloc.createChatRoom(
-        roomName,
-        roomDescription,
-        "private",
-        [user.id!],
-      );
+                                                ChatRoom newChatRoom =
+                                                    await ooBloc.createChatRoom(
+                                                  roomName,
+                                                  roomDescription,
+                                                  "private",
+                                                  [user.id!],
+                                                );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(chatRoomId: newChatRoom.id!),
-        ),
-      ).then((_) async {
-        await ooBloc.getChatRooms();
-        List<Message> messages = await ooBloc.getChatRoomMessages(newChatRoom.id!);
-        if (messages.isEmpty) {
-          await ooBloc.deleteChatRoom(newChatRoom.id!);
-          await ooBloc.getChatRooms(); // Refresh the chat rooms list after deletion
-        }
-      });
-    }
-  }
-}
-
-
-                                      ),
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ChatScreen(
+                                                            chatRoomId:
+                                                                newChatRoom
+                                                                    .id!),
+                                                  ),
+                                                ).then((_) async {
+                                                  await ooBloc.getChatRooms();
+                                                  List<Message> messages =
+                                                      await ooBloc
+                                                          .getChatRoomMessages(
+                                                              newChatRoom.id!);
+                                                  if (messages.isEmpty) {
+                                                    await ooBloc.deleteChatRoom(
+                                                        newChatRoom.id!);
+                                                    await ooBloc
+                                                        .getChatRooms(); // Refresh the chat rooms list after deletion
+                                                  }
+                                                });
+                                              }
+                                            }
+                                          }),
                                     );
                                   }).toList(),
                               ],
@@ -320,10 +339,9 @@ void showMessageBottomSheet(BuildContext context) {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                       
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Palette.MAIN),
-                          child: Text("Start messaging"),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Palette.MAIN),
                           onPressed: selectedUsers.isNotEmpty
                               ? () {
                                   setState(() {
@@ -333,6 +351,7 @@ void showMessageBottomSheet(BuildContext context) {
                                       context, selectedUsers);
                                 }
                               : null,
+                          child: Text(LU.of(context).start_messaging),
                         ),
                       ],
                     ),
@@ -355,7 +374,8 @@ void showCreateChatRoomDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text('Create Chat Room', style: TextStyle(color: Palette.MAIN)),
+        title: Text(LU.of(context).create_chat_room,
+            style: TextStyle(color: Palette.MAIN)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -400,13 +420,14 @@ void showCreateChatRoomDialog(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('Cancel', style: TextStyle(color: Palette.MAIN)),
                 style: TextButton.styleFrom(
                   primary: Palette.MAIN,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                 ),
+                child: Text(LU.of(context).action_cancel,
+                    style: TextStyle(color: Palette.MAIN)),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -421,7 +442,7 @@ void showCreateChatRoomDialog(
                     Navigator.of(context).pop();
                   }
                 },
-                child: Text('Finish'),
+                child: Text(LU.of(context).finish),
                 style: ElevatedButton.styleFrom(
                   primary: Palette.MAIN,
                   shape: RoundedRectangleBorder(

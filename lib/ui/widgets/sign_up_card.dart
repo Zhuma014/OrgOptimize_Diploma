@@ -162,7 +162,7 @@ class _SignUpCardState extends State<SignUpCard> {
       if (value.isValid) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(value.exception ?? 'Sign Up Successful'),
+            content: Text(value.exception ?? LU.of(context).sign_up_successful),
             backgroundColor: Palette.MAIN,
             duration: const Duration(seconds: 2),
           ),
@@ -179,7 +179,7 @@ class _SignUpCardState extends State<SignUpCard> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(value.exception ?? 'Sign Up Failed'),
+            content: Text(value.exception ?? LU.of(context).sign_up_failed),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

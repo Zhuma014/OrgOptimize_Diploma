@@ -7,6 +7,7 @@ import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class ClubInfoModal extends StatefulWidget {
   final Club club;
@@ -73,7 +74,7 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
                 return _buildAdminProfileContent(adminProfile);
               }
 
-              return const Text("Admin profile not found");
+              return Text(LU.of(context).admin_not_found);
             },
           ),
         ),
@@ -101,7 +102,7 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
               Row(
                 children: [
                   Text(
-                    'Admin:  ',
+                    '${LU.of(context).admin}:  ',
                     style: TextStyle(
                         color: Palette.DARK_BLUE.withOpacity(0.7),
                         fontWeight: FontWeight.w200),
@@ -120,7 +121,7 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
               Row(
                 children: [
                   Text(
-                    'Created At:  ',
+                    '${LU.of(context).created_at}:  ',
                     style: TextStyle(
                         color: Palette.DARK_BLUE.withOpacity(0.7),
                         fontWeight: FontWeight.w200),
@@ -221,7 +222,7 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
                
               );
             },
-            child: const Text('Leave the club'),
+            child: Text(LU.of(context).leave_the_club),
           ),
       ],
     );
@@ -238,9 +239,9 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text(
-                'Edit Club',
-                style: TextStyle(fontSize: SSC.p20, fontWeight: FontWeight.bold),
+              title: Text(
+                LU.of(context).edit_club,
+                style: const TextStyle(fontSize: SSC.p20, fontWeight: FontWeight.bold),
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -308,9 +309,9 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text(
-                        'Cancel',
-                        style: TextStyle(color: Colors.grey, fontSize: SSC.p16),
+                      child: Text(
+                        LU.of(context).action_cancel,
+                        style: const TextStyle(color: Colors.grey, fontSize: SSC.p16),
                       ),
                     ),
                     TextButton(
@@ -334,9 +335,9 @@ class _ClubInfoModalState extends State<ClubInfoModal> {
                               Navigator.pop(context);
                             }
                           : null,
-                      child: const Text(
-                        'Edit',
-                        style: TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
+                      child: Text(
+                        LU.of(context).edit,
+                        style: const TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
                       ),
                     ),
                   ],

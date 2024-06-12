@@ -7,6 +7,7 @@ import 'package:urven/ui/screens/chat/chat_screen.dart';
 import 'package:urven/ui/widgets/chat_room_list_item.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 
 class ChatRoomsScreen extends StatefulWidget {
@@ -48,7 +49,7 @@ class _ChatRoomsScreenState extends State<ChatRoomsScreen> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No Chat Rooms Available'));
+                  return Center(child: Text(LU.of(context).no_chat_rooms));
                 }
 
                 List<ChatRoom> chatRooms = snapshot.data!

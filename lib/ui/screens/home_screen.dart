@@ -86,23 +86,23 @@ class _HomeScreenState extends State<HomeScreen>
                       selectedEventType = value!;
                     });
                   },
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: EventType.userOwned,
-                      child: Text('My', style: TextStyle(fontSize: SSC.p16)),
+                      child: Text(LU.of(context).my, style: TextStyle(fontSize: SSC.p16)),
                     ),
                     DropdownMenuItem(
                       value: EventType.club,
-                      child: Text('Clubs', style: TextStyle(fontSize: SSC.p16)),
+                      child: Text(LU.of(context).clubs, style: TextStyle(fontSize: SSC.p16)),
                     ),
                     DropdownMenuItem(
                       value: EventType.both,
-                      child: Text('All', style: TextStyle(fontSize: SSC.p16)),
+                      child: Text(LU.of(context).all, style: TextStyle(fontSize: SSC.p16)),
                     ),
                   ],
                 ),
-                const Text(
-                  "Upcoming Events",
+                Text(
+                  LU.of(context).upcoming_events,
                   style: TextStyle(
                     fontSize: SSC.p16,
                     fontWeight: FontWeight.bold,
@@ -188,8 +188,8 @@ class _HomeScreenState extends State<HomeScreen>
                   List<Event> selectedDayEvents =
                       getEventsForDay(_selectedDay, events);
                   if (selectedDayEvents.isEmpty) {
-                    return const Center(
-                      child: Text("You don't have events"),
+                    return Center(
+                      child: Text(LU.of(context).you_dont_have_events),
                     );
                   } else {
                     return ListView.builder(
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen>
                   if (snapshot.data != null && snapshot.data!.isNotEmpty) {
                     return const Center(child: CircularProgressIndicator());
                   } else {
-                    return const Center(child: Text("You don't have events"));
+                    return Center(child: Text(LU.of(context).you_dont_have_events));
                   }
                 }
               },
@@ -367,7 +367,7 @@ void _showAddEventModal(BuildContext context) {
                             children: [
                               RichText(
                                 text: TextSpan(
-                                  text: 'Select Club or My Own Event',
+                                  text: LU.of(context).club_or_my_event,
                                   style: TextStyle(
                                     color: Palette.MAIN.withOpacity(0.5),
                                     fontSize: SSC.p14,
@@ -422,9 +422,9 @@ void _showAddEventModal(BuildContext context) {
                                 ),
                                 value: selectedClubId,
                                 items: [
-                                  const DropdownMenuItem(
+                                  DropdownMenuItem(
                                     value: 0,
-                                    child: Text('My Own Event'),
+                                    child: Text(LU.of(context).my_own_event),
                                   ),
                                   ...adminClubs.map((club) {
                                     return DropdownMenuItem(
@@ -446,7 +446,7 @@ void _showAddEventModal(BuildContext context) {
                           ),
                         );
                       } else {
-                        return const Text('No clubs available');
+                        return Text(LU.of(context).no_clubs_available);
                       }
                     },
                   ),

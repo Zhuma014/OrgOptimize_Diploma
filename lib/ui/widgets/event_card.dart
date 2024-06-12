@@ -40,7 +40,7 @@ class _EventCardState extends State<EventCard> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.event.title ?? 'No Title',
+                    widget.event.title ?? LU.of(context).no_title,
                     style: const TextStyle(
                       fontSize: SSC.p16,
                       fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class _EventCardState extends State<EventCard> {
                                                         Navigator.pop(context);
 
                                   },
-                            child: const Text('I will come'),
+                            child: Text(LU.of(context).i_will_come),
                           ),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -131,7 +131,7 @@ class _EventCardState extends State<EventCard> {
                                                         Navigator.pop(context);
 
                                   },
-                            child: const Text('I will not come'),
+                            child: Text(LU.of(context).i_will_not_come),
                           ),
                         ],
                       ),
@@ -146,7 +146,7 @@ class _EventCardState extends State<EventCard> {
                             backgroundColor: Palette.MAIN,
                           ),
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('Got it!'),
+                          child: Text('${LU.of(context).got_it}!'),
                         ),
                       ),
                     ),
@@ -171,7 +171,7 @@ class _EventCardState extends State<EventCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.event.title ?? 'No Title',
+                      widget.event.title ?? LU.of(context).no_title,
                       style: const TextStyle(
                         fontSize: SSC.p16,
                         fontWeight: FontWeight.bold,
@@ -317,7 +317,7 @@ class _EventCardState extends State<EventCard> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
-                                    'List of attendees for ${widget.event.title}',
+                                    '${LU.of(context).list_of_attendees} ${widget.event.title}',
                                     style: const TextStyle(
                                       fontSize: SSC.p18,
                                       fontWeight: FontWeight.bold,
@@ -344,7 +344,7 @@ class _EventCardState extends State<EventCard> {
                                           },
                                         );
                                       } else {
-                                        return const Text('No attendances found');
+                                        return Text(LU.of(context).no_attendances_found);
                                       }
                                     },
                                   ),
@@ -527,7 +527,7 @@ class _EventCardState extends State<EventCard> {
                               children: [
                                 RichText(
                                   text: TextSpan(
-                                    text: 'Select Club or My Own Event',
+                                    text: LU.of(context).club_or_my_event,
                                     style: TextStyle(
                                       color: Palette.MAIN.withOpacity(0.5),
                                       fontSize: SSC.p14,
@@ -582,9 +582,9 @@ class _EventCardState extends State<EventCard> {
                                   ),
                                   value: selectedClubId,
                                   items: [
-                                    const DropdownMenuItem(
+                                    DropdownMenuItem(
                                       value: 0,
-                                      child: Text('My Own Event'),
+                                      child: Text(LU.of(context).my_own_event),
                                     ),
                                     ...adminClubs.map((club) {
                                       return DropdownMenuItem(
@@ -606,7 +606,7 @@ class _EventCardState extends State<EventCard> {
                             ),
                           );
                         } else {
-                          return const Text('No clubs available');
+                          return Text(LU.of(context).no_clubs_available);
                         }
                       },
                     ),

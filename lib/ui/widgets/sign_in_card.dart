@@ -127,10 +127,10 @@ class _SignInCardState extends State<SignInCard> {
 
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill in all fields'),
+        SnackBar(
+          content: Text(LU.of(context).please_fill_all_fields),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -162,7 +162,7 @@ class _SignInCardState extends State<SignInCard> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(value.exception ?? 'Sign In Failed'),
+            content: Text(value.exception ?? LU.of(context).sign_in_failed),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

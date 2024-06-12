@@ -198,7 +198,7 @@ class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "You are admin of:",
+                              LU.of(context).you_admin_of,
                               style: TextStyle(
                                   fontSize: SSC.p15,
                                   color: Palette.MAIN.withOpacity(0.5),
@@ -224,7 +224,7 @@ class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
           .toList();
       if (adminClubs.isEmpty) {
         return Text(
-          "No admin clubs",
+          LU.of(context).no_admin_clubs,
           style: TextStyle(
             color: Palette.DARK_GREY_2.withOpacity(0.7),
             fontStyle: FontStyle.italic,
@@ -256,7 +256,7 @@ class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      club.name ?? 'Unknown Club',
+                      club.name ?? LU.of(context).unknown_club,
                       style: TextStyle(
                         fontSize: SSC.p14,
                         fontWeight: FontWeight.bold,
@@ -265,7 +265,7 @@ class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
                     ),
                     const SizedBox(height: SSC.p4),
                     Text(
-                      club.description ?? 'No description available',
+                      club.description ?? LU.of(context).no_description_available,
                       style: TextStyle(
                         color: Palette.DARK_GREY_2.withOpacity(0.7),
                       ),
@@ -278,8 +278,8 @@ class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
         );
       }
     } else {
-      return const Text(
-        "No admin clubs",
+      return Text(
+        LU.of(context).no_admin_clubs,
         style: TextStyle(
           color: Colors.grey,
           fontStyle: FontStyle.italic,
@@ -290,7 +290,7 @@ class EditProfileScreenState extends BaseScreenState<EditProfileScreen> {
 ),
 const SizedBox(height: SSC.p10),
 Text(
-  "You are member of:",
+  LU.of(context).you_are_member_of,
   style: TextStyle(
     fontSize: 15.0,
     color: Palette.MAIN.withOpacity(0.5),
@@ -319,7 +319,7 @@ StreamBuilder<List<Club>>(
         return FutureBuilder(
           future: Future.delayed(const Duration(seconds: 2)),
           builder: (context, _) => Text(
-            "No member clubs",
+            LU.of(context).no_member_clubs,
             style: TextStyle(
               color: Palette.DARK_GREY_2.withOpacity(0.7),
               fontStyle: FontStyle.italic,
@@ -352,7 +352,7 @@ StreamBuilder<List<Club>>(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      club.name ?? 'Unknown Club',
+                      club.name ?? LU.of(context).unknown_club,
                       style: TextStyle(
                         fontSize: SSC.p14,
                         fontWeight: FontWeight.bold,
@@ -361,7 +361,7 @@ StreamBuilder<List<Club>>(
                     ),
                     const SizedBox(height: SSC.p4),
                     Text(
-                      club.description ?? 'No description available',
+                      club.description ?? LU.of(context).no_description_available,
                       style: TextStyle(
                         color: Palette.DARK_GREY_2.withOpacity(0.7),
                       ),
@@ -374,8 +374,8 @@ StreamBuilder<List<Club>>(
         );
       }
     } else {
-      return const Text(
-        "No member clubs",
+      return Text(
+        LU.of(context).no_member_clubs,
         style: TextStyle(
           color: Colors.grey,
           fontStyle: FontStyle.italic,
@@ -407,7 +407,7 @@ StreamBuilder<List<Club>>(
     ooBloc.updateProfileSubject.listen((UserEdit editedUser) {
       if (editedUser.fullName != null && editedUser.birthDate != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Your profile updated successfully"),            backgroundColor: Palette.MAIN,
+          SnackBar(content: Text(LU.of(context).your_profile_updated_successfully),            backgroundColor: Palette.MAIN,
 ),
           
         );

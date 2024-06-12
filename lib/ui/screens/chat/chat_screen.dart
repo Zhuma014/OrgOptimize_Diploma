@@ -9,6 +9,7 @@ import 'package:urven/data/network/websocket/websocket_service.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/chat_app_bar.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class ChatScreen extends StatefulWidget {
   final int chatRoomId;
@@ -26,8 +27,7 @@ class _ChatScreenState extends State<ChatScreen> {
   List<Message> allMessages = [];
   ScrollController _scrollController = ScrollController();
   Map<int, String> userIdToName = {};
-    Map<int, String> chatRoomIdToName = {};
-
+  Map<int, String> chatRoomIdToName = {};
 
   @override
   void initState() {
@@ -36,44 +36,38 @@ class _ChatScreenState extends State<ChatScreen> {
 
     ooBloc.getChatRoomMessages(widget.chatRoomId);
     ooBloc.getChatRoomMembers(widget.chatRoomId);
-        ooBloc.getChatRooms(); 
+    ooBloc.getChatRooms();
 
-
-      getChatRoomMembers();
-          getChatRooms();
-
-
+    getChatRoomMembers();
+    getChatRooms();
 
     ooBloc.getUserProfile();
     _scrollController = ScrollController();
   }
 
-void getChatRoomMembers() {
-  ooBloc.getChatRoomMembersSubject.listen((members) {
-    if (mounted) {
-      setState(() {
-        userIdToName = {
-          for (var member in members)
-            member.id!: member.fullName ?? 'Unknown'
-        };
-      });
-    }
-  });
-}
-
-  void getChatRooms() {
-    ooBloc.getChatRoomsSubject.listen((chatRooms) {
+  void getChatRoomMembers() {
+    ooBloc.getChatRoomMembersSubject.listen((members) {
       if (mounted) {
         setState(() {
-          chatRoomIdToName = {
-            for (var room in chatRooms)
-              room.id!: room.name ?? 'Unknown'
+          userIdToName = {
+            for (var member in members) member.id!: member.fullName ?? 'Unknown'
           };
         });
       }
     });
   }
 
+  void getChatRooms() {
+    ooBloc.getChatRoomsSubject.listen((chatRooms) {
+      if (mounted) {
+        setState(() {
+          chatRoomIdToName = {
+            for (var room in chatRooms) room.id!: room.name ?? 'Unknown'
+          };
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +85,7 @@ void getChatRoomMembers() {
                   child:
                       Text('Error fetching user profile: ${snapshot.error}'));
             } else if (!snapshot.hasData || snapshot.data == null) {
-              return const Center(child: Text('No user profile found'));
+              return Center(child: Text(LU.of(context).no_user_profile));
             } else {
               UserProfile userProfile = snapshot.data!;
               currentUserId = userProfile.id;
@@ -105,7 +99,7 @@ void getChatRoomMembers() {
                         if (snapshot.data!.isEmpty) {
                           return Center(
                               child: Text(
-                            'Start a conversation...',
+                            LU.of(context).start_conversation,
                             style: TextStyle(
                                 color: Palette.DARK_GREY_2.withOpacity(0.6)),
                           ));
@@ -175,16 +169,19 @@ void getChatRoomMembers() {
                                       child: Stack(
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.all(SSC.p8),
+                                            padding:
+                                                const EdgeInsets.all(SSC.p8),
                                             child: Column(
-                                              crossAxisAlignment: messageObj.userId == currentUserId
-                                              ? CrossAxisAlignment.end
-                                              :CrossAxisAlignment.start,
+                                              crossAxisAlignment: messageObj
+                                                          .userId ==
+                                                      currentUserId
+                                                  ? CrossAxisAlignment.end
+                                                  : CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   messageObj.userId ==
                                                           currentUserId
-                                                      ? 'You'
+                                                      ? LU.of(context).you
                                                       : userIdToName[messageObj
                                                               .userId] ??
                                                           'Unknown',
@@ -204,8 +201,10 @@ void getChatRoomMembers() {
                                                         BorderRadius.circular(
                                                             12.0),
                                                   ),
-                                                  padding: const EdgeInsets.symmetric(horizontal:SSC.p20,vertical: SSC.p14
-                                                      ),
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: SSC.p20,
+                                                      vertical: SSC.p14),
                                                   child: Column(
                                                     crossAxisAlignment:
                                                         CrossAxisAlignment
@@ -219,11 +218,15 @@ void getChatRoomMembers() {
                                             ),
                                           ),
                                           Positioned(
-                                            
                                             bottom: 8,
-                                                right: messageObj.userId == currentUserId ? 12 : null,
-  left: messageObj.userId == currentUserId ? null : 12,
-
+                                            right: messageObj.userId ==
+                                                    currentUserId
+                                                ? 12
+                                                : null,
+                                            left: messageObj.userId ==
+                                                    currentUserId
+                                                ? null
+                                                : 12,
                                             child: Text(
                                               messageObj.timestamp != null
                                                   ? DateFormat('HH:mm').format(
@@ -245,14 +248,12 @@ void getChatRoomMembers() {
                         );
                       } else {
                         return Center(
-                              child: Text(
-                            'Start a conversation...',
-                            style: TextStyle(
-                                color: Palette.DARK_GREY_2.withOpacity(0.6)),
-                          ));
+                            child: Text(
+                          LU.of(context).start_conversation,
+                          style: TextStyle(
+                              color: Palette.DARK_GREY_2.withOpacity(0.6)),
+                        ));
                       }
-              
-                     
                     },
                   ),
                 ),
@@ -304,17 +305,16 @@ void getChatRoomMembers() {
                               ));
                               _messageController.clear();
 
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-  if (_scrollController.hasClients) {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
-  }
-});
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                if (_scrollController.hasClients) {
+                                  _scrollController.animateTo(
+                                    _scrollController.position.maxScrollExtent,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
+                                }
+                              });
                               setState(() {});
-
                             }
                           },
                           icon: const Icon(Icons.send, color: Colors.white),
