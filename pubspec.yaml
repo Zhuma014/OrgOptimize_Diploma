@@ -46,7 +46,7 @@ dependencies:
   table_calendar: ^3.0.9
   firebase_messaging: ^14.7.10
   flutter_local_notifications: ^17.1.2
-  
+  confetti: ^0.6.0
 
 dev_dependencies:
   flutter_test:

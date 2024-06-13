@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
+import 'package:urven/ui/screens/forgot_password_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/logger.dart';
 import 'package:urven/utils/lu.dart';
@@ -58,7 +59,7 @@ class _SignInCardState extends State<SignInCard> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const SignInCard(),
+                      builder: (context) => ForgotPasswordScreen(),
                     ),
                   );
                 },
@@ -70,7 +71,7 @@ class _SignInCardState extends State<SignInCard> {
                 child: Text(
                   LU.of(context).forgot_password,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.grey,
                     fontSize: SSC.p14,
                     fontWeight: FontWeight.w400,
                   ),

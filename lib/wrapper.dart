@@ -33,7 +33,8 @@ class _MainWrapperState extends State<MainWrapper> {
   @override
   Widget build(BuildContext context) {
     SSC().init(context);
-    return WillPopScope(
+   
+   return WillPopScope(
       onWillPop: () async {
         if (selectedIndex != 0) {
           context.read<BottomNavBarCubit>().changeSelectedIndex(0);
@@ -74,6 +75,7 @@ class _MainWrapperState extends State<MainWrapper> {
         );
       }),
     );
+   
   }
 
   final List<Widget> _screens = [

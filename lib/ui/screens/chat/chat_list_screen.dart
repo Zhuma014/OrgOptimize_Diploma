@@ -175,7 +175,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         StreamBuilder<List<ChatRoom>>(
-                          stream: ooBloc.getChatRoomsSubject,
+                          stream: ooBloc.getChatRoomsSubject.stream,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -464,50 +464,98 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               );
                             } else {
                               return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: privateChats.map((chatRoom) {
-                                  List<String> memberNames =
-                                      chatRoom?.name?.split(':') ?? [];
-                                  memberNames.removeWhere(
-                                      (name) => name.trim().isEmpty);
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: privateChats.map((chatRoom) {
+    List<String> memberNames = chatRoom.name?.split(':') ?? [];
+    memberNames.removeWhere((name) => name.trim().isEmpty);
 
-                                  String? neighborName;
-                                  if (ooBloc
-                                          .userProfileSubject.value?.fullName ==
-                                      memberNames[0]) {
-                                    neighborName = memberNames[1];
-                                  } else if (ooBloc
-                                          .userProfileSubject.value?.fullName ==
-                                      memberNames[1]) {
-                                    neighborName = memberNames[0];
-                                  }
-                                  return ListTile(
-                                    title: Text(
-                                      neighborName!,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    subtitle: Text(
-                                        getLastMessageText(
-                                            chatRoom.lastMessage),
-                                        style: const TextStyle(
-                                            color: Palette.MAIN)),
-                                    trailing:
-                                        const Icon(Icons.arrow_forward_ios),
-                                    onTap: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ChatScreen(
-                                              chatRoomId: chatRoom.id!),
-                                        ),
-                                      ).then((_) => ooBloc.getChatRooms()).then(
-                                          (_) => ooBloc.getChatRoomMessages(
-                                              chatRoom.id!));
-                                    },
-                                  );
-                                }).toList(),
-                              );
+    String? neighborName;
+    if (ooBloc.userProfileSubject.value?.fullName == memberNames[0]) {
+      neighborName = memberNames[1];
+    } else if (ooBloc.userProfileSubject.value?.fullName == memberNames[1]) {
+      neighborName = memberNames[0];
+    }
+
+    return Builder(
+      builder: (context) => Dismissible(
+          key: Key(chatRoom.id.toString()),
+          direction: DismissDirection.startToEnd,
+          confirmDismiss: (_) async {
+            return await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Delete Chat Room'),
+                content: const Text(
+                    'Are you sure you want to delete this chat room? Please change the owner'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(false);
+                    },
+                    child: const Text('Cancel',style: TextStyle(color:Colors.grey),),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(true);
+                    },
+                    child: const Text('Delete anyway',style: TextStyle(color: Colors.red),),
+                  ),
+                ],
+              ),
+            );
+          },
+          background: Container(
+            color: Colors.red,
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 20.0),
+            child: const Icon(Icons.delete, color: Colors.white),
+          ),
+         onDismissed: (direction) async {
+          await ooBloc.deleteChatRoom(chatRoom.id!);
+          ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Chat room deleted successfully!'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              // Remove the Dismissible widget from the tree
+              setState(() {
+                    privateChats.remove(chatRoom);
+              });
+            },
+
+          child: Builder(
+            builder: (context) {
+              return ListTile(
+                title: Text(
+                  neighborName!,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  getLastMessageText(chatRoom.lastMessage),
+                  style: const TextStyle(color: Palette.MAIN),
+                ),
+                trailing: const Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(chatRoomId: chatRoom.id!),
+                    ),
+                  ).then((_) => ooBloc.getChatRooms()).then(
+                        (_) => ooBloc.getChatRoomMessages(chatRoom.id!),
+                      );
+                },
+              );
+            }
+          ),
+        ),
+      
+    );
+  }).toList(),
+);
+
+
                             }
                           },
                         ),

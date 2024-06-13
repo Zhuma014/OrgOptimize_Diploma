@@ -35,7 +35,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   late final AndroidInitializationSettings initializationSettingsAndroid =
-      const AndroidInitializationSettings('ic_launcher');
+      const AndroidInitializationSettings('logo');
 
   late final DarwinInitializationSettings initializationSettingsDarwin =
       DarwinInitializationSettings(

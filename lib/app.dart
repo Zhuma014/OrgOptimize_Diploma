@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/ui/screens/authentication_screen.dart';
+import 'package:urven/ui/screens/confirm_email_screen.dart';
 
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/lu.dart';
@@ -61,7 +62,7 @@ class OrgOptimizeApp extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AuthenticationScreen(),
+                          builder: (context) => const  AuthenticationScreen(),
                         ),
                       );
                     },

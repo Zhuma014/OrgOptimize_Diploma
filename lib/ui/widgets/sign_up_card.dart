@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/preferences/preferences_manager.dart';
 import 'package:urven/internal/bloc/cubits/bottom_nav_bar_bloc.dart';
+import 'package:urven/ui/screens/confirm_email_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/email_utils.dart';
 import 'package:urven/utils/logger.dart';
@@ -160,20 +161,14 @@ class _SignUpCardState extends State<SignUpCard> {
       });
 
       if (value.isValid) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(value.exception ?? 'Sign Up Successful'),
-            backgroundColor: Palette.MAIN,
-            duration: const Duration(seconds: 2),
-          ),
-        );
+      
         _nameController.clear();
         _emailController.clear();
         _passwordController.clear();
         _birthdayController.clear();
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const MainWrapper()),
-          (route) => route.isFirst,
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (context) => ConfirmEmailScreen()),
+          
         );
         context.read<BottomNavBarCubit>().changeSelectedIndex(0);
       } else {

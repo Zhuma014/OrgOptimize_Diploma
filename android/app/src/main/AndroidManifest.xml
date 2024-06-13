@@ -10,8 +10,8 @@
 
     <application
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:label="urven"
+        android:icon="@mipmap/logo"
+        android:label="OrgOptimize"
         android:usesCleartextTraffic="true">
 
         <!-- Firebase Messaging Service -->

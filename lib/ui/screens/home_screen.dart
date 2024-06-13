@@ -1,21 +1,23 @@
 // ignore_for_file: depend_on_referenced_packages, no_leading_underscores_for_local_identifiers, use_build_context_synchronously
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/data/models/club/club_events.dart';
 import 'package:urven/data/models/user/user_profile.dart';
+import 'package:urven/ui/screens/confirm_email_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/common_input_field.dart';
 import 'package:urven/ui/widgets/event_card.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/lu.dart';
 import 'package:urven/utils/screen_size_configs.dart';
- 
+
 import 'package:table_calendar/table_calendar.dart';
 import 'package:rxdart/rxdart.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -34,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen>
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   late UserProfile userProfile;
+  late StreamSubscription<bool> _isConfirmedSubscription;
 
   @override
   void initState() {
@@ -44,6 +47,16 @@ class _HomeScreenState extends State<HomeScreen>
     ooBloc.getAllUserEvents();
     ooBloc.getClubEvents();
     ooBloc.getOwnEvents();
+    ooBloc.isConfirmed();
+
+    _isConfirmedSubscription =
+        ooBloc.isConfirmedSubject.stream.listen((isConfirmed) {
+      if (!isConfirmed && mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => ConfirmEmailScreen()),
+        );
+      }
+    });
   }
 
   @override
@@ -63,159 +76,177 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: SSC.p10),
-            child: Toolbar(
-              isBackButtonVisible: false,
-              title: LU.of(context).home,
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: SSC.p8, horizontal: SSC.p16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                DropdownButton<EventType>(
-                  value: selectedEventType,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedEventType = value!;
-                    });
-                  },
-                  items: const [
-                    DropdownMenuItem(
-                      value: EventType.userOwned,
-                      child: Text('My', style: TextStyle(fontSize: SSC.p16)),
+      body: StreamBuilder<bool>(
+      stream: ooBloc.isConfirmedSubject.stream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }  else {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: SSC.p10),
+                    child: Toolbar(
+                      isBackButtonVisible: false,
+                      title: LU.of(context).home,
                     ),
-                    DropdownMenuItem(
-                      value: EventType.club,
-                      child: Text('Clubs', style: TextStyle(fontSize: SSC.p16)),
-                    ),
-                    DropdownMenuItem(
-                      value: EventType.both,
-                      child: Text('All', style: TextStyle(fontSize: SSC.p16)),
-                    ),
-                  ],
-                ),
-                const Text(
-                  "Upcoming Events",
-                  style: TextStyle(
-                    fontSize: SSC.p16,
-                    fontWeight: FontWeight.bold,
                   ),
-                ),
-              ],
-            ),
-          ),
-          TableCalendar(
-            firstDay: DateTime.utc(2020, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            calendarFormat: _calendarFormat,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-            },
-            onFormatChanged: (format) {
-              if (_calendarFormat != format) {
-                setState(() {
-                  _calendarFormat = format;
-                });
-              }
-            },
-            onPageChanged: (focusedDay) {
-              _focusedDay = focusedDay;
-            },
-            calendarStyle: CalendarStyle(
-              selectedDecoration: const BoxDecoration(
-                color: Palette.MAIN,
-                shape: BoxShape.circle,
-              ),
-              todayDecoration: BoxDecoration(
-                color: Palette.MAIN.withOpacity(0.5),
-                shape: BoxShape.circle,
-              ),
-              weekendTextStyle: const TextStyle(color: Palette.MAIN),
-              selectedTextStyle: const TextStyle(color: Colors.white),
-              todayTextStyle: const TextStyle(color: Colors.white),
-            ),
-            daysOfWeekStyle: const DaysOfWeekStyle(
-              weekendStyle: TextStyle(color: Palette.MAIN),
-            ),
-            headerStyle: const HeaderStyle(
-              titleCentered: true,
-              formatButtonVisible: false,
-              titleTextStyle: TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
-              leftChevronIcon: Icon(
-                Icons.chevron_left,
-                color: Palette.MAIN,
-              ),
-              rightChevronIcon: Icon(
-                Icons.chevron_right,
-                color: Palette.MAIN,
-              ),
-            ),
-          ),
-          Expanded(
-            child: StreamBuilder<List<Event>>(
-              stream: selectedEventType == EventType.userOwned
-                  ? ooBloc.getUserOwnedEventsSubject.stream
-                  : selectedEventType == EventType.club
-                      ? ooBloc.getClubEventsSubject.stream
-                      : Rx.combineLatest2(
-                          ooBloc.getUserOwnedEventsSubject.stream,
-                          ooBloc.getClubEventsSubject.stream,
-                          (List<Event> userEvents, List<Event> clubEvents) =>
-                              userEvents + clubEvents,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: SSC.p8, horizontal: SSC.p16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DropdownButton<EventType>(
+                          value: selectedEventType,
+                          onChanged: (value) {
+                            setState(() {
+                              selectedEventType = value!;
+                            });
+                          },
+                          items: const [
+                            DropdownMenuItem(
+                              value: EventType.userOwned,
+                              child: Text('My',
+                                  style: TextStyle(fontSize: SSC.p16)),
+                            ),
+                            DropdownMenuItem(
+                              value: EventType.club,
+                              child: Text('Clubs',
+                                  style: TextStyle(fontSize: SSC.p16)),
+                            ),
+                            DropdownMenuItem(
+                              value: EventType.both,
+                              child: Text('All',
+                                  style: TextStyle(fontSize: SSC.p16)),
+                            ),
+                          ],
                         ),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Event> events = snapshot.data!;
-                  if (isSortedByDate) {
-                    sortEventsByDate(events);
-                  } else {
-                    events.sort((a, b) => a.date!.compareTo(b.date!));
-                  }
-                  List<Event> selectedDayEvents =
-                      getEventsForDay(_selectedDay, events);
-                  if (selectedDayEvents.isEmpty) {
-                    return const Center(
-                      child: Text("You don't have events"),
-                    );
-                  } else {
-                    return ListView.builder(
-                      itemCount: selectedDayEvents.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: EventCard(event: selectedDayEvents[index]),
-                        );
+                        const Text(
+                          "Upcoming Events",
+                          style: TextStyle(
+                            fontSize: SSC.p16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TableCalendar(
+                    firstDay: DateTime.utc(2020, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    focusedDay: _focusedDay,
+                    calendarFormat: _calendarFormat,
+                    selectedDayPredicate: (day) {
+                      return isSameDay(_selectedDay, day);
+                    },
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onFormatChanged: (format) {
+                      if (_calendarFormat != format) {
+                        setState(() {
+                          _calendarFormat = format;
+                        });
+                      }
+                    },
+                    onPageChanged: (focusedDay) {
+                      _focusedDay = focusedDay;
+                    },
+                    calendarStyle: CalendarStyle(
+                      selectedDecoration: const BoxDecoration(
+                        color: Palette.MAIN,
+                        shape: BoxShape.circle,
+                      ),
+                      todayDecoration: BoxDecoration(
+                        color: Palette.MAIN.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      weekendTextStyle: const TextStyle(color: Palette.MAIN),
+                      selectedTextStyle: const TextStyle(color: Colors.white),
+                      todayTextStyle: const TextStyle(color: Colors.white),
+                    ),
+                    daysOfWeekStyle: const DaysOfWeekStyle(
+                      weekendStyle: TextStyle(color: Palette.MAIN),
+                    ),
+                    headerStyle: const HeaderStyle(
+                      titleCentered: true,
+                      formatButtonVisible: false,
+                      titleTextStyle:
+                          TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
+                      leftChevronIcon: Icon(
+                        Icons.chevron_left,
+                        color: Palette.MAIN,
+                      ),
+                      rightChevronIcon: Icon(
+                        Icons.chevron_right,
+                        color: Palette.MAIN,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: StreamBuilder<List<Event>>(
+                      stream: selectedEventType == EventType.userOwned
+                          ? ooBloc.getUserOwnedEventsSubject.stream
+                          : selectedEventType == EventType.club
+                              ? ooBloc.getClubEventsSubject.stream
+                              : Rx.combineLatest2(
+                                  ooBloc.getUserOwnedEventsSubject.stream,
+                                  ooBloc.getClubEventsSubject.stream,
+                                  (List<Event> userEvents,
+                                          List<Event> clubEvents) =>
+                                      userEvents + clubEvents,
+                                ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          List<Event> events = snapshot.data!;
+                          if (isSortedByDate) {
+                            sortEventsByDate(events);
+                          } else {
+                            events.sort((a, b) => a.date!.compareTo(b.date!));
+                          }
+                          List<Event> selectedDayEvents =
+                              getEventsForDay(_selectedDay, events);
+                          if (selectedDayEvents.isEmpty) {
+                            return const Center(
+                              child: Text("You don't have events"),
+                            );
+                          } else {
+                            return ListView.builder(
+                              itemCount: selectedDayEvents.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: EventCard(
+                                      event: selectedDayEvents[index]),
+                                );
+                              },
+                            );
+                          }
+                        } else if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        } else {
+                          if (snapshot.data != null &&
+                              snapshot.data!.isNotEmpty) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            return const Center(
+                                child: Text("You don't have events"));
+                          }
+                        }
                       },
-                    );
-                  }
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  if (snapshot.data != null && snapshot.data!.isNotEmpty) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else {
-                    return const Center(child: Text("You don't have events"));
-                  }
-                }
-              },
-            ),
-          ),
-        ],
-      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+          }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddEventModal(context);
@@ -236,8 +267,7 @@ void _showAddEventModal(BuildContext context) {
   TextEditingController locationController = TextEditingController();
 
   int? selectedClubId;
-  int? userProfileId =
-      ooBloc.userProfileSubject.value?.id; 
+  int? userProfileId = ooBloc.userProfileSubject.value?.id;
 
   String? _validateDescription(String? value) {
     if (value == null || value.isEmpty) {
@@ -250,20 +280,18 @@ void _showAddEventModal(BuildContext context) {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate:  DateTime.now(),
+      firstDate: DateTime.now(),
       lastDate: DateTime(2101),
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.light().copyWith(
             colorScheme: const ColorScheme.light(
-              primary:
-                  Palette.MAIN, 
-              onPrimary: Colors.white, 
-              surface: Palette.MAIN, 
-              onSurface: Colors.black, 
+              primary: Palette.MAIN,
+              onPrimary: Colors.white,
+              surface: Palette.MAIN,
+              onSurface: Colors.black,
             ),
-            dialogBackgroundColor:
-                Colors.white, 
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
@@ -278,14 +306,12 @@ void _showAddEventModal(BuildContext context) {
           return Theme(
             data: ThemeData.light().copyWith(
               colorScheme: const ColorScheme.light(
-                primary: Palette
-                    .MAIN, 
-                onPrimary: Colors.white, 
-                surface: Colors.white, 
-                onSurface: Colors.black, 
+                primary: Palette.MAIN,
+                onPrimary: Colors.white,
+                surface: Colors.white,
+                onSurface: Colors.black,
               ),
-              dialogBackgroundColor:
-                  Colors.white,
+              dialogBackgroundColor: Colors.white,
             ),
             child: child!,
           );
@@ -492,7 +518,7 @@ void _showAddEventModal(BuildContext context) {
                             backgroundColor: Palette.BACKGROUND,
                             side: const BorderSide(color: Palette.MAIN)),
                         onPressed: () {
-                          Navigator.pop(context); 
+                          Navigator.pop(context);
                         },
                         child: Text(
                           LU.of(context).action_cancel,
@@ -526,7 +552,6 @@ void _showAddEventModal(BuildContext context) {
                             setState(() {});
 
                             Navigator.pop(context);
-
                           }
                         },
                         child: Text(

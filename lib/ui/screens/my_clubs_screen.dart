@@ -171,9 +171,9 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                             await ooBloc.getJoinRequests(
                                                 selectedClubId);
 
-                                            if (!isDialogOpen) {
+                                            
                                               showUserProfileDialog();
-                                            }
+                                            
                                           }
                                         },
                                         child: const Text('Requests'),
@@ -229,7 +229,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
 
     isDialogOpen = true;
 
-    joinRequests = ooBloc.joinRequestListSubject.value;
+joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
     pendingRequests =
         joinRequests.where((request) => request.status == 'pending').toList();
 

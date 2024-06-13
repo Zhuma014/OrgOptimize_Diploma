@@ -103,6 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 
   void _onDeleteAccount() {
+      if (!mounted) return;
     
        showCustomDialog(
         context: context,
@@ -112,11 +113,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
         negativeText: LU.of(context).action_cancel,
         onPositivePressed: () {
           ooBloc.deleteProfileSubject.listen((event) {
+                    if (!mounted) return;
+
             PreferencesManager.instance.wipeOut();
             Navigator.of(context).pushAndRemoveUntil(
-    MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
-    (route) => false,
-  );
+        MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
+        (route) => false,
+        );
   
 
           });

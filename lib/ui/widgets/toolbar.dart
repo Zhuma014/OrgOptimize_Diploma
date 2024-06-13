@@ -108,8 +108,7 @@ class Toolbar extends StatelessWidget {
                   ),
                 ),
                 onTap: () {
-                   Navigator.pushNamed(
-                                      context, Navigation.EDIT_USER_PROFILE);
+                  Navigator.pushNamed(context, Navigation.EDIT_USER_PROFILE);
                 },
               ),
           ],
@@ -198,7 +197,11 @@ void showMessageBottomSheet(BuildContext context) {
                           style: TextStyle(color: Colors.red),
                         ),
                       );
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    } else if (!snapshot.hasData ||
+                        snapshot.data!.isEmpty ||
+                        (snapshot.data!.length == 1 &&
+                            snapshot.data!.first.id ==
+                                ooBloc.userProfileSubject.value?.id)) {
                       return Center(
                         child: Text(
                           'No users found',
@@ -206,7 +209,6 @@ void showMessageBottomSheet(BuildContext context) {
                         ),
                       );
                     }
-
                     List<UserProfile> users = snapshot.data!;
                     users = users
                         .where((user) =>
@@ -255,14 +257,25 @@ void showMessageBottomSheet(BuildContext context) {
                                       ),
                                       elevation: 2,
                                       child: ListTile(
-                                        title: Text(
-                                          user.fullName!,
-                                          style: TextStyle(color: Palette.MAIN),
-                                        ),
-                                        onTap: () async {
+                                          title: Text(
+                                            user.fullName!,
+                                            style:
+                                                TextStyle(color: Palette.MAIN),
+                                          ),
+                                         onTap: () async {
   if (!isSelecting) {
     Navigator.pop(context);
-    ChatRoom? existingChatRoom = await ooBloc.getExistingPrivateChatRoom(user.id!);
+
+    final userId = user.id;
+    final currentUserProfile = ooBloc.userProfileSubject.value;
+    final currentUserId = currentUserProfile?.id;
+
+    if (userId == null || currentUserId == null) {
+      // Handle the case where userId or currentUserId is null
+      return;
+    }
+
+    ChatRoom? existingChatRoom = await ooBloc.getExistingPrivateChatRoom(userId);
     if (existingChatRoom != null) {
       Navigator.push(
         context,
@@ -275,35 +288,40 @@ void showMessageBottomSheet(BuildContext context) {
       });
     } else {
       // Create the new chat room
-      String roomName = '${ooBloc.userProfileSubject.value?.fullName}:${user.fullName!}';
-      String roomDescription = '${ooBloc.userProfileSubject.value?.id}:${user.id!}';
+      String roomName = '${currentUserProfile?.fullName}:${user.fullName}';
+      String roomDescription = '${currentUserId}:${userId}';
 
-      ChatRoom newChatRoom = await ooBloc.createChatRoom(
+      ChatRoom? newChatRoom = await ooBloc.createChatRoom(
         roomName,
         roomDescription,
         "private",
-        [user.id!],
+        [userId],
       );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(chatRoomId: newChatRoom.id!),
-        ),
-      ).then((_) async {
-        await ooBloc.getChatRooms();
-        List<Message> messages = await ooBloc.getChatRoomMessages(newChatRoom.id!);
-        if (messages.isEmpty) {
-          await ooBloc.deleteChatRoom(newChatRoom.id!);
-          await ooBloc.getChatRooms(); // Refresh the chat rooms list after deletion
-        }
-      });
+      if (newChatRoom != null) {
+        // Wait for 3 seconds before navigating to the new chat room
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ChatScreen(chatRoomId: newChatRoom.id!),
+          ),
+        ).then((_) async {
+          await ooBloc.getChatRooms();
+          List<Message> messages = await ooBloc.getChatRoomMessages(newChatRoom.id!);
+          if (messages.isEmpty) {
+            await ooBloc.deleteChatRoom(newChatRoom.id!);
+            await ooBloc.getChatRooms(); // Refresh the chat rooms list after deletion
+          }
+        });
+      } else {
+        // Handle the case where chat room creation failed
+        print('Failed to create chat room');
+      }
     }
   }
 }
-
-
-                                      ),
+),
                                     );
                                   }).toList(),
                               ],
@@ -320,9 +338,9 @@ void showMessageBottomSheet(BuildContext context) {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                       
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Palette.MAIN),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Palette.MAIN),
                           child: Text("Start messaging"),
                           onPressed: selectedUsers.isNotEmpty
                               ? () {

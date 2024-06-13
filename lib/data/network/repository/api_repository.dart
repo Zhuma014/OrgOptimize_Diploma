@@ -24,7 +24,6 @@ import '../../models/club/club_events.dart';
 const String TAG = 'ApiRepository';
 
 class ApiRepository {
-
   static const SIGN_IN = '/login';
   static const SIGN_OUT = '/signout';
   static const SIGN_UP = '/register';
@@ -35,6 +34,7 @@ class ApiRepository {
   static const USER_CLUBS = '/clubs/user-clubs';
   static const USER_PROFILE = '/whoami';
   static const USER = '/users/';
+  static const USER_IS_CONFIRMED = '/users/is_confirmed';
   static const JOIN_REQUEST = '/join/';
   static const JOIN_REQUESTS_LIST = '/join/requests/';
   static const APPROVE_JOIN_REQUEST =
@@ -96,19 +96,19 @@ class ApiRepository {
       throw 'Failed to sign up: $e';
     }
   }
+
   Future<void> signOut() async {
-  final fcmToken =  PreferencesManager.instance.getFirebaseMessagingToken();
-  try {
-         FormData formData = FormData.fromMap(
-          {'fcm_token': fcmToken});
-    await _dioService.delete(
-      path: SIGN_OUT,
-      data: formData, 
-    );
-  } catch (e) {
-    print('An error occurred while signing out: $e');
+    final fcmToken = PreferencesManager.instance.getFirebaseMessagingToken();
+    try {
+      FormData formData = FormData.fromMap({'fcm_token': fcmToken});
+      await _dioService.delete(
+        path: SIGN_OUT,
+        data: formData,
+      );
+    } catch (e) {
+      print('An error occurred while signing out: $e');
+    }
   }
-}
 
   Future<UserProfile> getUserProfile() async {
     try {
@@ -117,6 +117,56 @@ class ApiRepository {
     } catch (e) {
       Logger.d(TAG, 'getUserProfile() -> e:$e');
       throw 'Failed to get user profile: $e';
+    }
+  }
+
+  Future<bool> getEmailConfirmationStatus() async {
+    try {
+      final response = await _dioService.get(path: USER_IS_CONFIRMED);
+      return response['confirmed_email'];
+    } catch (e) {
+      Logger.d(TAG, 'getEmailConfirmationStatus() -> e:$e');
+      throw 'Failed to get email confirmation status: $e';
+    }
+  }
+
+  Future<bool> sendConfirmationEmail({
+    required String email,
+  }) async {
+    try {
+      final response = await _dioService.post(
+        path: '/mail/send-confirmation-email',
+        body: {
+          'email': email,
+        },
+      );
+
+      if (response.containsKey("detail")) {
+        return false;
+      }
+      return true;
+    } catch (e) {
+      Logger.d(TAG, 'sendConfirmationEmail() -> e:$e');
+      throw 'Failed to send confirmation email: $e';
+    }
+  }
+
+  Future<bool> resetPassword({required String email}) async {
+    try {
+      final response = await _dioService.post(
+        path: '/mail/send-password-reset-email',
+        body: {'email': email},
+      );
+
+      print("RESPONSE: $response");
+      
+if (response.toString().contains('User not found')) {
+  return false;
+}
+
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -196,11 +246,11 @@ class ApiRepository {
       );
     } catch (e) {
       Logger.d(TAG, 'changeAdmin() -> e: $e');
-      throw 'Failed to change admin: $e'; 
+      throw 'Failed to change admin: $e';
     }
   }
 
-    Future<void> changeChatRoomOwner(int roomId, int newOwnerId) async {
+  Future<void> changeChatRoomOwner(int roomId, int newOwnerId) async {
     try {
       final requestBody = {
         "new_owner_id": newOwnerId,
@@ -211,7 +261,7 @@ class ApiRepository {
       );
     } catch (e) {
       Logger.d(TAG, 'changeChatRoomOwner() -> e: $e');
-      throw 'Failed to change chat room owner: $e'; 
+      throw 'Failed to change chat room owner: $e';
     }
   }
 
@@ -247,22 +297,22 @@ class ApiRepository {
     }
   }
 
-    Future<ChatRoom> updateChatRoom(int roomId, String name, String description,String type, List<int>? chosenMembers ) async {
-       final Map<String, dynamic> data = {
-    'name': name,
-    'description': description,
-    'type': type,
-  };
+  Future<ChatRoom> updateChatRoom(int roomId, String name, String description,
+      String type, List<int>? chosenMembers) async {
+    final Map<String, dynamic> data = {
+      'name': name,
+      'description': description,
+      'type': type,
+    };
 
-  if (chosenMembers != null) {
-    data['chosen_members'] = chosenMembers;
-  }
+    if (chosenMembers != null) {
+      data['chosen_members'] = chosenMembers;
+    }
 
     try {
       final response = await _dioService.put(
         path: '$CHAT_ROOMS/$roomId',
-             body: data,
-
+        body: data,
       );
       return ChatRoom.fromJson(response);
     } catch (e) {
@@ -282,7 +332,7 @@ class ApiRepository {
     }
   }
 
-    Future<void> deleteChatRoom(int roomId) async {
+  Future<void> deleteChatRoom(int roomId) async {
     try {
       await _dioService.delete(
         path: '$CHAT_ROOMS/$roomId',
@@ -303,7 +353,7 @@ class ApiRepository {
     }
   }
 
-    Future<bool> leaveChatRoom(int roomId) async {
+  Future<bool> leaveChatRoom(int roomId) async {
     try {
       await _dioService.delete(path: '$CHAT_ROOMS/$roomId/leave');
       return true;
@@ -481,7 +531,7 @@ class ApiRepository {
       return JoinRequest.fromJson(response);
     } catch (e) {
       Logger.d(TAG, 'joinClub() -> e: $e');
-      throw 'Failed to join a club: $e'; 
+      throw 'Failed to join a club: $e';
     }
   }
 
@@ -512,11 +562,10 @@ class ApiRepository {
             .replaceFirst('{club_id}', clubId.toString())
             .replaceFirst('{request_id}', requestId.toString()),
       );
-      return JoinRequest.fromJson(
-          response); 
+      return JoinRequest.fromJson(response);
     } catch (e) {
       Logger.d(TAG, 'approveJoinRequest() -> e: $e');
-      throw 'Failed to approve join request: $e'; 
+      throw 'Failed to approve join request: $e';
     }
   }
 
@@ -527,11 +576,10 @@ class ApiRepository {
             .replaceFirst('{club_id}', clubId.toString())
             .replaceFirst('{request_id}', requestId.toString()),
       );
-      return JoinRequest.fromJson(
-          response); 
+      return JoinRequest.fromJson(response);
     } catch (e) {
       Logger.d(TAG, 'rejectJoinRequest() -> e: $e');
-      throw 'Failed to reject join request: $e'; 
+      throw 'Failed to reject join request: $e';
     }
   }
 
@@ -541,7 +589,7 @@ class ApiRepository {
       Map<String, dynamic> body = {
         "name": name,
         "description": description,
-        "type": type, 
+        "type": type,
         "chosen_members": chosenMembers,
       };
 
@@ -574,31 +622,29 @@ class ApiRepository {
     }
   }
 
+  Future<List<Message>> getChatRoomMessages(int roomId) async {
+    try {
+      final response = await _dioService.get(
+          path:
+              CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
 
-Future<List<Message>> getChatRoomMessages(int roomId) async {
-  try {
-    final response = await _dioService.get(
-        path: CHAT_ROOM_MESSAGES.replaceFirst('{room_id}', roomId.toString()));
+      Logger.d(TAG, 'getChatRoomMessages() -> response: $response');
 
-    Logger.d(TAG, 'getChatRoomMessages() -> response: $response');
-
-    if (response is List) {
-      return response.map((json) => Message.fromJson(json)).toList();
-    } else if (response is Map<String, dynamic>) {
-      List<dynamic> messageList = response['messages'];
-      return messageList.map((json) => Message.fromJson(json)).toList();
-    } else if (response == null) {
+      if (response is List) {
+        return response.map((json) => Message.fromJson(json)).toList();
+      } else if (response is Map<String, dynamic>) {
+        List<dynamic> messageList = response['messages'];
+        return messageList.map((json) => Message.fromJson(json)).toList();
+      } else if (response == null) {
+        return [];
+      } else {
+        throw 'Unexpected response format';
+      }
+    } catch (e) {
+      Logger.d(TAG, 'getChatRoomMessages() -> e:$e');
       return [];
-    } else {
-      throw 'Unexpected response format';
     }
-  } catch (e) {
-    Logger.d(TAG, 'getChatRoomMessages() -> e:$e');
-    return [];  
   }
-}
-
-
 
   Future<List<ChatRoomMember>> getChatRoomMembers(int roomId) async {
     try {
