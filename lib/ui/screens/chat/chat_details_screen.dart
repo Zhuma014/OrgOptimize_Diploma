@@ -8,6 +8,7 @@ import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class ChatDetailsScreen extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -59,7 +60,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       if (updatedChatRoom != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Chat room updated successfully'),
+            content: Text(LU.of(context).chat_room_updated_successfully),
             backgroundColor: Palette.MAIN,
           ),
         );
@@ -72,7 +73,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update chat room'),
+            content: Text(LU.of(context).failed_to_update_chat_room),
             backgroundColor: Colors.red,
           ),
         );
@@ -84,7 +85,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     await ooBloc.changeChatRoomOwner(widget.chatRoom.id!, newOwnerId).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Chat room owner changed successfully!'),
+          content: Text(LU.of(context).changed_successfully),
           backgroundColor: Palette.MAIN,
         ),
       );
@@ -97,7 +98,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     await ooBloc.deleteChatRoomMember(widget.chatRoom.id!, memberId).then((_) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Member deleted successfully!'),
+          content: Text(LU.of(context).deleted_successfully),
           backgroundColor: Palette.MAIN,
         ),
       );
@@ -119,7 +120,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         await ooBloc.deleteChatRoom(chatRoomId).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Chat room deleted successfully!'),
+                content: Text(LU.of(context).deleted_successfully),
                 backgroundColor: Colors.red),
           );
         });
@@ -140,7 +141,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         await ooBloc.leaveChatRoom(chatRoomId).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text('Chat room left successfully!'),
+                content: Text(LU.of(context).left_successfully),
                 backgroundColor: Colors.red),
           );
         });
@@ -174,7 +175,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                   children: [
                     
                     Text(
-                      'Select users to add',
+                      LU.of(context).select_users_to_add,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -242,7 +243,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                     if (filteredUsers.isEmpty) {
                       return Center(
                         child: Text(
-                          'All users are in this chat room.',
+                          LU.of(context).all_in_this_chat_room,
                           style: TextStyle(color: Palette.MAIN),
                         ),
                       );
@@ -312,7 +313,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                                 Navigator.of(context).pop();
                               }
                             : null,
-                        child: Text('Add Selected Users'),
+                        child: Text(LU.of(context).add_selected_users),
                       ),
                     ],
                   ),
@@ -335,7 +336,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text(widget.chatRoom.name ?? 'Chat Details'),
+        title: Text(widget.chatRoom.name ?? LU.of(context).chat_details),
         backgroundColor: Palette.MAIN,
         actions: [
           if (currentUserIsOwner &&
@@ -356,7 +357,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         ],
       ),
       body: widget.chatRoom.type == 'private'
-          ? Center(child: Text('No details available for private chats.'))
+          ? Center(child: Text(LU.of(context).no_details_for_private_chats))
           : Form(
               key: _formKey,
               child: Padding(
@@ -392,7 +393,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'Members',
+                      LU.of(context).members,
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -413,7 +414,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                                     style: TextStyle(color: Colors.red)));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
-                            return Center(child: Text('No members found.'));
+                            return Center(child: Text(LU.of(context).no_members_found));
                           }
                     
                           List<ChatRoomMember> members = snapshot.data!;
@@ -467,13 +468,13 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         },
         itemBuilder: (BuildContext context) =>
             <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'delete',
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(LU.of(context).delete, style: TextStyle(color: Colors.red)),
           ),
-          const PopupMenuItem<String>(
+          PopupMenuItem<String>(
             value: 'change_owner',
-            child: Text('Make Owner', style: TextStyle(color: Palette.MAIN)),
+            child: Text(LU.of(context).make_owner, style: TextStyle(color: Palette.MAIN)),
           ),
         ],
       )
@@ -500,7 +501,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                 }
               },
               child: Text(
-                currentUserIsOwner ? 'Delete Chat Room' : 'Leave Chat Room',
+                currentUserIsOwner ? LU.of(context).delete_chat_room : LU.of(context).leave_chat_room,
               ),
             ),
      ),

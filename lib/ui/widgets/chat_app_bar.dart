@@ -7,6 +7,7 @@ import 'package:urven/data/models/chat/chat_room_member.dart';
 import 'package:urven/ui/screens/chat/chat_details_screen.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int chatRoomId;
@@ -28,25 +29,25 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
               stream: ooBloc.getChatRoomsSubject,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Text(
-                    'Loading...',
-                    style: TextStyle(fontSize: SSC.p14, fontWeight: FontWeight.bold),
+                  return Text(
+                    LU.of(context).loading,
+                    style: const TextStyle(fontSize: SSC.p14, fontWeight: FontWeight.bold),
                   );
                 } else if (snapshot.hasError) {
                   print('Error fetching chat rooms: ${snapshot.error}');
-                  return const Text(
-                    'Error',
-                    style: TextStyle(fontSize: SSC.p14, fontWeight: FontWeight.bold),
+                  return Text(
+                    LU.of(context).error_occured,
+                    style: const TextStyle(fontSize: SSC.p14, fontWeight: FontWeight.bold),
                   );
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text(
-                    'Default Chat Room',
-                    style: TextStyle(fontSize: SSC.p14, fontWeight: FontWeight.bold),
+                  return Text(
+                    LU.of(context).default_chat_room,
+                    style: const TextStyle(fontSize: SSC.p14, fontWeight: FontWeight.bold),
                   );
                 } else {
                   ChatRoom? chatRoom = snapshot.data!.firstWhere(
                     (room) => room.id == chatRoomId,
-                    orElse: () => ChatRoom(id: -1, name: 'Default Chat Room'),
+                    orElse: () => ChatRoom(id: -1, name: LU.of(context).default_chat_room),
                   );
 
                   if (chatRoom.type == 'private') {
@@ -61,7 +62,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                     }
 
                     return Text(
-                      neighborName ?? 'Default Chat Room',
+                      neighborName ?? LU.of(context).default_chat_room,
                       style: const TextStyle(fontSize: SSC.p16, fontWeight: FontWeight.bold),
                     );
                   } else {
@@ -69,7 +70,7 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          chatRoom.name ?? 'Default Chat Room',
+                          chatRoom.name ?? LU.of(context).default_chat_room,
                           style: const TextStyle(fontSize: SSC.p16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: SSC.p4),
@@ -77,9 +78,9 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                           stream: ooBloc.getChatRoomMembersSubject,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState == ConnectionState.waiting) {
-                              return const Text(
-                                'Loading members...',
-                                style: TextStyle(fontSize: SSC.p12),
+                              return Text(
+                                LU.of(context).loading,
+                                style: const TextStyle(fontSize: SSC.p12),
                               );
                             } else if (snapshot.hasError) {
                               print('Error fetching chat room members: ${snapshot.error}');
@@ -88,16 +89,16 @@ class ChatAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 style: TextStyle(fontSize: SSC.p12),
                               );
                             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                              return const Text(
-                                'No members',
-                                style: TextStyle(fontSize: SSC.p12),
+                              return Text(
+                                LU.of(context).no_members_found,
+                                style: const TextStyle(fontSize: SSC.p12),
                               );
                             } else {
                               final memberNames = snapshot.data!
                                   .map((member) => member.fullName ?? 'Unknown')
                                   .toList();
                               return Text(
-                                'Members: ${memberNames.join(', ')}',
+                                '${LU.of(context).members}: ${memberNames.join(', ')}',
                                 style: const TextStyle(fontSize: SSC.p12),
                               );
                             }

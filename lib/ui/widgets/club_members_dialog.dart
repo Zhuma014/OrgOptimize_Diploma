@@ -6,6 +6,7 @@ import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/utils/common_dialog.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class ClubMembersDialog extends StatefulWidget {
   final int clubId;
@@ -41,13 +42,13 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(SSC.p50),
-              child: Text('No members found in ${widget.clubName}.'),
+              child: Text('${LU.of(context).no_members_found}: ${widget.clubName}.'),
             ),
           );
         } else {
           final members = snapshot.data!;
           return AlertDialog(
-            title: Text('Members of ${widget.clubName}'),
+            title: Text('${widget.clubName} ${LU.of(context).members}'),
             content: SingleChildScrollView(
               child: ListBody(
                 children: members.map((member) {
@@ -55,7 +56,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                     return ListTile(
                       title: Text(member.fullName!),
                       subtitle: Text(member.email!),
-                      trailing: const Text("You"),
+                      trailing: Text(LU.of(context).you),
                     );
                   } else {
                     return ListTile(
@@ -122,7 +123,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: const Text('Close'),
+                child: Text(LU.of(context).close),
               ),
             ],
           );

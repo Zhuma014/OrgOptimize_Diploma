@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/action_button.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 abstract class BaseScreenState<T extends StatefulWidget> extends State<T> {
   @override
@@ -22,7 +23,7 @@ abstract class BaseScreenState<T extends StatefulWidget> extends State<T> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              title == null || title.isEmpty ? 'Error occurred' : title,
+              title == null || title.isEmpty ? LU.of(context).error_occured : title,
               style: const TextStyle(
                 color: Palette.DARK_BLUE,
                 fontSize: SSC.p16,

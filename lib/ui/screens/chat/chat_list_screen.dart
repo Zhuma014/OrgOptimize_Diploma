@@ -11,6 +11,7 @@ import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/screen_size_configs.dart';
 import 'package:flutter/gestures.dart';
+import 'package:urven/utils/lu.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -61,13 +62,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(Icons.group, color: Colors.purple),
                           SizedBox(width: 8.0),
                           Text(
-                            'Club Chats',
-                            style: TextStyle(
+                            LU.of(context).club_chats,
+                            style: const TextStyle(
                               fontSize: 20.0,
                               fontWeight: FontWeight.bold,
                               color: Palette.DARK_BLUE,
@@ -97,8 +98,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      const Text(
-                                          'You are not a member of any club'),
+                                      Text(
+                                          LU.of(context).you_are_not_member),
                                       const SizedBox(height: SSC.p12),
                                       ElevatedButton(
                                         style: ElevatedButton.styleFrom(
@@ -108,8 +109,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           Navigator.pushNamed(
                                               context, Navigation.ALLCLUBS);
                                         },
-                                        child: const Text(
-                                          'Join Clubs',
+                                        child: Text(
+                                          LU.of(context).join_clubs,
                                           style: TextStyle(
                                               color: Palette.BACKGROUND),
                                         ),
@@ -156,13 +157,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           ),
                         ],
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
                           Icon(Icons.groups, color: Colors.purple),
                           SizedBox(width: 8.0),
                           Text(
-                            'Group Chats',
-                            style: TextStyle(
+                            LU.of(context).group_chats,
+                            style: const TextStyle(
                               fontSize: 20.0,
                               fontWeight: FontWeight.bold,
                               color: Palette.DARK_BLUE,
@@ -190,12 +191,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'You do not have group chats, ',
+                                          text: LU.of(context).no_group_chats,
                                           style: DefaultTextStyle.of(context)
                                               .style,
                                           children: [
                                             TextSpan(
-                                              text: 'start messaging',
+                                              text: LU.of(context).start_messaging,
                                               style: const TextStyle(
                                                 color: Palette.MAIN,
                                                 decoration:
@@ -224,12 +225,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'You do not have group chats, ',
+                                          text: LU.of(context).no_group_chats,
                                           style: DefaultTextStyle.of(context)
                                               .style,
                                           children: [
                                             TextSpan(
-                                              text: 'start messaging',
+                                              text: LU.of(context).start_messaging,
                                               style: const TextStyle(
                                                 color: Palette.MAIN,
                                                 decoration:
@@ -264,12 +265,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'You do not have group chats, ',
+                                          text: LU.of(context).no_group_chats,
                                           style: DefaultTextStyle.of(context)
                                               .style,
                                           children: [
                                             TextSpan(
-                                              text: 'start messaging',
+                                              text: LU.of(context).start_messaging,
                                               style: const TextStyle(
                                                 color: Palette.MAIN,
                                                 decoration:
@@ -334,13 +335,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                               ),
                             ],
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
                               Icon(Icons.person, color: Colors.purple),
                               SizedBox(width: 8.0),
                               Text(
-                                'Private Chats',
-                                style: TextStyle(
+                                LU.of(context).private_chats,
+                                style: const TextStyle(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.bold,
                                   color: Palette.DARK_BLUE,
@@ -365,12 +366,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'You do not have private chats, ',
+                                          text: LU.of(context).no_private_chats,
                                           style: DefaultTextStyle.of(context)
                                               .style,
                                           children: [
                                             TextSpan(
-                                              text: 'start messaging',
+                                              text: LU.of(context).start_messaging,
                                               style: const TextStyle(
                                                 color: Palette.MAIN,
                                                 decoration:
@@ -399,12 +400,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'You do not have private chats, ',
+                                          text: LU.of(context).no_private_chats,
                                           style: DefaultTextStyle.of(context)
                                               .style,
                                           children: [
                                             TextSpan(
-                                              text: 'start messaging',
+                                              text: LU.of(context).start_messaging,
                                               style: const TextStyle(
                                                 color: Palette.MAIN,
                                                 decoration:
@@ -438,12 +439,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'You do not have private chats, ',
+                                          text: LU.of(context).no_private_chats,
                                           style: DefaultTextStyle.of(context)
                                               .style,
                                           children: [
                                             TextSpan(
-                                              text: 'start messaging',
+                                              text: LU.of(context).start_messaging,
                                               style: const TextStyle(
                                                 color: Palette.MAIN,
                                                 decoration:
@@ -615,7 +616,7 @@ class ClubListItem extends StatelessWidget {
       contentPadding:
           const EdgeInsets.symmetric(horizontal: SSC.p16, vertical: SSC.p8),
       title: Text(
-        club.name ?? 'Unnamed Club',
+        club.name ?? LU.of(context).unknown_club,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(

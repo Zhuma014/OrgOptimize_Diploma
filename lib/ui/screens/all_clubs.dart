@@ -9,6 +9,7 @@ import 'package:urven/data/models/club/club.dart';
 import 'package:urven/ui/theme/palette.dart';
 import 'package:urven/ui/widgets/toolbar.dart';
 import 'package:urven/utils/screen_size_configs.dart';
+import 'package:urven/utils/lu.dart';
 
 class ClubsScreen extends StatefulWidget {
   const ClubsScreen({Key? key}) : super(key: key);
@@ -24,7 +25,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
   TextEditingController searchController = TextEditingController();
   StreamSubscription<List<Club>>? userClubsSubscription;
   bool isLoading = false;
-  Map<int, bool> loadingClubs = {}; 
+  Map<int, bool> loadingClubs = {};
   StreamSubscription? _createClubSubscription;
 
   @override
@@ -34,7 +35,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
     ooBloc.getAllClubs();
     ooBloc.getUserClubs();
     searchController.addListener(_filterClubs);
-    _loadPendingRequests(); 
+    _loadPendingRequests();
 
     userClubsSubscription =
         ooBloc.getUserClubsSubject.stream.listen(_updateUserClubs);
@@ -94,16 +95,16 @@ class _ClubsScreenState extends State<ClubsScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text(
-              'Join a Club',
-              style: TextStyle(
+            title: Text(
+              LU.of(context).join_the_club,
+              style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: SSC.p20,
               ),
             ),
-            content: const Text(
-              'Do you really want to join this club?',
+            content: Text(
+              LU.of(context).really_want_to_join,
               style: TextStyle(
                 color: Colors.black,
                 fontSize: SSC.p16,
@@ -114,8 +115,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                child: const Text(
-                  'Cancel',
+                child: Text(
+                  LU.of(context).action_cancel,
                   style: TextStyle(
                     color: Colors.grey,
                     fontSize: SSC.p16,
@@ -127,8 +128,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                   Navigator.pop(context);
                   _handleJoinClub(clubId);
                 },
-                child: const Text(
-                  'Join',
+                child: Text(
+                  LU.of(context).join,
                   style: TextStyle(
                     color: Palette.MAIN,
                     fontSize: SSC.p16,
@@ -155,8 +156,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
       });
       _savePendingRequests(); // Save pending requests to SharedPreferences
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Your join request is pending."),
+        SnackBar(
+          content: Text(LU.of(context).request_pending),
           backgroundColor: Palette.MAIN,
         ),
       );
@@ -292,9 +293,9 @@ class _ClubsScreenState extends State<ClubsScreen> {
                     });
 
                     if (filteredClubs.isEmpty) {
-                      return const Center(
+                      return Center(
                         child: Text(
-                          'No clubs available',
+                          LU.of(context).no_clubs_available,
                           style: TextStyle(
                             color: Palette.MAIN,
                           ),
@@ -327,18 +328,18 @@ class _ClubsScreenState extends State<ClubsScreen> {
                             ),
                           ),
                           trailing: isClubCreatedByUser
-                              ? const Text(
-                                  'Admin',
+                              ? Text(
+                                  LU.of(context).admin,
                                   style: TextStyle(color: Colors.red),
                                 )
                               : isUserClubMember
-                                  ? const Text(
-                                      'Member',
+                                  ? Text(
+                                      LU.of(context).member,
                                       style: TextStyle(color: Colors.green),
                                     )
                                   : isPending
-                                      ? const Text(
-                                          'Requested',
+                                      ? Text(
+                                          LU.of(context).requested,
                                           style: TextStyle(color: Colors.grey),
                                         )
                                       : loadingClubs[club.id] == true
@@ -357,8 +358,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                                                 _openJoinClubModal(
                                                     context, club.id!);
                                               },
-                                              child: const Text(
-                                                'Join',
+                                              child: Text(
+                                                LU.of(context).join,
                                                 style: TextStyle(
                                                     color: Colors.blue),
                                               ),
@@ -393,8 +394,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text(
-                'Create a Club',
+              title: Text(
+                LU.of(context).create_club,
                 style:
                     TextStyle(fontSize: SSC.p20, fontWeight: FontWeight.bold),
               ),
@@ -464,8 +465,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: const Text(
-                        'Cancel',
+                      child: Text(
+                        LU.of(context).action_cancel,
                         style: TextStyle(color: Colors.grey, fontSize: SSC.p16),
                       ),
                     ),
@@ -477,8 +478,8 @@ class _ClubsScreenState extends State<ClubsScreen> {
                               Navigator.pop(context);
                             }
                           : null,
-                      child: const Text(
-                        'Create',
+                      child: Text(
+                        LU.of(context).create,
                         style:
                             TextStyle(color: Palette.MAIN, fontSize: SSC.p16),
                       ),
@@ -494,18 +495,15 @@ class _ClubsScreenState extends State<ClubsScreen> {
   }
 
   void _performCreateClub(String name, String description) {
-
-
     // Call the createClub method
     ooBloc.createClub(name: name, description: description);
 
     // Set up a new subscription to handle the response
     _createClubSubscription = ooBloc.createClubSubject.stream.listen((value) {
-
       if (value.isValid) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Club created successfully'),
+          SnackBar(
+            content: Text(LU.of(context).club_created_successfully),
             backgroundColor: Palette.MAIN,
             duration: Duration(seconds: 2),
           ),
@@ -513,7 +511,7 @@ class _ClubsScreenState extends State<ClubsScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(value.exception ?? 'Failed to create club'),
+            content: Text(value.exception ?? LU.of(context).failed_club_create),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 2),
           ),

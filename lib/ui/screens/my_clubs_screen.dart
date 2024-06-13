@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:urven/data/bloc/org_optimize_bloc.dart';
 import 'package:urven/data/models/club/club.dart';
 import 'package:urven/data/models/user/join_request.dart';
-
+import 'package:urven/utils/lu.dart';
 import 'package:urven/data/models/user/user_profile.dart';
 import 'package:urven/ui/screens/navigation.dart';
 import 'package:urven/ui/theme/palette.dart';
@@ -109,8 +109,8 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
-                                  'You are not a member of any club, please create your own club or be the member of'),
+                              Text(
+                                  LU.of(context).you_are_not_member),
                               const SizedBox(height: SSC.p16),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
@@ -119,7 +119,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                   Navigator.pushNamed(
                                       context, Navigation.ALLCLUBS);
                                 },
-                                child: const Text('Join Clubs'),
+                                child: Text(LU.of(context).join_clubs),
                               ),
                             ],
                           ),
@@ -142,7 +142,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      isAdmin ? '' : 'You are Member',
+                                      isAdmin ? '' : LU.of(context).you_are_member,
                                       style:
                                           const TextStyle(color: Palette.MAIN),
                                     ),
@@ -176,7 +176,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                             
                                           }
                                         },
-                                        child: const Text('Requests'),
+                                        child: Text(LU.of(context).requests),
                                       ),
                                     if (isAdmin)
                                       const SizedBox(
@@ -207,7 +207,7 @@ class _MyClubsScreenState extends State<MyClubsScreen> {
                                             ),
                                           );
                                         },
-                                        child: const Text('Members'),
+                                        child: Text(LU.of(context).members),
                                       ),
                                   ],
                                 ),
@@ -244,8 +244,8 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Join Requests',
+                    Text(
+                      LU.of(context).join_requests,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: SSC.p20,
@@ -268,10 +268,10 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                     mainAxisSize: MainAxisSize.min,
                     children: numRequests == 0
                         ? [
-                            const Padding(
+                            Padding(
                               padding: EdgeInsets.all(SSC.p16),
                               child: Text(
-                                'There are no requests',
+                                LU.of(context).no_requests,
                                 style: TextStyle(
                                   fontStyle: FontStyle.italic,
                                   color: Colors.grey,
@@ -286,12 +286,12 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return const ListTile(
-                                    title: Text('Loading user info...'),
+                                  return ListTile(
+                                    title: Text(LU.of(context).loading_info),
                                   );
                                 } else if (snapshot.hasError) {
-                                  return const ListTile(
-                                    title: Text('Error loading user info'),
+                                  return  ListTile(
+                                    title: Text(LU.of(context).loadingerror),
                                   );
                                 } else if (snapshot.hasData &&
                                     snapshot.data != null) {
@@ -300,13 +300,13 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                                       builder: (context, setState) {
                                     return ListTile(
                                       title: Text(
-                                          'User: ${userProfile.fullName ?? 'Unknown'}'),
+                                          '${LU.of(context).user}: ${userProfile.fullName ?? LU.of(context).unknown}'),
                                       subtitle:
-                                          Text('Request ID: ${request.id}'),
+                                          Text('${LU.of(context).request_id}: ${request.id}'),
                                       trailing: request.status == 'approved'
-                                          ? const Text('Approved')
+                                          ? Text(LU.of(context).approved)
                                           : request.status == 'rejected'
-                                              ? const Text('Rejected')
+                                              ? Text(LU.of(context).rejected)
                                               : Row(
                                                   mainAxisSize:
                                                       MainAxisSize.min,
@@ -344,8 +344,8 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                                     );
                                   });
                                 } else {
-                                  return const ListTile(
-                                    title: Text('User not found'),
+                                  return ListTile(
+                                    title: Text(LU.of(context).user_not_found),
                                   );
                                 }
                               },
@@ -355,7 +355,7 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: const Text('Close'),
+                    child: Text(LU.of(context).close),
                     onPressed: () {
                       setState(() {
                         isDialogOpen = false;
