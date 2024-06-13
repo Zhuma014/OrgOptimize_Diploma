@@ -120,7 +120,7 @@ class Toolbar extends StatelessWidget {
   }
 }
 
-void showMessageBottomSheet(BuildContext context) {
+void showMessageBottomSheet(BuildContext scaffoldContext) {
   List<UserProfile> selectedUsers = [];
   bool isSelecting = false;
   String searchQuery = '';
@@ -128,7 +128,7 @@ void showMessageBottomSheet(BuildContext context) {
   ooBloc.getAllUsers();
 
   showModalBottomSheet(
-    context: context,
+    context: scaffoldContext,
     backgroundColor: Palette.BACKGROUND,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -264,66 +264,86 @@ void showMessageBottomSheet(BuildContext context) {
                                             style:
                                                 TextStyle(color: Palette.MAIN),
                                           ),
-                                         onTap: () async {
-  if (!isSelecting) {
-    Navigator.pop(context);
+                                          onTap: () async {
+                                            if (!isSelecting) {
+                                              Navigator.pop(scaffoldContext);
 
-    final userId = user.id;
-    final currentUserProfile = ooBloc.userProfileSubject.value;
-    final currentUserId = currentUserProfile?.id;
+                                              final userId = user.id;
+                                              final currentUserProfile = ooBloc
+                                                  .userProfileSubject.value;
+                                              final currentUserId =
+                                                  currentUserProfile?.id;
 
-    if (userId == null || currentUserId == null) {
-      // Handle the case where userId or currentUserId is null
-      return;
-    }
+                                              if (userId == null ||
+                                                  currentUserId == null) {
+                                                // Handle the case where userId or currentUserId is null
+                                                return;
+                                              }
 
-    ChatRoom? existingChatRoom = await ooBloc.getExistingPrivateChatRoom(userId);
-    if (existingChatRoom != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatScreen(chatRoomId: existingChatRoom.id!),
-        ),
-      ).then((_) async {
-        await ooBloc.getChatRooms();
-        await ooBloc.getChatRoomMessages(existingChatRoom.id!);
-      });
-    } else {
-      // Create the new chat room
-      String roomName = '${currentUserProfile?.fullName}:${user.fullName}';
-      String roomDescription = '${currentUserId}:${userId}';
+                                              ChatRoom? existingChatRoom =
+                                                  await ooBloc
+                                                      .getExistingPrivateChatRoom(
+                                                          userId);
+                                              if (existingChatRoom != null) {
+                                                
+                                                Navigator.push(
+                                                  scaffoldContext,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ChatScreen(
+                                                            chatRoomId:
+                                                                existingChatRoom
+                                                                    .id!),
+                                                  ),
+                                                ).then((_) async {
+                                                  await ooBloc.getChatRooms();
+                                                  await ooBloc
+                                                      .getChatRoomMessages(
+                                                          existingChatRoom.id!);
+                                                });
+                                              } else {
+                                                // Create the new chat room
+                                                String roomName =
+                                                    '${currentUserProfile?.fullName}:${user.fullName}';
+                                                String roomDescription =
+                                                    '${currentUserId}:${userId}';
 
-      ChatRoom? newChatRoom = await ooBloc.createChatRoom(
-        roomName,
-        roomDescription,
-        "private",
-        [userId],
-      );
+                                                ChatRoom newChatRoom =
+                                                    await ooBloc.createChatRoom(
+                                                  roomName,
+                                                  roomDescription,
+                                                  "private",
+                                                  [userId],
+                                                );
 
-      if (newChatRoom != null) {
-        // Wait for 3 seconds before navigating to the new chat room
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatScreen(chatRoomId: newChatRoom.id!),
-          ),
-        ).then((_) async {
-          await ooBloc.getChatRooms();
-          List<Message> messages = await ooBloc.getChatRoomMessages(newChatRoom.id!);
-          if (messages.isEmpty) {
-            await ooBloc.deleteChatRoom(newChatRoom.id!);
-            await ooBloc.getChatRooms(); // Refresh the chat rooms list after deletion
-          }
-        });
-      } else {
-        // Handle the case where chat room creation failed
-        print('Failed to create chat room');
-      }
-    }
-  }
-}
-),
+                                                print(
+                                                    "CHATROOMID: ${newChatRoom.id}");
+                                                
+                                                 Navigator.push(
+                                                  scaffoldContext,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ChatScreen(
+                                                            chatRoomId:
+                                                                newChatRoom
+                                                                    .id!),
+                                                  ),
+                                                ).then((_) async {
+                                                  await ooBloc.getChatRooms();
+                                                  List<Message> messages =
+                                                      await ooBloc
+                                                          .getChatRoomMessages(
+                                                              newChatRoom.id!);
+                                                  if (messages.isEmpty) {
+                                                    await ooBloc.deleteChatRoom(
+                                                        newChatRoom.id!);
+                                                    await ooBloc
+                                                        .getChatRooms(); // Refresh the chat rooms list after deletion
+                                                  }
+                                                });
+                                              }
+                                            }
+                                          }),
                                     );
                                   }).toList(),
                               ],
@@ -343,14 +363,13 @@ void showMessageBottomSheet(BuildContext context) {
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Palette.MAIN),
-                          child: Text("Start messaging"),
                           onPressed: selectedUsers.isNotEmpty
                               ? () {
                                   setState(() {
                                     isSelecting = false;
                                   });
                                   showCreateChatRoomDialog(
-                                      context, selectedUsers);
+                                      scaffoldContext, selectedUsers);
                                 }
                               : null,
                           child: Text(LU.of(context).start_messaging),

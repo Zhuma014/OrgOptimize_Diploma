@@ -161,17 +161,7 @@ class _SignUpCardState extends State<SignUpCard> {
       });
 
       if (value.isValid) {
-<<<<<<< HEAD
-      
-=======
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(value.exception ?? LU.of(context).sign_up_successful),
-            backgroundColor: Palette.MAIN,
-            duration: const Duration(seconds: 2),
-          ),
-        );
->>>>>>> 83a211ee8bce8a6675cc6b0d3e48884db2264649
+
         _nameController.clear();
         _emailController.clear();
         _passwordController.clear();

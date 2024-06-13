@@ -76,7 +76,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-<<<<<<< HEAD
       body: StreamBuilder<bool>(
       stream: ooBloc.isConfirmedSubject.stream,
       builder: (context, snapshot) {
@@ -92,51 +91,6 @@ class _HomeScreenState extends State<HomeScreen>
                       isBackButtonVisible: false,
                       title: LU.of(context).home,
                     ),
-=======
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: SSC.p10),
-            child: Toolbar(
-              isBackButtonVisible: false,
-              title: LU.of(context).home,
-            ),
-          ),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: SSC.p8, horizontal: SSC.p16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                DropdownButton<EventType>(
-                  value: selectedEventType,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedEventType = value!;
-                    });
-                  },
-                  items: [
-                    DropdownMenuItem(
-                      value: EventType.userOwned,
-                      child: Text(LU.of(context).my, style: TextStyle(fontSize: SSC.p16)),
-                    ),
-                    DropdownMenuItem(
-                      value: EventType.club,
-                      child: Text(LU.of(context).clubs, style: TextStyle(fontSize: SSC.p16)),
-                    ),
-                    DropdownMenuItem(
-                      value: EventType.both,
-                      child: Text(LU.of(context).all, style: TextStyle(fontSize: SSC.p16)),
-                    ),
-                  ],
-                ),
-                Text(
-                  LU.of(context).upcoming_events,
-                  style: TextStyle(
-                    fontSize: SSC.p16,
-                    fontWeight: FontWeight.bold,
->>>>>>> 83a211ee8bce8a6675cc6b0d3e48884db2264649
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -169,9 +123,8 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           ],
                         ),
-<<<<<<< HEAD
-                        const Text(
-                          "Upcoming Events",
+                        Text(
+                          LU.of(context).upcoming_events,
                           style: TextStyle(
                             fontSize: SSC.p16,
                             fontWeight: FontWeight.bold,
@@ -294,47 +247,6 @@ class _HomeScreenState extends State<HomeScreen>
               );
             }
           }),
-=======
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  List<Event> events = snapshot.data!;
-                  if (isSortedByDate) {
-                    sortEventsByDate(events);
-                  } else {
-                    events.sort((a, b) => a.date!.compareTo(b.date!));
-                  }
-                  List<Event> selectedDayEvents =
-                      getEventsForDay(_selectedDay, events);
-                  if (selectedDayEvents.isEmpty) {
-                    return Center(
-                      child: Text(LU.of(context).you_dont_have_events),
-                    );
-                  } else {
-                    return ListView.builder(
-                      itemCount: selectedDayEvents.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: EventCard(event: selectedDayEvents[index]),
-                        );
-                      },
-                    );
-                  }
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  if (snapshot.data != null && snapshot.data!.isNotEmpty) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else {
-                    return Center(child: Text(LU.of(context).you_dont_have_events));
-                  }
-                }
-              },
-            ),
-          ),
-        ],
-      ),
->>>>>>> 83a211ee8bce8a6675cc6b0d3e48884db2264649
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddEventModal(context);

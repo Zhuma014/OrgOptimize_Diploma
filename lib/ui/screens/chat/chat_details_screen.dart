@@ -25,7 +25,6 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   late TextEditingController _descriptionController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-
   @override
   void initState() {
     super.initState();
@@ -35,10 +34,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         TextEditingController(text: widget.chatRoom.description);
     ooBloc.getChatRoomMembers(widget.chatRoom.id!);
     ooBloc.getUserProfile();
-
   }
-
-  
 
   @override
   void dispose() {
@@ -66,10 +62,8 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
         );
         setState(() {
           widget.chatRoom.name = _nameController.text;
-          
         });
-         ooBloc
-          .getChatRoomMembers(widget.chatRoom.id!);
+        ooBloc.getChatRoomMembers(widget.chatRoom.id!);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -115,8 +109,20 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
           'Are you sure you want to delete this chat room? Please change the owner',
       positiveText: 'Delete anyway',
       negativeText: 'Cancel',
-      onPositivePressed: () async {
-        Navigator.pop(context);
+        onPositivePressed: () async {
+        if (widget.chatRoom.type == "Main" ||
+            widget.chatRoom.type == "General") {
+          Navigator.pop(context);
+          Navigator.pop(context);
+                    Navigator.pop(context);
+
+        }
+        else{
+                    Navigator.pop(context);
+                              Navigator.pop(context);
+
+
+        }
         await ooBloc.deleteChatRoom(chatRoomId).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -136,9 +142,23 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
       positiveText: 'Leave',
       negativeText: 'Cancel',
       onPositivePressed: () async {
-        Navigator.pop(context);
+        if (widget.chatRoom.type == "Main" ||
+            widget.chatRoom.type == "General") {
+          Navigator.pop(context);
+          Navigator.pop(context);
+                    Navigator.pop(context);
+
+        }
+        else{
+                    Navigator.pop(context);
+                              Navigator.pop(context);
+
+
+        }
 
         await ooBloc.leaveChatRoom(chatRoomId).then((_) {
+          ooBloc.getChatRooms();
+        }).then((_) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
                 content: Text(LU.of(context).left_successfully),
@@ -149,184 +169,181 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
     );
   }
 
- void showMessageBottomSheet(BuildContext context) {
-  List<UserProfile> selectedUsers = [];
-  String searchQuery = '';
+  void showMessageBottomSheet(BuildContext context) {
+    List<UserProfile> selectedUsers = [];
+    String searchQuery = '';
 
-  ooBloc.getAllUsers();
-  ooBloc.getChatRoomMembers(widget.chatRoom.id!);
+    ooBloc.getAllUsers();
+    ooBloc.getChatRoomMembers(widget.chatRoom.id!);
 
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Palette.BACKGROUND,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    
-                    Text(
-                      LU.of(context).select_users_to_add,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Palette.MAIN,
-                      ),
-                    ),
-                                        IconButton(
-                            icon: Icon(Icons.cancel, color: Palette.MAIN),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          ),
-                  ],
-                ),
-                SizedBox(height: 5),
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Enter a name',
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: EdgeInsets.symmetric(
-                        vertical: 10.0, horizontal: 20.0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    prefixIcon: Icon(Icons.search, color: Palette.MAIN),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value.toLowerCase();
-                    });
-                  },
-                ),
-                SizedBox(height: 5),
-                StreamBuilder<List<UserProfile>>(
-                  stream: ooBloc.usersSubject,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          'Error: ${snapshot.error}',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      );
-                    }
-
-                    List<UserProfile> users = snapshot.data ?? [];
-                    List<int> chatRoomMemberIds = [];
-                    List<ChatRoomMember> chatRoomMembers =
-                        ooBloc.getChatRoomMembersSubject.value ?? [];
-
-                    chatRoomMemberIds =
-                        chatRoomMembers.map((member) => member.id!).toList();
-
-                    List<UserProfile> filteredUsers = users
-                        .where((user) =>
-                            !chatRoomMemberIds.contains(user.id) &&
-                            user.id != ooBloc.userProfileSubject.value?.id &&
-                            user.fullName!.toLowerCase().contains(searchQuery))
-                        .toList();
-
-                    if (filteredUsers.isEmpty) {
-                      return Center(
-                        child: Text(
-                          LU.of(context).all_in_this_chat_room,
-                          style: TextStyle(color: Palette.MAIN),
-                        ),
-                      );
-                    }
-
-                    return Expanded(
-                      child: Column(
-                        children: [
-                          SizedBox(height: 16),
-                          Expanded(
-                            child: ListView(
-                              shrinkWrap: true,
-                              children: [
-                                ...filteredUsers.map((user) {
-                                  return Card(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    elevation: 2,
-                                    child: CheckboxListTile(
-                                      title: Text(
-                                        user.fullName!,
-                                        style: TextStyle(color: Palette.MAIN),
-                                      ),
-                                      value: selectedUsers.contains(user),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          if (value!) {
-                                            selectedUsers.add(user);
-                                          } else {
-                                            selectedUsers.remove(user);
-                                          }
-                                        });
-                                      },
-                                        activeColor: Palette.MAIN,
-                                        
-
-                                    ),
-                                  );
-                                }).toList(),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Palette.BACKGROUND,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                     
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          primary: selectedUsers.isNotEmpty
-                              ? Palette.MAIN
-                              : Colors.grey,
+                      Text(
+                        LU.of(context).select_users_to_add,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Palette.MAIN,
                         ),
-                        onPressed: selectedUsers.isNotEmpty
-                            ? () {
-                                _updateChatRoom(
-                                    chosenMembers: selectedUsers
-                                        .map((user) => user.id!)
-                                        .toList());
-                                Navigator.of(context).pop();
-                              }
-                            : null,
-                        child: Text(LU.of(context).add_selected_users),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.cancel, color: Palette.MAIN),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+                  SizedBox(height: 5),
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Enter a name',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 10.0, horizontal: 20.0),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide.none,
+                      ),
+                      prefixIcon: Icon(Icons.search, color: Palette.MAIN),
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        searchQuery = value.toLowerCase();
+                      });
+                    },
+                  ),
+                  SizedBox(height: 5),
+                  StreamBuilder<List<UserProfile>>(
+                    stream: ooBloc.usersSubject,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(
+                          child: Text(
+                            'Error: ${snapshot.error}',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        );
+                      }
 
+                      List<UserProfile> users = snapshot.data ?? [];
+                      List<int> chatRoomMemberIds = [];
+                      List<ChatRoomMember> chatRoomMembers =
+                          ooBloc.getChatRoomMembersSubject.value ?? [];
+
+                      chatRoomMemberIds =
+                          chatRoomMembers.map((member) => member.id!).toList();
+
+                      List<UserProfile> filteredUsers = users
+                          .where((user) =>
+                              !chatRoomMemberIds.contains(user.id) &&
+                              user.id != ooBloc.userProfileSubject.value?.id &&
+                              user.fullName!
+                                  .toLowerCase()
+                                  .contains(searchQuery))
+                          .toList();
+
+                      if (filteredUsers.isEmpty) {
+                        return Center(
+                          child: Text(
+                            LU.of(context).all_in_this_chat_room,
+                            style: TextStyle(color: Palette.MAIN),
+                          ),
+                        );
+                      }
+
+                      return Expanded(
+                        child: Column(
+                          children: [
+                            SizedBox(height: 16),
+                            Expanded(
+                              child: ListView(
+                                shrinkWrap: true,
+                                children: [
+                                  ...filteredUsers.map((user) {
+                                    return Card(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      elevation: 2,
+                                      child: CheckboxListTile(
+                                        title: Text(
+                                          user.fullName!,
+                                          style: TextStyle(color: Palette.MAIN),
+                                        ),
+                                        value: selectedUsers.contains(user),
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (value!) {
+                                              selectedUsers.add(user);
+                                            } else {
+                                              selectedUsers.remove(user);
+                                            }
+                                          });
+                                        },
+                                        activeColor: Palette.MAIN,
+                                      ),
+                                    );
+                                  }).toList(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            primary: selectedUsers.isNotEmpty
+                                ? Palette.MAIN
+                                : Colors.grey,
+                          ),
+                          onPressed: selectedUsers.isNotEmpty
+                              ? () {
+                                  _updateChatRoom(
+                                      chosenMembers: selectedUsers
+                                          .map((user) => user.id!)
+                                          .toList());
+                                  Navigator.of(context).pop();
+                                }
+                              : null,
+                          child: Text(LU.of(context).add_selected_users),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -414,13 +431,14 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                                     style: TextStyle(color: Colors.red)));
                           } else if (!snapshot.hasData ||
                               snapshot.data!.isEmpty) {
-                            return Center(child: Text(LU.of(context).no_members_found));
+                            return Center(
+                                child: Text(LU.of(context).no_members_found));
                           }
-                    
+
                           List<ChatRoomMember> members = snapshot.data!;
                           return ListView.builder(
-                              shrinkWrap: true, // Add this line
-                    
+                            shrinkWrap: true, // Add this line
+
                             itemCount: members.length,
                             itemBuilder: (context, index) {
                               ChatRoomMember member = members[index];
@@ -430,82 +448,100 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                                 title: Text(member.fullName!),
                                 subtitle: Text(member.role!),
                                 trailing: (!isCurrentUser && currentUserIsOwner)
-    ? PopupMenuButton<String>(
-        onSelected: (value) {
-          if (value == 'delete') {
-            showCustomDialog(
-              context: context,
-              title: 'Delete Member',
-              description: 'Are you sure you want to delete this member?',
-              positiveText: 'Delete',
-              negativeText: 'Cancel',
-              onPositivePressed: () {
-                _deleteChatRoomMember(member.id!);
-              },
-              onNegativePressed: () {
-                // Optionally handle the cancel action here
-              },
-              positiveButtonColor: Colors.red, // Set the color for the positive button
-            );
-          } else if (value == 'change_owner') {
-            showCustomDialog(
-              context: context,
-              title: 'Change Owner',
-              description: 'Are you sure you want to make this member the owner?',
-              positiveText: 'Change Owner',
-              negativeText: 'Cancel',
-              onPositivePressed: () {
-                _changeChatRoomOwner(member.id!);
-                Navigator.pop(context); // Dismiss the popup menu
-                Navigator.pop(context); // Dismiss the previous screen
-              },
-              onNegativePressed: () {
-                // Optionally handle the cancel action here
-              },
-              positiveButtonColor: Palette.MAIN, // Set the color for the positive button
-            );
-          }
-        },
-        itemBuilder: (BuildContext context) =>
-            <PopupMenuEntry<String>>[
-          PopupMenuItem<String>(
-            value: 'delete',
-            child: Text(LU.of(context).delete, style: TextStyle(color: Colors.red)),
-          ),
-          PopupMenuItem<String>(
-            value: 'change_owner',
-            child: Text(LU.of(context).make_owner, style: TextStyle(color: Palette.MAIN)),
-          ),
-        ],
-      )
-    : null,
+                                    ? PopupMenuButton<String>(
+                                        onSelected: (value) {
+                                          if (value == 'delete') {
+                                            showCustomDialog(
+                                              context: context,
+                                              title: 'Delete Member',
+                                              description:
+                                                  'Are you sure you want to delete this member?',
+                                              positiveText: 'Delete',
+                                              negativeText: 'Cancel',
+                                              onPositivePressed: () {
+                                                _deleteChatRoomMember(
+                                                    member.id!);
+                                              },
+                                              onNegativePressed: () {
+                                                // Optionally handle the cancel action here
+                                              },
+                                              positiveButtonColor: Colors
+                                                  .red, // Set the color for the positive button
+                                            );
+                                          } else if (value == 'change_owner') {
+                                            showCustomDialog(
+                                              context: context,
+                                              title: 'Change Owner',
+                                              description:
+                                                  'Are you sure you want to make this member the owner?',
+                                              positiveText: 'Change Owner',
+                                              negativeText: 'Cancel',
+                                              onPositivePressed: () {
+                                                _changeChatRoomOwner(
+                                                    member.id!);
+                                                Navigator.pop(
+                                                    context); // Dismiss the popup menu
+                                                Navigator.pop(
+                                                    context); // Dismiss the previous screen
+                                              },
+                                              onNegativePressed: () {
+                                                // Optionally handle the cancel action here
+                                              },
+                                              positiveButtonColor: Palette
+                                                  .MAIN, // Set the color for the positive button
+                                            );
+                                          }
+                                        },
+                                        itemBuilder: (BuildContext context) =>
+                                            <PopupMenuEntry<String>>[
+                                          PopupMenuItem<String>(
+                                            value: 'delete',
+                                            child: Text(LU.of(context).delete,
+                                                style: TextStyle(
+                                                    color: Colors.red)),
+                                          ),
+                                          PopupMenuItem<String>(
+                                            value: 'change_owner',
+                                            child: Text(
+                                                LU.of(context).make_owner,
+                                                style: TextStyle(
+                                                    color: Palette.MAIN)),
+                                          ),
+                                        ],
+                                      )
+                                    : null,
                               );
                             },
                           );
                         },
                       ),
                     ),
-                                      SizedBox(height: 16), // Add some space between the list and the button
+                    SizedBox(
+                        height:
+                            16), // Add some space between the list and the button
 
-     SizedBox(
-      width: double.infinity,
-       child: ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () {
-                if (currentUserIsOwner) {
-                  // Logic for deleting the chat room
-                  _deleteChatRoom(widget.chatRoom.id!);
-                } else {
-                  // Logic for leaving the chat room
-                  _leaveChatRoom(widget.chatRoom.id!);
-                }
-              },
-              child: Text(
-                currentUserIsOwner ? LU.of(context).delete_chat_room : LU.of(context).leave_chat_room,
-              ),
-            ),
-     ),
-      ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red),
+                        onPressed: () {
+                          if (currentUserIsOwner) {
+                            // Logic for deleting the chat room
+                            _deleteChatRoom(widget.chatRoom.id!);
+                          } else {
+                            // Logic for leaving the chat room
+                            _leaveChatRoom(widget.chatRoom.id!);
+                          }
+                        },
+                        child: Text(
+                          currentUserIsOwner
+                              ? LU.of(context).delete_chat_room
+                              : LU.of(context).leave_chat_room,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

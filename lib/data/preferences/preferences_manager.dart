@@ -43,6 +43,7 @@ class PreferencesManager {
 
   Future<void> clearTokens() async {
     await pref.remove(_KEY_ACCESS_TOKEN);
+
   }
 
   Future<void> wipeOut() async {

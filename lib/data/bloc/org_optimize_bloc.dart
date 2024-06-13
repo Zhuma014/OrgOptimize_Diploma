@@ -41,7 +41,7 @@ class OrgOptimizeBloc {
   BehaviorSubject<bool> deleteClubSubject = BehaviorSubject();
   BehaviorSubject<bool> leaveClubSubject = BehaviorSubject();
   BehaviorSubject<bool> isConfirmedSubject = BehaviorSubject();
-   BehaviorSubject<bool> sendConfirmationEmailSubject = BehaviorSubject<bool>();
+  BehaviorSubject<bool> sendConfirmationEmailSubject = BehaviorSubject<bool>();
   BehaviorSubject<bool> resetPasswordSubject = BehaviorSubject<bool>();
   BehaviorSubject<List<Club>> getAllClubsSubject = BehaviorSubject();
   BehaviorSubject<List<Club>> getUserClubsSubject = BehaviorSubject();
@@ -102,8 +102,6 @@ class OrgOptimizeBloc {
 
     signInSubject.sink.add(response);
   }
-
-  
 
   signUp(String email, String password, DateTime birthdate, String fullname,
       {required String fcm_token}) async {
@@ -342,55 +340,49 @@ class OrgOptimizeBloc {
     getClubEvents();
   }
 
-void isConfirmed() async {
-  try {
-    if (isConfirmedSubject.isClosed) {
-      isConfirmedSubject = BehaviorSubject<bool>();
-    }
+  void isConfirmed() async {
+    try {
+      if (isConfirmedSubject.isClosed) {
+        isConfirmedSubject = BehaviorSubject<bool>();
+      }
 
-    bool isConfirmed = await _repository.getEmailConfirmationStatus();
-    if (!isConfirmedSubject.isClosed) {
-      isConfirmedSubject.sink.add(isConfirmed);
-    }
-  } catch (e) {
-    if (!isConfirmedSubject.isClosed) {
-      isConfirmedSubject.sink.addError(e.toString());
+      bool isConfirmed = await _repository.getEmailConfirmationStatus();
+      if (!isConfirmedSubject.isClosed) {
+        isConfirmedSubject.sink.add(isConfirmed);
+      }
+    } catch (e) {
+      if (!isConfirmedSubject.isClosed) {
+        isConfirmedSubject.sink.addError(e.toString());
+      }
     }
   }
-}
 
+  sendConfirmationEmail(String email) async {
+    try {
+      if (sendConfirmationEmailSubject.isClosed) {
+        sendConfirmationEmailSubject = BehaviorSubject<bool>();
+      }
 
-
-          sendConfirmationEmail(String email) async {
-          try {
-            if (sendConfirmationEmailSubject.isClosed) {
-              sendConfirmationEmailSubject = BehaviorSubject<bool>();
-            }
-
-            bool isSent = await _repository.sendConfirmationEmail(email: email);
-            sendConfirmationEmailSubject.sink.add(isSent);
-      } catch (e) {
+      bool isSent = await _repository.sendConfirmationEmail(email: email);
+      sendConfirmationEmailSubject.sink.add(isSent);
+    } catch (e) {
       sendConfirmationEmailSubject.sink.addError(e.toString());
-      }
-      }
+    }
+  }
 
-      resetPassword(String email) async {
-      try {
+  resetPassword(String email) async {
+    try {
       if (resetPasswordSubject.isClosed) {
-      resetPasswordSubject = BehaviorSubject<bool>();
+        resetPasswordSubject = BehaviorSubject<bool>();
       }
 
-
-        bool isSent = await _repository.resetPassword(email: email);
-        resetPasswordSubject.sink.add(isSent);
-        return isSent; // Return the boolean value from the repository call
-
-      } catch (e) {
-        resetPasswordSubject.sink.addError(e.toString());
-      }
-      }
-
-
+      bool isSent = await _repository.resetPassword(email: email);
+      resetPasswordSubject.sink.add(isSent);
+      return isSent; // Return the boolean value from the repository call
+    } catch (e) {
+      resetPasswordSubject.sink.addError(e.toString());
+    }
+  }
 
   Future<UserProfile?> getUserProfileById(int userId) async {
     try {
@@ -596,10 +588,7 @@ void isConfirmed() async {
 
   signOut() async {
     await _repository.signOut();
-    if (!userProfileSubject.isClosed) {
-      userProfileSubject.sink.add(null);
-      // joinRequestListSubject.sink.add([]);
-    }
+
     PreferencesManager.instance.wipeOut();
   }
 
@@ -731,17 +720,17 @@ void isConfirmed() async {
   }
 
   deleteAccount() async {
-
- if (deleteProfileSubject.isClosed) {
+    if (deleteProfileSubject.isClosed) {
       deleteProfileSubject = BehaviorSubject<dynamic>();
     }
-        deleteProfileSubject.sink.add(await _repository.deleteProfile());
+    deleteProfileSubject.sink.add(await _repository.deleteProfile());
+    PreferencesManager.instance.wipeOut();
     clearSession();
   }
 
   userEdit(
     String fullName,
-    String birthdate,
+    String birthdate, 
   ) async {
     updateProfileSubject = BehaviorSubject<UserEdit>();
 
@@ -792,29 +781,32 @@ void isConfirmed() async {
     }
   }
 
-clearSession() {
-  if (!userProfileSubject.isClosed) {
-    userProfileSubject.sink.add(null);
+  clearSession() {
+    if (!userProfileSubject.isClosed) {
+      userProfileSubject.sink.add(null);
+    }
+    if (!getClubEventsSubject.isClosed) {
+      getClubEventsSubject.sink.add([]);
+    }
+    if (!getUserOwnedEventsSubject.isClosed) {
+      getUserOwnedEventsSubject.sink.add([]);
+    }
+    if (!getUserClubsSubject.isClosed) {
+      getUserClubsSubject.sink.add([]);
+    }
+    if (!getChatRoomsSubject.isClosed) {
+      getChatRoomsSubject.sink.add([]);
+    }
+    if (!_chatRoomMessagesSubject.isClosed) {
+      _chatRoomMessagesSubject.sink.add([]);
+    }
+    if (!isConfirmedSubject.isClosed) {
+      isConfirmedSubject.sink.add(false);
+    }
+    if (!joinRequestListSubject.isClosed) {
+      joinRequestListSubject.sink.add([]);
+    }
   }
-  if (!getClubEventsSubject.isClosed) {
-    getClubEventsSubject.sink.add([]);
-  }
-  if (!getUserOwnedEventsSubject.isClosed) {
-    getUserOwnedEventsSubject.sink.add([]);
-  }
-  if (!getUserClubsSubject.isClosed) {
-    getUserClubsSubject.sink.add([]);
-  }
-  if (!getChatRoomsSubject.isClosed) {
-    getChatRoomsSubject.sink.add([]);
-  }
-  if (!_chatRoomMessagesSubject.isClosed) {
-    _chatRoomMessagesSubject.sink.add([]);
-  }
-  if (!isConfirmedSubject.isClosed) {
-    isConfirmedSubject.sink.add(false);
-  }
-}
 
   dispose() {
     try {
@@ -843,9 +835,9 @@ clearSession() {
       attendancesSubject.close();
       _chatRoomMessagesSubject.close();
       membersSubject.close();
-    isConfirmedSubject.close();
-sendConfirmationEmailSubject.close();
-resetPasswordSubject.close();
+      isConfirmedSubject.close();
+      sendConfirmationEmailSubject.close();
+      resetPasswordSubject.close();
     } catch (e) {
       Logger.e(TAG, e.toString());
     }
