@@ -123,7 +123,7 @@ class _ClubMembersDialogState extends State<ClubMembersDialog> {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text(LU.of(context).close),
+                child: Text(LU.of(context).close,style: TextStyle(color: Palette.MAIN),),
               ),
             ],
           );

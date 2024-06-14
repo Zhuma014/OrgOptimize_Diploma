@@ -300,7 +300,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                                           fontWeight: FontWeight.bold),
                                     ),
                                     subtitle: Text(
-                                        getLastMessageText(
+                                        getLastMessageText(context,
                                             chatRoom.lastMessage),
                                         style: const TextStyle(
                                             color: Palette.MAIN)),
@@ -533,7 +533,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
-                  getLastMessageText(chatRoom.lastMessage),
+                  getLastMessageText(context,chatRoom.lastMessage),
                   style: const TextStyle(color: Palette.MAIN),
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),
@@ -579,12 +579,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 }
 
-String getLastMessageText(String? lastMessage) {
+String getLastMessageText(BuildContext context, String? lastMessage) {
   final currentUserId = ooBloc.userProfileSubject.value?.id.toString();
   print(currentUserId);
 
   if (lastMessage == null || lastMessage.isEmpty) {
-    return 'No messages yet';
+    return LU.of(context).no_messages;
   }
 
   final parts = lastMessage.split(':');

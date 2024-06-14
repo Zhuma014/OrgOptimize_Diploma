@@ -104,11 +104,11 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   void _deleteChatRoom(int chatRoomId) async {
     showCustomDialog(
       context: context,
-      title: 'Delete Chat Room',
+      title: LU.of(context).delete_chat_room,
       description:
-          'Are you sure you want to delete this chat room? Please change the owner',
-      positiveText: 'Delete anyway',
-      negativeText: 'Cancel',
+          LU.of(context).are_you_sure_to_delete,
+      positiveText: LU.of(context).delete_anyway,
+      negativeText: LU.of(context).cancel,
         onPositivePressed: () async {
         if (widget.chatRoom.type == "Main" ||
             widget.chatRoom.type == "General") {
@@ -137,10 +137,10 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
   void _leaveChatRoom(int chatRoomId) async {
     showCustomDialog(
       context: context,
-      title: 'Leave Chat Room',
-      description: 'Are you sure you want to leave this chat room?',
-      positiveText: 'Leave',
-      negativeText: 'Cancel',
+      title: LU.of(context).leave_chat_room,
+      description: LU.of(context).are_you_sure_to_leave,
+      positiveText: LU.of(context).leave,
+      negativeText: LU.of(context).cancel,
       onPositivePressed: () async {
         if (widget.chatRoom.type == "Main" ||
             widget.chatRoom.type == "General") {
@@ -212,7 +212,7 @@ class _ChatDetailsScreenState extends State<ChatDetailsScreen> {
                   SizedBox(height: 5),
                   TextField(
                     decoration: InputDecoration(
-                      hintText: 'Enter a name',
+                      hintText: LU.of(context).enter_name,
                       filled: true,
                       fillColor: Colors.white,
                       contentPadding: EdgeInsets.symmetric(

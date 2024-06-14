@@ -110,13 +110,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           'Are you sure you want to delete your profile? All clubs that you created will also be deleted.',
       positiveText: 'Yes, delete',
       negativeText: LU.of(context).action_cancel,
-      onPositivePressed: () {
+      onPositivePressed: () async {
 
+              await   ooBloc.deleteAccount();
+  
+ 
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const OrgOptimizeApp()),
           (route) => false,
         );
-      ooBloc.deleteAccount();
 
       },
       onNegativePressed: () {},

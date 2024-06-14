@@ -87,13 +87,13 @@ class OrgOptimizeBloc {
       _attendanceStatusSubject.stream;
   Map<int, bool> get attendanceStatus => _attendanceStatusSubject.value;
 
-  signIn(String username, String password, {required String fcm_token}) async {
+  signIn(String username, String password, {String? fcm_token}) async {
     Logger.d(TAG, 'signInMember() -> $username, $password');
 
     signInSubject = BehaviorSubject<SignIn>();
 
     SignIn response =
-        await _repository.signIn(username, password, fcm_token: fcm_token);
+        await _repository.signIn(username, password, fcm_token: fcm_token!);
 
     if (response.isValid) {
       PreferencesManager.instance.saveAuthCredentials(response.accessToken!);

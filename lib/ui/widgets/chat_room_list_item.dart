@@ -26,7 +26,7 @@ class ChatRoomListItem extends StatelessWidget {
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
         subtitle: Text(
-                                        getLastMessageText(
+                                        getLastMessageText(context,
                                             chatRoom.lastMessage),
                                         style: const TextStyle(
                                             color: Palette.MAIN)),

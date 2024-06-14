@@ -25,7 +25,7 @@
     "date": "Күні",
     "location":"Орналасуы",
     "my_events":"Менің оқиғаларым",
-    "upcoming_events":"Клубтың алдағы Оқиғалары",
+    "upcoming_events":"Алдағы Оқиғалар",
     "get_started": "Бастау",
     "calendar": "Күнтізбе",
     "profile": "Профиль",
@@ -38,7 +38,7 @@
     "select_language": "Тілді таңдаңыз:",
     "unknown_error": "Белгісіз қате",
     "action_cancel": "Болдырмау",
-    "settings": "Параметрлер",
+    "settings": "Баптаулар",
     "create_event": "Оқиға жасау",
     "save": "Сақтау",
     "join_the_club": "Клубқа қосылу",
@@ -67,7 +67,7 @@
     "club_or_my_event": "Клубты немесе Жеке оқиғаны таңдаңыз",
     "my_own_event": "Менің жеке оқиғам",
     "you_are_not_member": "Сіз ешқандай клубтың мүшесі емессіз, клуб құрыңыз не мүшесі болыңыз",
-    "join_clubs": "Клубтарға Қосылу",
+    "join_clubs": "Клубтарға қосылу",
     "you_are_member": "Сіз Мүшесіз",
     "requests": "Өтініштер",
     "members": "Мүшелер",
@@ -101,7 +101,7 @@
     "club_chats": "Клуб Чаттары",
     "group_chats": "Топтық Чаттар",
     "no_group_chats": "Сізде топтық чаттар жоқ, ",
-    "start_messaging": "хабар алмасуды бастаңыз",
+    "start_messaging": "хабар алмасуды бастау",
     "private_chats": "Жеке Чаттар",
     "no_private_chats": "Сізде жеке чаттар жоқ, ",
     "no_chat_rooms": "Чат Бөлмелері Жоқ",
@@ -125,9 +125,19 @@
     "sign_in_failed": "Жүйеге Кіру Өтпеді",
     "sign_up_successful": "Сәтті Тіркелдіңіз",
     "sign_up_failed": "Тіркелу Өтпеді",
-    "select_user_to_message": "Хабарласуға пайдаланушыны таңдаңыз",
+    "select_user_to_message": "Пайдаланушыны таңдау",
     "no_users_found": "Пайдаланушылар табылмады",
     "create_chat_room": "Чат Бөлмесін Құрыңыз",
-    "finish": "Аяқтау"
+    "finish": "Аяқтау",
+    "are_you_sure_to_delete": "Чатты шыныменде өшіргіңіз келе ма?",
+  "delete_anyway":"Өшіру",
+  "cancel": "Жоқ",
+  "are_you_sure_to_leave": "Чаттан шыныменде шыққыңыз келе ма?",
+  "leave":"Шығу",
+  "enter_name":"Атын енгізіңіз",
+  "my_clubs":"Менің клубтарым",
+  "no_messages":"Хабарламалар жоқ"
+
+
     }
   

@@ -62,7 +62,7 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
                     _buildProfileOption(
                       context,
                       icon: Icons.group_work,
-                      title: "My clubs",
+                      title: LU.of(context).my_clubs,
                       onPressed: () {
                         Navigator.pushNamed(context, Navigation.MYCLUBS);
                       },
@@ -71,7 +71,7 @@ class UserProfileScreenState extends BaseScreenState<UserProfileScreen> {
                     _buildProfileOption(
                       context,
                       icon: Icons.group,
-                      title: "Join the clubs",
+                      title: LU.of(context).join_clubs,
                       onPressed: () {
                         Navigator.pushNamed(context, Navigation.ALLCLUBS);
                       },

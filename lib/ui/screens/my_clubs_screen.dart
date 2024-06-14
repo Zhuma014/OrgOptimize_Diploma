@@ -355,7 +355,8 @@ joinRequests = ooBloc.joinRequestListSubject.valueOrNull!;
                 ),
                 actions: <Widget>[
                   TextButton(
-                    child: Text(LU.of(context).close),
+                    child: Text(LU.of(context).close,style: TextStyle(color: Palette.MAIN), ),
+
                     onPressed: () {
                       setState(() {
                         isDialogOpen = false;
